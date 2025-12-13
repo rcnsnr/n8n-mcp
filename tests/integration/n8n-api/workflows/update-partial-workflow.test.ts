@@ -12,19 +12,22 @@ import { getTestN8nClient } from '../utils/n8n-client';
 import { N8nApiClient } from '../../../../src/services/n8n-api-client';
 import { SIMPLE_WEBHOOK_WORKFLOW, SIMPLE_HTTP_WORKFLOW, MULTI_NODE_WORKFLOW } from '../utils/fixtures';
 import { cleanupOrphanedWorkflows } from '../utils/cleanup-helpers';
-import { createMcpContext } from '../utils/mcp-context';
+import { createMcpContext, getMcpRepository } from '../utils/mcp-context';
 import { InstanceContext } from '../../../../src/types/instance-context';
+import { NodeRepository } from '../../../../src/database/node-repository';
 import { handleUpdatePartialWorkflow } from '../../../../src/mcp/handlers-workflow-diff';
 
 describe('Integration: handleUpdatePartialWorkflow', () => {
   let context: TestContext;
   let client: N8nApiClient;
   let mcpContext: InstanceContext;
+  let repository: NodeRepository;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     context = createTestContext();
     client = getTestN8nClient();
     mcpContext = createMcpContext();
+    repository = await getMcpRepository();
   });
 
   afterEach(async () => {
@@ -56,7 +59,7 @@ describe('Integration: handleUpdatePartialWorkflow', () => {
         if (!created.id) throw new Error('Workflow ID is missing');
         context.trackWorkflow(created.id);
 
-        // Add a Set node
+        // Add a Set node and connect it to maintain workflow validity
         const response = await handleUpdatePartialWorkflow(
           {
             id: created.id,
@@ -81,14 +84,28 @@ describe('Integration: handleUpdatePartialWorkflow', () => {
                     }
                   }
                 }
+              },
+              {
+                type: 'addConnection',
+                source: 'Webhook',
+                target: 'Set',
+                sourcePort: 'main',
+                targetPort: 'main'
               }
             ]
           },
+          repository,
           mcpContext
         );
 
         expect(response.success).toBe(true);
-        const updated = response.data as any;
+        // Response now returns minimal data - verify with a follow-up get
+        const responseData = response.data as any;
+        expect(responseData.id).toBe(created.id);
+        expect(responseData.nodeCount).toBe(2);
+
+        // Fetch actual workflow to verify changes
+        const updated = await client.getWorkflow(created.id);
         expect(updated.nodes).toHaveLength(2);
         expect(updated.nodes.find((n: any) => n.name === 'Set')).toBeDefined();
       });
@@ -122,6 +139,7 @@ describe('Integration: handleUpdatePartialWorkflow', () => {
               }
             ]
           },
+          repository,
           mcpContext
         );
 
@@ -154,11 +172,18 @@ describe('Integration: handleUpdatePartialWorkflow', () => {
               }
             ]
           },
+          repository,
           mcpContext
         );
 
         expect(response.success).toBe(true);
-        const updated = response.data as any;
+        // Response now returns minimal data - verify with a follow-up get
+        const responseData = response.data as any;
+        expect(responseData.id).toBe(created.id);
+        expect(responseData.nodeCount).toBe(1);
+
+        // Fetch actual workflow to verify changes
+        const updated = await client.getWorkflow(created.id);
         expect(updated.nodes).toHaveLength(1);
         expect(updated.nodes.find((n: any) => n.name === 'HTTP Request')).toBeUndefined();
       });
@@ -185,6 +210,7 @@ describe('Integration: handleUpdatePartialWorkflow', () => {
               }
             ]
           },
+          repository,
           mcpContext
         );
 
@@ -219,13 +245,19 @@ describe('Integration: handleUpdatePartialWorkflow', () => {
               }
             ]
           },
+          repository,
           mcpContext
         );
 
         expect(response.success).toBe(true);
-        const updated = response.data as any;
+        // Response now returns minimal data - verify with a follow-up get
+        expect((response.data as any).id).toBe(created.id);
+
+        // Fetch actual workflow to verify changes
+        const updated = await client.getWorkflow(created.id);
         const webhookNode = updated.nodes.find((n: any) => n.name === 'Webhook');
-        expect(webhookNode.parameters.path).toBe('updated-path');
+        expect(webhookNode).toBeDefined();
+        expect(webhookNode!.parameters.path).toBe('updated-path');
       });
 
       it('should update nested parameters', async () => {
@@ -254,14 +286,20 @@ describe('Integration: handleUpdatePartialWorkflow', () => {
               }
             ]
           },
+          repository,
           mcpContext
         );
 
         expect(response.success).toBe(true);
-        const updated = response.data as any;
+        // Response now returns minimal data - verify with a follow-up get
+        expect((response.data as any).id).toBe(created.id);
+
+        // Fetch actual workflow to verify changes
+        const updated = await client.getWorkflow(created.id);
         const webhookNode = updated.nodes.find((n: any) => n.name === 'Webhook');
-        expect(webhookNode.parameters.httpMethod).toBe('POST');
-        expect(webhookNode.parameters.path).toBe('new-path');
+        expect(webhookNode).toBeDefined();
+        expect(webhookNode!.parameters.httpMethod).toBe('POST');
+        expect(webhookNode!.parameters.path).toBe('new-path');
       });
     });
 
@@ -291,13 +329,19 @@ describe('Integration: handleUpdatePartialWorkflow', () => {
               }
             ]
           },
+          repository,
           mcpContext
         );
 
         expect(response.success).toBe(true);
-        const updated = response.data as any;
+        // Response now returns minimal data - verify with a follow-up get
+        expect((response.data as any).id).toBe(created.id);
+
+        // Fetch actual workflow to verify changes
+        const updated = await client.getWorkflow(created.id);
         const webhookNode = updated.nodes.find((n: any) => n.name === 'Webhook');
-        expect(webhookNode.position).toEqual(newPosition);
+        expect(webhookNode).toBeDefined();
+        expect(webhookNode!.position).toEqual(newPosition);
       });
     });
 
@@ -324,13 +368,19 @@ describe('Integration: handleUpdatePartialWorkflow', () => {
               }
             ]
           },
+          repository,
           mcpContext
         );
 
         expect(response.success).toBe(true);
-        const updated = response.data as any;
+        // Response now returns minimal data - verify with a follow-up get
+        expect((response.data as any).id).toBe(created.id);
+
+        // Fetch actual workflow to verify changes
+        const updated = await client.getWorkflow(created.id);
         const webhookNode = updated.nodes.find((n: any) => n.name === 'Webhook');
-        expect(webhookNode.disabled).toBe(true);
+        expect(webhookNode).toBeDefined();
+        expect(webhookNode!.disabled).toBe(true);
       });
 
       it('should enable a disabled node', async () => {
@@ -351,6 +401,7 @@ describe('Integration: handleUpdatePartialWorkflow', () => {
             id: created.id,
             operations: [{ type: 'disableNode', nodeName: 'Webhook' }]
           },
+          repository,
           mcpContext
         );
 
@@ -365,14 +416,20 @@ describe('Integration: handleUpdatePartialWorkflow', () => {
               }
             ]
           },
+          repository,
           mcpContext
         );
 
         expect(response.success).toBe(true);
-        const updated = response.data as any;
+        // Response now returns minimal data - verify with a follow-up get
+        expect((response.data as any).id).toBe(created.id);
+
+        // Fetch actual workflow to verify changes
+        const updated = await client.getWorkflow(created.id);
         const webhookNode = updated.nodes.find((n: any) => n.name === 'Webhook');
+        expect(webhookNode).toBeDefined();
         // After enabling, disabled should be false or undefined (both mean enabled)
-        expect(webhookNode.disabled).toBeFalsy();
+        expect(webhookNode!.disabled).toBeFalsy();
       });
     });
   });
@@ -409,11 +466,16 @@ describe('Integration: handleUpdatePartialWorkflow', () => {
               }
             ]
           },
+          repository,
           mcpContext
         );
 
         expect(response.success).toBe(true);
-        const updated = response.data as any;
+        // Response now returns minimal data - verify with a follow-up get
+        expect((response.data as any).id).toBe(created.id);
+
+        // Fetch actual workflow to verify changes
+        const updated = await client.getWorkflow(created.id);
         expect(updated.connections).toBeDefined();
         expect(updated.connections.Webhook).toBeDefined();
       });
@@ -446,6 +508,7 @@ describe('Integration: handleUpdatePartialWorkflow', () => {
               }
             ]
           },
+          repository,
           mcpContext
         );
 
@@ -454,7 +517,7 @@ describe('Integration: handleUpdatePartialWorkflow', () => {
     });
 
     describe('removeConnection', () => {
-      it('should remove connection between nodes', async () => {
+      it('should reject removal of last connection (creates invalid workflow)', async () => {
         const workflow = {
           ...SIMPLE_HTTP_WORKFLOW,
           name: createTestWorkflowName('Partial - Remove Connection'),
@@ -466,6 +529,7 @@ describe('Integration: handleUpdatePartialWorkflow', () => {
         if (!created.id) throw new Error('Workflow ID is missing');
         context.trackWorkflow(created.id);
 
+        // Try to remove the only connection - should be rejected (leaves 2 nodes with no connections)
         const response = await handleUpdatePartialWorkflow(
           {
             id: created.id,
@@ -473,16 +537,19 @@ describe('Integration: handleUpdatePartialWorkflow', () => {
               {
                 type: 'removeConnection',
                 source: 'Webhook',
-                target: 'HTTP Request'
+                target: 'HTTP Request',
+                sourcePort: 'main',
+                targetPort: 'main'
               }
             ]
           },
+          repository,
           mcpContext
         );
 
-        expect(response.success).toBe(true);
-        const updated = response.data as any;
-        expect(Object.keys(updated.connections || {})).toHaveLength(0);
+        // Should fail validation - multi-node workflow needs connections
+        expect(response.success).toBe(false);
+        expect(response.error).toContain('Workflow validation failed');
       });
 
       it('should ignore error for non-existent connection with ignoreErrors flag', async () => {
@@ -509,6 +576,7 @@ describe('Integration: handleUpdatePartialWorkflow', () => {
               }
             ]
           },
+          repository,
           mcpContext
         );
 
@@ -518,7 +586,7 @@ describe('Integration: handleUpdatePartialWorkflow', () => {
     });
 
     describe('replaceConnections', () => {
-      it('should replace all connections', async () => {
+      it('should reject replacing with empty connections (creates invalid workflow)', async () => {
         const workflow = {
           ...SIMPLE_HTTP_WORKFLOW,
           name: createTestWorkflowName('Partial - Replace Connections'),
@@ -530,7 +598,7 @@ describe('Integration: handleUpdatePartialWorkflow', () => {
         if (!created.id) throw new Error('Workflow ID is missing');
         context.trackWorkflow(created.id);
 
-        // Replace with empty connections
+        // Try to replace with empty connections - should be rejected (leaves 2 nodes with no connections)
         const response = await handleUpdatePartialWorkflow(
           {
             id: created.id,
@@ -541,12 +609,13 @@ describe('Integration: handleUpdatePartialWorkflow', () => {
               }
             ]
           },
+          repository,
           mcpContext
         );
 
-        expect(response.success).toBe(true);
-        const updated = response.data as any;
-        expect(Object.keys(updated.connections || {})).toHaveLength(0);
+        // Should fail validation - multi-node workflow needs connections
+        expect(response.success).toBe(false);
+        expect(response.error).toContain('Workflow validation failed');
       });
     });
 
@@ -569,6 +638,7 @@ describe('Integration: handleUpdatePartialWorkflow', () => {
             id: created.id,
             operations: [{ type: 'removeNode', nodeName: 'HTTP Request' }]
           },
+          repository,
           mcpContext
         );
 
@@ -584,6 +654,7 @@ describe('Integration: handleUpdatePartialWorkflow', () => {
             ],
             validateOnly: true
           },
+          repository,
           mcpContext
         );
 
@@ -623,12 +694,16 @@ describe('Integration: handleUpdatePartialWorkflow', () => {
               }
             ]
           },
+          repository,
           mcpContext
         );
 
         expect(response.success).toBe(true);
-        const updated = response.data as any;
+        // Response now returns minimal data - verify with a follow-up get
+        expect((response.data as any).id).toBe(created.id);
 
+        // Fetch actual workflow to verify changes
+        const updated = await client.getWorkflow(created.id);
         // Note: n8n API may not return all settings in response
         // The operation should succeed even if settings aren't reflected in the response
         expect(updated.settings).toBeDefined();
@@ -660,6 +735,7 @@ describe('Integration: handleUpdatePartialWorkflow', () => {
               }
             ]
           },
+          repository,
           mcpContext
         );
 
@@ -692,6 +768,7 @@ describe('Integration: handleUpdatePartialWorkflow', () => {
               }
             ]
           },
+          repository,
           mcpContext
         );
 
@@ -726,6 +803,7 @@ describe('Integration: handleUpdatePartialWorkflow', () => {
               }
             ]
           },
+          repository,
           mcpContext
         );
 
@@ -783,11 +861,18 @@ describe('Integration: handleUpdatePartialWorkflow', () => {
             }
           ]
         },
+        repository,
         mcpContext
       );
 
       expect(response.success).toBe(true);
-      const updated = response.data as any;
+      // Response now returns minimal data - verify with a follow-up get
+      const responseData = response.data as any;
+      expect(responseData.id).toBe(created.id);
+      expect(responseData.nodeCount).toBe(2);
+
+      // Fetch actual workflow to verify changes
+      const updated = await client.getWorkflow(created.id);
       expect(updated.nodes).toHaveLength(2);
       expect(updated.connections.Webhook).toBeDefined();
     });
@@ -815,6 +900,7 @@ describe('Integration: handleUpdatePartialWorkflow', () => {
           ],
           validateOnly: true
         },
+        repository,
         mcpContext
       );
 
@@ -858,6 +944,7 @@ describe('Integration: handleUpdatePartialWorkflow', () => {
           ],
           continueOnError: true
         },
+        repository,
         mcpContext
       );
 
@@ -865,6 +952,202 @@ describe('Integration: handleUpdatePartialWorkflow', () => {
       expect(response.success).toBe(true);
       expect(response.details?.applied).toBeDefined();
       expect(response.details?.failed).toBeDefined();
+    });
+  });
+
+  // ======================================================================
+  // WORKFLOW STRUCTURE VALIDATION (prevents corrupted workflows)
+  // ======================================================================
+
+  describe('Workflow Structure Validation', () => {
+    it('should reject removal of all connections in multi-node workflow', async () => {
+      // Create workflow with 2 nodes and 1 connection
+      const workflow = {
+        ...SIMPLE_HTTP_WORKFLOW,
+        name: createTestWorkflowName('Partial - Reject Empty Connections'),
+        tags: ['mcp-integration-test']
+      };
+
+      const created = await client.createWorkflow(workflow);
+      expect(created.id).toBeTruthy();
+      if (!created.id) throw new Error('Workflow ID is missing');
+      context.trackWorkflow(created.id);
+
+      // Try to remove the only connection - should be rejected
+      const response = await handleUpdatePartialWorkflow(
+        {
+          id: created.id,
+          operations: [
+            {
+              type: 'removeConnection',
+              source: 'Webhook',
+              target: 'HTTP Request',
+              sourcePort: 'main',
+              targetPort: 'main'
+            }
+          ]
+        },
+        repository,
+        mcpContext
+      );
+
+      // Should fail validation
+      expect(response.success).toBe(false);
+      expect(response.error).toContain('Workflow validation failed');
+      expect(response.details?.errors).toBeDefined();
+      expect(Array.isArray(response.details?.errors)).toBe(true);
+      expect((response.details?.errors as string[])[0]).toContain('no connections');
+    });
+
+    it('should reject removal of all nodes except one non-webhook node', async () => {
+      // Create workflow with 4 nodes: Webhook, Set 1, Set 2, Merge
+      const workflow = {
+        ...MULTI_NODE_WORKFLOW,
+        name: createTestWorkflowName('Partial - Reject Single Non-Webhook'),
+        tags: ['mcp-integration-test']
+      };
+
+      const created = await client.createWorkflow(workflow);
+      expect(created.id).toBeTruthy();
+      if (!created.id) throw new Error('Workflow ID is missing');
+      context.trackWorkflow(created.id);
+
+      // Try to remove all nodes except Merge node (non-webhook) - should be rejected
+      const response = await handleUpdatePartialWorkflow(
+        {
+          id: created.id,
+          operations: [
+            {
+              type: 'removeNode',
+              nodeName: 'Webhook'
+            },
+            {
+              type: 'removeNode',
+              nodeName: 'Set 1'
+            },
+            {
+              type: 'removeNode',
+              nodeName: 'Set 2'
+            }
+          ]
+        },
+        repository,
+        mcpContext
+      );
+
+      // Should fail validation
+      expect(response.success).toBe(false);
+      expect(response.error).toContain('Workflow validation failed');
+      expect(response.details?.errors).toBeDefined();
+      expect(Array.isArray(response.details?.errors)).toBe(true);
+      expect((response.details?.errors as string[])[0]).toContain('Single non-webhook node');
+    });
+
+    it('should allow valid partial updates that maintain workflow integrity', async () => {
+      // Create workflow with 4 nodes
+      const workflow = {
+        ...MULTI_NODE_WORKFLOW,
+        name: createTestWorkflowName('Partial - Valid Update'),
+        tags: ['mcp-integration-test']
+      };
+
+      const created = await client.createWorkflow(workflow);
+      expect(created.id).toBeTruthy();
+      if (!created.id) throw new Error('Workflow ID is missing');
+      context.trackWorkflow(created.id);
+
+      // Valid update: add a node and connect it
+      const response = await handleUpdatePartialWorkflow(
+        {
+          id: created.id,
+          operations: [
+            {
+              type: 'addNode',
+              node: {
+                name: 'Process Data',
+                type: 'n8n-nodes-base.set',
+                typeVersion: 3.4,
+                position: [850, 300],
+                parameters: {
+                  assignments: {
+                    assignments: []
+                  }
+                }
+              }
+            },
+            {
+              type: 'addConnection',
+              source: 'Merge',
+              target: 'Process Data',
+              sourcePort: 'main',
+              targetPort: 'main'
+            }
+          ]
+        },
+        repository,
+        mcpContext
+      );
+
+      // Should succeed
+      expect(response.success).toBe(true);
+      // Response now returns minimal data - verify with a follow-up get
+      const responseData = response.data as any;
+      expect(responseData.id).toBe(created.id);
+      expect(responseData.nodeCount).toBe(5); // Original 4 + 1 new
+
+      // Fetch actual workflow to verify changes
+      const updated = await client.getWorkflow(created.id);
+      expect(updated.nodes).toHaveLength(5); // Original 4 + 1 new
+      expect(updated.nodes.find((n: any) => n.name === 'Process Data')).toBeDefined();
+    });
+
+    it('should reject adding node without connecting it (disconnected node)', async () => {
+      // Create workflow with 2 connected nodes
+      const workflow = {
+        ...SIMPLE_HTTP_WORKFLOW,
+        name: createTestWorkflowName('Partial - Reject Disconnected Node'),
+        tags: ['mcp-integration-test']
+      };
+
+      const created = await client.createWorkflow(workflow);
+      expect(created.id).toBeTruthy();
+      if (!created.id) throw new Error('Workflow ID is missing');
+      context.trackWorkflow(created.id);
+
+      // Try to add a third node WITHOUT connecting it - should be rejected
+      const response = await handleUpdatePartialWorkflow(
+        {
+          id: created.id,
+          operations: [
+            {
+              type: 'addNode',
+              node: {
+                name: 'Disconnected Set',
+                type: 'n8n-nodes-base.set',
+                typeVersion: 3.4,
+                position: [800, 300],
+                parameters: {
+                  assignments: {
+                    assignments: []
+                  }
+                }
+              }
+              // Note: No connection operation - this creates a disconnected node
+            }
+          ]
+        },
+        repository,
+        mcpContext
+      );
+
+      // Should fail validation - disconnected node detected
+      expect(response.success).toBe(false);
+      expect(response.error).toContain('Workflow validation failed');
+      expect(response.details?.errors).toBeDefined();
+      expect(Array.isArray(response.details?.errors)).toBe(true);
+      const errorMessage = (response.details?.errors as string[])[0];
+      expect(errorMessage).toContain('Disconnected nodes detected');
+      expect(errorMessage).toContain('Disconnected Set');
     });
   });
 });

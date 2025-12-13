@@ -11,19 +11,22 @@ import { getTestN8nClient } from '../utils/n8n-client';
 import { N8nApiClient } from '../../../../src/services/n8n-api-client';
 import { SIMPLE_WEBHOOK_WORKFLOW, SIMPLE_HTTP_WORKFLOW } from '../utils/fixtures';
 import { cleanupOrphanedWorkflows } from '../utils/cleanup-helpers';
-import { createMcpContext } from '../utils/mcp-context';
+import { createMcpContext, getMcpRepository } from '../utils/mcp-context';
 import { InstanceContext } from '../../../../src/types/instance-context';
+import { NodeRepository } from '../../../../src/database/node-repository';
 import { handleUpdateWorkflow } from '../../../../src/mcp/handlers-n8n-manager';
 
 describe('Integration: handleUpdateWorkflow', () => {
   let context: TestContext;
   let client: N8nApiClient;
   let mcpContext: InstanceContext;
+  let repository: NodeRepository;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     context = createTestContext();
     client = getTestN8nClient();
     mcpContext = createMcpContext();
+    repository = await getMcpRepository();
   });
 
   afterEach(async () => {
@@ -68,17 +71,22 @@ describe('Integration: handleUpdateWorkflow', () => {
           nodes: replacement.nodes,
           connections: replacement.connections
         },
+        repository,
         mcpContext
       );
 
-      // Verify MCP response
+      // Verify MCP response - now returns minimal data
       expect(response.success).toBe(true);
       expect(response.data).toBeDefined();
 
       const updated = response.data as any;
       expect(updated.id).toBe(created.id);
       expect(updated.name).toBe(replacement.name);
-      expect(updated.nodes).toHaveLength(2); // HTTP workflow has 2 nodes
+      expect(updated.nodeCount).toBe(2); // HTTP workflow has 2 nodes
+
+      // Fetch actual workflow to verify
+      const actual = await client.getWorkflow(created.id);
+      expect(actual.nodes).toHaveLength(2);
     });
   });
 
@@ -138,13 +146,19 @@ describe('Integration: handleUpdateWorkflow', () => {
           nodes: updatedNodes,
           connections: updatedConnections
         },
+        repository,
         mcpContext
       );
 
       expect(response.success).toBe(true);
+      // Response now returns minimal data
       const updated = response.data as any;
-      expect(updated.nodes).toHaveLength(2);
-      expect(updated.nodes.find((n: any) => n.name === 'Set')).toBeDefined();
+      expect(updated.nodeCount).toBe(2);
+
+      // Fetch actual workflow to verify
+      const actual = await client.getWorkflow(created.id);
+      expect(actual.nodes).toHaveLength(2);
+      expect(actual.nodes.find((n: any) => n.name === 'Set')).toBeDefined();
     });
   });
 
@@ -183,13 +197,18 @@ describe('Integration: handleUpdateWorkflow', () => {
             timezone: 'Europe/London'
           }
         },
+        repository,
         mcpContext
       );
 
       expect(response.success).toBe(true);
+      // Response now returns minimal data
       const updated = response.data as any;
-      // Note: n8n API may not return settings in response
-      expect(updated.nodes).toHaveLength(1); // Nodes unchanged
+      expect(updated.nodeCount).toBe(1); // Nodes unchanged
+
+      // Fetch actual workflow to verify
+      const actual = await client.getWorkflow(created.id);
+      expect(actual.nodes).toHaveLength(1);
     });
   });
 
@@ -228,6 +247,7 @@ describe('Integration: handleUpdateWorkflow', () => {
           ],
           connections: {}
         },
+        repository,
         mcpContext
       );
 
@@ -242,6 +262,7 @@ describe('Integration: handleUpdateWorkflow', () => {
           id: '99999999',
           name: 'Should Fail'
         },
+        repository,
         mcpContext
       );
 
@@ -281,13 +302,19 @@ describe('Integration: handleUpdateWorkflow', () => {
           nodes: current.nodes,         // Required by n8n API
           connections: current.connections  // Required by n8n API
         },
+        repository,
         mcpContext
       );
 
       expect(response.success).toBe(true);
+      // Response now returns minimal data
       const updated = response.data as any;
       expect(updated.name).toBe(newName);
-      expect(updated.nodes).toHaveLength(1); // Structure unchanged
+      expect(updated.nodeCount).toBe(1); // Structure unchanged
+
+      // Fetch actual workflow to verify
+      const actual = await client.getWorkflow(created.id);
+      expect(actual.nodes).toHaveLength(1);
     });
   });
 
@@ -326,13 +353,18 @@ describe('Integration: handleUpdateWorkflow', () => {
             timezone: 'America/New_York'
           }
         },
+        repository,
         mcpContext
       );
 
       expect(response.success).toBe(true);
+      // Response now returns minimal data
       const updated = response.data as any;
       expect(updated.name).toBe(newName);
-      expect(updated.settings?.timezone).toBe('America/New_York');
+
+      // Fetch actual workflow to verify settings
+      const actual = await client.getWorkflow(created.id);
+      expect(actual.settings?.timezone).toBe('America/New_York');
     });
   });
 });

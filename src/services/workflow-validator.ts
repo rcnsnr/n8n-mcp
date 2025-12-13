@@ -3,6 +3,7 @@
  * Validates complete workflow structure, connections, and node configurations
  */
 
+import crypto from 'crypto';
 import { NodeRepository } from '../database/node-repository';
 import { EnhancedConfigValidator } from './enhanced-config-validator';
 import { ExpressionValidator } from './expression-validator';
@@ -11,6 +12,10 @@ import { NodeSimilarityService, NodeSuggestion } from './node-similarity-service
 import { NodeTypeNormalizer } from '../utils/node-type-normalizer';
 import { Logger } from '../utils/logger';
 import { validateAISpecificNodes, hasAINodes } from './ai-node-validator';
+import { isAIToolSubNode } from './ai-tool-validators';
+import { isTriggerNode } from '../utils/node-type-utils';
+import { isNonExecutableNode } from '../utils/node-classification';
+import { ToolVariantGenerator } from './tool-variant-generator';
 const logger = new Logger({ prefix: '[WorkflowValidator]' });
 
 interface WorkflowNode {
@@ -51,12 +56,19 @@ interface WorkflowJson {
   meta?: any;
 }
 
-interface ValidationIssue {
+export interface ValidationIssue {
   type: 'error' | 'warning';
   nodeId?: string;
   nodeName?: string;
   message: string;
   details?: any;
+  code?: string;
+  fix?: {
+    type: string;
+    currentType?: string;
+    suggestedType?: string;
+    description?: string;
+  };
 }
 
 export interface WorkflowValidationResult {
@@ -85,17 +97,8 @@ export class WorkflowValidator {
     this.similarityService = new NodeSimilarityService(nodeRepository);
   }
 
-  /**
-   * Check if a node is a Sticky Note or other non-executable node
-   */
-  private isStickyNote(node: WorkflowNode): boolean {
-    const stickyNoteTypes = [
-      'n8n-nodes-base.stickyNote',
-      'nodes-base.stickyNote',
-      '@n8n/n8n-nodes-base.stickyNote'
-    ];
-    return stickyNoteTypes.includes(node.type);
-  }
+  // Note: isStickyNote logic moved to shared utility: src/utils/node-classification.ts
+  // Use isNonExecutableNode(node.type) instead
 
   /**
    * Validate a complete workflow
@@ -146,7 +149,7 @@ export class WorkflowValidator {
       }
 
       // Update statistics after null check (exclude sticky notes from counts)
-      const executableNodes = Array.isArray(workflow.nodes) ? workflow.nodes.filter(n => !this.isStickyNote(n)) : [];
+      const executableNodes = Array.isArray(workflow.nodes) ? workflow.nodes.filter(n => !isNonExecutableNode(n.type)) : [];
       result.statistics.totalNodes = executableNodes.length;
       result.statistics.enabledNodes = executableNodes.filter(n => !n.disabled).length;
 
@@ -304,8 +307,11 @@ export class WorkflowValidator {
     // Check for duplicate node names
     const nodeNames = new Set<string>();
     const nodeIds = new Set<string>();
-    
-    for (const node of workflow.nodes) {
+    const nodeIdToIndex = new Map<string, number>(); // Track which node index has which ID
+
+    for (let i = 0; i < workflow.nodes.length; i++) {
+      const node = workflow.nodes[i];
+
       if (nodeNames.has(node.name)) {
         result.errors.push({
           type: 'error',
@@ -317,25 +323,22 @@ export class WorkflowValidator {
       nodeNames.add(node.name);
 
       if (nodeIds.has(node.id)) {
+        const firstNodeIndex = nodeIdToIndex.get(node.id);
+        const firstNode = firstNodeIndex !== undefined ? workflow.nodes[firstNodeIndex] : undefined;
+
         result.errors.push({
           type: 'error',
           nodeId: node.id,
-          message: `Duplicate node ID: "${node.id}"`
+          message: `Duplicate node ID: "${node.id}". Node at index ${i} (name: "${node.name}", type: "${node.type}") conflicts with node at index ${firstNodeIndex} (name: "${firstNode?.name || 'unknown'}", type: "${firstNode?.type || 'unknown'}"). Each node must have a unique ID. Generate a new UUID using crypto.randomUUID() - Example: {id: "${crypto.randomUUID()}", name: "${node.name}", type: "${node.type}", ...}`
         });
+      } else {
+        nodeIds.add(node.id);
+        nodeIdToIndex.set(node.id, i);
       }
-      nodeIds.add(node.id);
     }
 
-    // Count trigger nodes - normalize type names first
-    const triggerNodes = workflow.nodes.filter(n => {
-      const normalizedType = NodeTypeNormalizer.normalizeToFullForm(n.type);
-      const lowerType = normalizedType.toLowerCase();
-      return lowerType.includes('trigger') ||
-             (lowerType.includes('webhook') && !lowerType.includes('respond')) ||
-             normalizedType === 'nodes-base.start' ||
-             normalizedType === 'nodes-base.manualTrigger' ||
-             normalizedType === 'nodes-base.formTrigger';
-    });
+    // Count trigger nodes using shared trigger detection
+    const triggerNodes = workflow.nodes.filter(n => isTriggerNode(n.type));
     result.statistics.triggerNodes = triggerNodes.length;
 
     // Check for at least one trigger node
@@ -356,7 +359,7 @@ export class WorkflowValidator {
     profile: string
   ): Promise<void> {
     for (const node of workflow.nodes) {
-      if (node.disabled || this.isStickyNote(node)) continue;
+      if (node.disabled || isNonExecutableNode(node.type)) continue;
 
       try {
         // Validate node name length
@@ -389,13 +392,10 @@ export class WorkflowValidator {
             });
           }
         }
-        // Normalize node type FIRST to ensure consistent lookup
+        // Normalize node type for database lookup (DO NOT mutate the original workflow)
+        // The normalizer converts to short form (nodes-base.*) for database queries,
+        // but n8n API requires full form (n8n-nodes-base.*). Never modify the input workflow.
         const normalizedType = NodeTypeNormalizer.normalizeToFullForm(node.type);
-
-        // Update node type in place if it was normalized
-        if (normalizedType !== node.type) {
-          node.type = normalizedType;
-        }
 
         // Get node definition using normalized type (needed for typeVersion validation)
         const nodeInfo = this.nodeRepository.getNode(normalizedType);
@@ -594,6 +594,9 @@ export class WorkflowValidator {
 
       // Check AI tool outputs
       if (outputs.ai_tool) {
+        // Validate that the source node can actually output ai_tool
+        this.validateAIToolSource(sourceNode, result);
+
         this.validateConnectionOutputs(
           sourceName,
           outputs.ai_tool,
@@ -632,16 +635,12 @@ export class WorkflowValidator {
 
     // Check for orphaned nodes (exclude sticky notes)
     for (const node of workflow.nodes) {
-      if (node.disabled || this.isStickyNote(node)) continue;
+      if (node.disabled || isNonExecutableNode(node.type)) continue;
 
-      const normalizedType = NodeTypeNormalizer.normalizeToFullForm(node.type);
-      const isTrigger = normalizedType.toLowerCase().includes('trigger') ||
-                       normalizedType.toLowerCase().includes('webhook') ||
-                       normalizedType === 'nodes-base.start' ||
-                       normalizedType === 'nodes-base.manualTrigger' ||
-                       normalizedType === 'nodes-base.formTrigger';
-      
-      if (!connectedNodes.has(node.name) && !isTrigger) {
+      // Use shared trigger detection function for consistency
+      const isNodeTrigger = isTriggerNode(node.type);
+
+      if (!connectedNodes.has(node.name) && !isNodeTrigger) {
         result.warnings.push({
           type: 'warning',
           nodeId: node.id,
@@ -694,7 +693,12 @@ export class WorkflowValidator {
         }
 
         // Special validation for SplitInBatches node
-        if (sourceNode && sourceNode.type === 'nodes-base.splitInBatches') {
+        // Check both full form (n8n-nodes-base.*) and short form (nodes-base.*)
+        const isSplitInBatches = sourceNode && (
+          sourceNode.type === 'n8n-nodes-base.splitInBatches' ||
+          sourceNode.type === 'nodes-base.splitInBatches'
+        );
+        if (isSplitInBatches) {
           this.validateSplitInBatchesConnection(
             sourceNode,
             outputIndex,
@@ -706,8 +710,8 @@ export class WorkflowValidator {
 
         // Check for self-referencing connections
         if (connection.node === sourceName) {
-          // This is only a warning for non-loop nodes
-          if (sourceNode && sourceNode.type !== 'nodes-base.splitInBatches') {
+          // This is only a warning for non-loop nodes (not SplitInBatches)
+          if (sourceNode && !isSplitInBatches) {
             result.warnings.push({
               type: 'warning',
               message: `Node "${sourceName}" has a self-referencing connection. This can cause infinite loops.`
@@ -867,6 +871,83 @@ export class WorkflowValidator {
   }
 
   /**
+   * Validate that a node can actually output ai_tool connections.
+   *
+   * Valid ai_tool sources are:
+   * 1. Langchain tool nodes (in AI_TOOL_VALIDATORS)
+   * 2. Tool variant nodes (e.g., nodes-base.supabaseTool)
+   *
+   * If a base node (e.g., nodes-base.supabase) is used with ai_tool connection
+   * but it has a Tool variant available, this is an error.
+   */
+  private validateAIToolSource(
+    sourceNode: WorkflowNode,
+    result: WorkflowValidationResult
+  ): void {
+    const normalizedType = NodeTypeNormalizer.normalizeToFullForm(sourceNode.type);
+
+    // Check if it's a known langchain tool node
+    if (isAIToolSubNode(normalizedType)) {
+      return; // Valid - it's a langchain tool
+    }
+
+    // Get node info from repository (single lookup, reused below)
+    const nodeInfo = this.nodeRepository.getNode(normalizedType);
+
+    // Check if it's a Tool variant (ends with Tool and is in database as isToolVariant)
+    if (ToolVariantGenerator.isToolVariantNodeType(normalizedType)) {
+      // It looks like a Tool variant, verify it exists in database
+      if (nodeInfo?.isToolVariant) {
+        return; // Valid - it's a Tool variant
+      }
+    }
+
+    if (!nodeInfo) {
+      // Node not found in database - might be a community node or unknown
+      // Don't error here, let other validation handle unknown nodes
+      return;
+    }
+
+    // Check if this is a base node that has a Tool variant available
+    if (nodeInfo.hasToolVariant) {
+      const toolVariantType = ToolVariantGenerator.getToolVariantNodeType(normalizedType);
+      const workflowToolVariantType = NodeTypeNormalizer.toWorkflowFormat(toolVariantType);
+
+      result.errors.push({
+        type: 'error',
+        nodeId: sourceNode.id,
+        nodeName: sourceNode.name,
+        message: `Node "${sourceNode.name}" uses "${sourceNode.type}" which cannot output ai_tool connections. ` +
+          `Use the Tool variant "${workflowToolVariantType}" instead for AI Agent integration.`,
+        code: 'WRONG_NODE_TYPE_FOR_AI_TOOL',
+        fix: {
+          type: 'tool-variant-correction',
+          currentType: sourceNode.type,
+          suggestedType: workflowToolVariantType,
+          description: `Change node type from "${sourceNode.type}" to "${workflowToolVariantType}"`
+        }
+      });
+      return;
+    }
+
+    // Check if it's an AI-capable node (isAITool flag) but not a Tool variant
+    if (nodeInfo.isAITool) {
+      // This node is AI-capable, which is fine for ai_tool connections
+      return;
+    }
+
+    // Node is not valid for ai_tool connections
+    result.errors.push({
+      type: 'error',
+      nodeId: sourceNode.id,
+      nodeName: sourceNode.name,
+      message: `Node "${sourceNode.name}" of type "${sourceNode.type}" cannot output ai_tool connections. ` +
+        `Only AI tool nodes (e.g., Calculator, HTTP Request Tool) or Tool variants (e.g., *Tool suffix nodes) can be connected to AI Agents as tools.`,
+      code: 'INVALID_AI_TOOL_SOURCE'
+    });
+  }
+
+  /**
    * Check if workflow has cycles
    * Allow legitimate loops for SplitInBatches and similar loop nodes
    */
@@ -877,7 +958,7 @@ export class WorkflowValidator {
     
     // Build node type map (exclude sticky notes)
     workflow.nodes.forEach(node => {
-      if (!this.isStickyNote(node)) {
+      if (!isNonExecutableNode(node.type)) {
         nodeTypeMap.set(node.name, node.type);
       }
     });
@@ -945,7 +1026,7 @@ export class WorkflowValidator {
 
     // Check from all executable nodes (exclude sticky notes)
     for (const node of workflow.nodes) {
-      if (!this.isStickyNote(node) && !visited.has(node.name)) {
+      if (!isNonExecutableNode(node.type) && !visited.has(node.name)) {
         if (hasCycleDFS(node.name)) return true;
       }
     }
@@ -964,7 +1045,7 @@ export class WorkflowValidator {
     const nodeNames = workflow.nodes.map(n => n.name);
 
     for (const node of workflow.nodes) {
-      if (node.disabled || this.isStickyNote(node)) continue;
+      if (node.disabled || isNonExecutableNode(node.type)) continue;
 
       // Skip expression validation for langchain nodes
       // They have AI-specific validators and different expression rules
@@ -1111,7 +1192,7 @@ export class WorkflowValidator {
 
     // Check node-level error handling properties for ALL executable nodes
     for (const node of workflow.nodes) {
-      if (!this.isStickyNote(node)) {
+      if (!isNonExecutableNode(node.type)) {
         this.checkNodeErrorHandling(node, workflow, result);
       }
     }
@@ -1145,16 +1226,23 @@ export class WorkflowValidator {
     }
 
     // Check for AI Agent workflows
-    const aiAgentNodes = workflow.nodes.filter(n => 
-      n.type.toLowerCase().includes('agent') || 
+    const aiAgentNodes = workflow.nodes.filter(n =>
+      n.type.toLowerCase().includes('agent') ||
       n.type.includes('langchain.agent')
     );
-    
+
     if (aiAgentNodes.length > 0) {
       // Check if AI agents have tools connected
+      // Tools connect TO the agent, so we need to find connections where the target is the agent
       for (const agentNode of aiAgentNodes) {
-        const connections = workflow.connections[agentNode.name];
-        if (!connections?.ai_tool || connections.ai_tool.flat().filter(c => c).length === 0) {
+        // Search all connections to find ones targeting this agent via ai_tool
+        const hasToolConnected = Object.values(workflow.connections).some(sourceOutputs => {
+          const aiToolConnections = sourceOutputs.ai_tool;
+          if (!aiToolConnections) return false;
+          return aiToolConnections.flat().some(conn => conn && conn.node === agentNode.name);
+        });
+
+        if (!hasToolConnected) {
           result.warnings.push({
             type: 'warning',
             nodeId: agentNode.id,
@@ -1292,6 +1380,15 @@ export class WorkflowValidator {
 
   /**
    * Check node-level error handling configuration for a single node
+   *
+   * Validates error handling properties (onError, continueOnFail, retryOnFail)
+   * and provides warnings for error-prone nodes (HTTP, webhooks, databases)
+   * that lack proper error handling. Delegates webhook-specific validation
+   * to checkWebhookErrorHandling() for clearer logic.
+   *
+   * @param node - The workflow node to validate
+   * @param workflow - The complete workflow for context
+   * @param result - Validation result to add errors/warnings to
    */
   private checkNodeErrorHandling(
     node: WorkflowNode,
@@ -1502,12 +1599,8 @@ export class WorkflowValidator {
             message: 'HTTP Request node without error handling. Consider adding "onError: \'continueRegularOutput\'" for non-critical requests or "retryOnFail: true" for transient failures.'
           });
         } else if (normalizedType.includes('webhook')) {
-          result.warnings.push({
-            type: 'warning',
-            nodeId: node.id,
-            nodeName: node.name,
-            message: 'Webhook node without error handling. Consider adding "onError: \'continueRegularOutput\'" to prevent workflow failures from blocking webhook responses.'
-          });
+          // Delegate to specialized webhook validation helper
+          this.checkWebhookErrorHandling(node, normalizedType, result);
         } else if (errorProneNodeTypes.some(db => normalizedType.includes(db) && ['postgres', 'mysql', 'mongodb'].includes(db))) {
           result.warnings.push({
             type: 'warning',
@@ -1596,6 +1689,52 @@ export class WorkflowValidator {
         }
       }
 
+  }
+
+  /**
+   * Check webhook-specific error handling requirements
+   *
+   * Webhooks have special error handling requirements:
+   * - respondToWebhook nodes (response nodes) don't need error handling
+   * - Webhook nodes with responseNode mode REQUIRE onError to ensure responses
+   * - Regular webhook nodes should have error handling to prevent blocking
+   *
+   * @param node - The webhook node to check
+   * @param normalizedType - Normalized node type for comparison
+   * @param result - Validation result to add errors/warnings to
+   */
+  private checkWebhookErrorHandling(
+    node: WorkflowNode,
+    normalizedType: string,
+    result: WorkflowValidationResult
+  ): void {
+    // respondToWebhook nodes are response nodes (endpoints), not triggers
+    // They're the END of execution, not controllers of flow - skip error handling check
+    if (normalizedType.includes('respondtowebhook')) {
+      return;
+    }
+
+    // Check for responseNode mode specifically
+    // responseNode mode requires onError to ensure response is sent even on error
+    if (node.parameters?.responseMode === 'responseNode') {
+      if (!node.onError && !node.continueOnFail) {
+        result.errors.push({
+          type: 'error',
+          nodeId: node.id,
+          nodeName: node.name,
+          message: 'responseNode mode requires onError: "continueRegularOutput"'
+        });
+      }
+      return;
+    }
+
+    // Regular webhook nodes without responseNode mode
+    result.warnings.push({
+      type: 'warning',
+      nodeId: node.id,
+      nodeName: node.name,
+      message: 'Webhook node without error handling. Consider adding "onError: \'continueRegularOutput\'" to prevent workflow failures from blocking webhook responses.'
+    });
   }
 
   /**
