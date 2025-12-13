@@ -43,6 +43,7 @@ services:
       - N8N_MODE=true
       - MCP_MODE=http
       - PORT=${MCP_PORT:-3000}
+      - MCP_PORT=${MCP_PORT:-3000}
       - N8N_API_URL=http://n8n:5678
       - N8N_API_KEY=${N8N_API_KEY}
       - MCP_AUTH_TOKEN=${MCP_AUTH_TOKEN}
