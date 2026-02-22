@@ -5,6 +5,7 @@ This guide provides comprehensive instructions for deploying n8n-MCP using Docke
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Docker Engine 20.10+ (Docker Desktop on Windows/macOS, or Docker Engine on Linux)
 - Docker Compose V2
 - (Optional) openssl for generating auth tokens
@@ -96,6 +97,7 @@ docker run -d \
 ```
 
 The config file supports:
+
 - All standard environment variables
 - Nested objects (flattened with underscore separators)
 - Arrays, booleans, numbers, and strings
@@ -105,6 +107,7 @@ The config file supports:
 ### Docker Compose Configuration
 
 The default `docker-compose.yml` provides:
+
 - Automatic restart on failure
 - Named volume for data persistence
 - Memory limits (512MB max, 256MB reserved)
@@ -145,6 +148,7 @@ docker run -d \
 ```
 
 Configure Claude Desktop with mcp-remote:
+
 ```json
 {
   "mcpServers": {
@@ -190,6 +194,7 @@ docker run -d \
 ```
 
 Configure Claude Desktop:
+
 ```json
 {
   "mcpServers": {
@@ -258,6 +263,7 @@ curl http://localhost:3000/health
 ```
 
 Response example:
+
 ```json
 {
   "status": "healthy",
@@ -322,6 +328,7 @@ WEBHOOK_SECURITY_MODE=permissive
 n8n-MCP supports two authentication methods for HTTP mode:
 
 #### Method 1: AUTH_TOKEN (Environment Variable)
+
 - Set the token directly as an environment variable
 - Simple and straightforward for basic deployments
 - Always use a strong token (minimum 32 characters)
@@ -335,6 +342,7 @@ docker run -e AUTH_TOKEN=your-secure-token ...
 ```
 
 #### Method 2: AUTH_TOKEN_FILE (File Path) - NEW in v2.7.5
+
 - Read token from a file (Docker secrets compatible)
 - More secure for production deployments
 - Prevents token exposure in process lists
@@ -348,6 +356,7 @@ docker run -e AUTH_TOKEN_FILE=/run/secrets/auth_token ...
 ```
 
 #### Best Practices
+
 - Never commit tokens to version control
 - Rotate tokens regularly
 - Use AUTH_TOKEN_FILE with Docker secrets for production
@@ -362,7 +371,8 @@ For production deployments:
 3. **VPN** - Consider VPN access for internal use
 
 Example with Caddy:
-```
+
+```text
 your-domain.com {
   reverse_proxy n8n-mcp:3000
   basicauth * {
@@ -383,10 +393,12 @@ your-domain.com {
 ### Memory Limits
 
 Default limits in docker-compose.yml:
+
 - Maximum: 512MB
 - Reserved: 256MB
 
 Adjust based on your needs:
+
 ```yaml
 services:
   n8n-mcp:
@@ -437,6 +449,7 @@ docker run -d \
 ```
 
 **Important Notes:**
+
 - The path must end with `.db`
 - For data persistence, ensure the path is within a mounted volume
 - Paths outside mounted volumes will be lost on container restart
@@ -447,6 +460,7 @@ docker run -d \
 ### Common Issues
 
 #### Container Exits Immediately
+
 ```bash
 # Check logs
 docker logs n8n-mcp
@@ -458,6 +472,7 @@ docker logs n8n-mcp
 ```
 
 #### Database Not Initialized
+
 ```bash
 # Manually initialize database
 docker exec n8n-mcp node dist/scripts/rebuild.js
@@ -468,6 +483,7 @@ docker compose up -d
 ```
 
 #### Permission Errors
+
 ```bash
 # Fix volume permissions
 docker exec n8n-mcp chown -R nodejs:nodejs /app/data
@@ -476,6 +492,7 @@ docker exec n8n-mcp chown -R nodejs:nodejs /app/data
 ### Debug Mode
 
 Enable debug logging:
+
 ```bash
 docker run -d \
   --name n8n-mcp-debug \
@@ -528,7 +545,7 @@ services:
           memory: 1G
         reservations:
           memory: 512M
-  
+
   nginx:
     image: nginx:alpine
     restart: always

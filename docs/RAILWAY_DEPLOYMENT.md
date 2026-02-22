@@ -11,6 +11,7 @@ Deploy n8n-MCP with one click:
 ## 📋 Overview
 
 Railway deployment provides:
+
 - ☁️ **Instant cloud hosting** - No server setup required
 - 🔒 **Secure by default** - HTTPS included, auth token warnings
 - 🌐 **Global access** - Connect from any Claude Desktop
@@ -38,12 +39,14 @@ Railway deployment provides:
 1. **Go to your Railway dashboard**
 2. **Click on your n8n-mcp service**
 3. **Navigate to "Variables" tab**
-4. **Find `AUTH_TOKEN`** 
+4. **Find `AUTH_TOKEN`**
 5. **Replace with secure token**:
+
    ```bash
    # Generate secure token locally:
    openssl rand -base64 32
    ```
+
 6. **Railway will automatically redeploy** with the new token
 
 > ⚠️ **Security Warning**: The server displays warnings every 5 minutes until you change the default token!
@@ -55,9 +58,11 @@ Railway deployment provides:
 1. In Railway dashboard, click on your service
 2. Go to **"Settings"** tab
 3. Under **"Domains"**, you'll see your URL:
-   ```
+
+   ```text
    https://your-app-name.up.railway.app
    ```
+
 4. Copy this URL for Claude Desktop configuration and add /mcp at the end
 
 ### 4. Connect Claude Desktop
@@ -82,6 +87,7 @@ Add to your Claude Desktop configuration:
 ```
 
 **Configuration file locations:**
+
 - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
 - **Linux**: `~/.config/Claude/claude_desktop_config.json`
@@ -142,7 +148,7 @@ To enable workflow management features:
 
 ### How It Works
 
-```
+```text
 Claude Desktop → mcp-remote → Railway (HTTPS) → n8n-MCP Server
 ```
 
@@ -154,6 +160,7 @@ Claude Desktop → mcp-remote → Railway (HTTPS) → n8n-MCP Server
 ### Single-Instance Design
 
 **Important**: The n8n-MCP HTTP server is designed for single n8n instance deployment:
+
 - n8n API credentials are configured server-side via environment variables
 - All clients connecting to the server share the same n8n instance
 - For multi-tenant usage, deploy separate Railway instances
@@ -170,15 +177,18 @@ Claude Desktop → mcp-remote → Railway (HTTPS) → n8n-MCP Server
 ### Connection Issues
 
 **"Invalid URL" error in Claude Desktop:**
+
 - Ensure you're using the exact configuration format shown above
 - Don't add "connect" or other arguments before the URL
 - The URL should end with `/mcp`
 
 **"Unauthorized" error:**
+
 - Check that your AUTH_TOKEN matches exactly (no extra spaces)
 - Ensure the Authorization header format is correct: `Authorization: Bearer TOKEN`
 
 **"Cannot connect to server":**
+
 - Verify your Railway deployment is running (check Railway dashboard)
 - Ensure the URL is correct and includes `https://`
 - Check Railway logs for any errors
@@ -188,6 +198,7 @@ Claude Desktop → mcp-remote → Railway (HTTPS) → n8n-MCP Server
 This is a common Windows issue with spaces in Node.js installation paths. The error occurs because Claude Desktop can't properly execute npx.
 
 **Solution 1: Use node directly (Recommended)**
+
 ```json
 {
   "mcpServers": {
@@ -207,6 +218,7 @@ This is a common Windows issue with spaces in Node.js installation paths. The er
 ```
 
 **Solution 2: Use cmd wrapper**
+
 ```json
 {
   "mcpServers": {
@@ -226,15 +238,18 @@ To find your exact npx path, open Command Prompt and run: `where npx`
 ### Railway-Specific Issues
 
 **Build failures:**
+
 - Railway uses AMD64 architecture - the template is configured for this
 - Check build logs in Railway dashboard for specific errors
 
 **Environment variable issues:**
+
 - Variables are case-sensitive
 - Don't include quotes in the Railway dashboard (only in JSON config)
 - Railway automatically restarts when you change variables
 
 **Domain not working:**
+
 - It may take 1-2 minutes for the domain to become active
 - Check the "Deployments" tab to ensure the latest deployment succeeded
 
@@ -254,6 +269,7 @@ To find your exact npx path, open Command Prompt and run: `where npx`
 ### Monitor Usage
 
 Railway provides metrics for:
+
 - **Memory usage** (typically ~100-200MB)
 - **CPU usage** (minimal when idle)
 - **Network traffic**
@@ -262,11 +278,13 @@ Railway provides metrics for:
 ## 💰 Pricing & Limits
 
 ### Railway Free Tier
+
 - **$5 free credit** monthly
 - **500 hours** of runtime
 - **Sufficient for personal use** of n8n-MCP
 
 ### Estimated Costs
+
 - **n8n-MCP typically uses**: ~0.1 GB RAM
 - **Monthly cost**: ~$2-3 for 24/7 operation
 - **Well within free tier** for most users
@@ -292,16 +310,19 @@ You could use the `latest` tag, but this may cause unexpected breaking changes.
 Railway deployments include enhanced security features:
 
 ### Rate Limiting
+
 - **Automatic brute force protection** - 20 attempts per 15 minutes per IP
 - **Configurable limits** via `AUTH_RATE_LIMIT_WINDOW` and `AUTH_RATE_LIMIT_MAX`
 - **Standard rate limit headers** for client awareness
 
 ### SSRF Protection
+
 - **Default strict mode** blocks localhost, private IPs, and cloud metadata
 - **Cloud metadata always blocked** (169.254.169.254, metadata.google.internal, etc.)
 - **Use `moderate` mode only if** connecting to local n8n instance
 
 **Security Configuration:**
+
 ```bash
 # In Railway Variables tab:
 WEBHOOK_SECURITY_MODE=strict          # Production (recommended)
@@ -328,9 +349,10 @@ AUTH_RATE_LIMIT_MAX=20                # 20 attempts per IP
 - **n8n-MCP Issues**: [GitHub Issues](https://github.com/czlonkowski/n8n-mcp/issues)
 - **Railway Community**: [Discord](https://discord.gg/railway)
 
-## 🎉 Success!
+## 🎉 Success
 
 Once connected, you can use all n8n-MCP features from Claude Desktop:
+
 - Search and explore 500+ n8n nodes
 - Get node configurations and examples
 - Validate workflows before deployment

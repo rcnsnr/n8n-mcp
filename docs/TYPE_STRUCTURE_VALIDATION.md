@@ -15,9 +15,11 @@ The system automatically validates node configurations without requiring any add
 The validation system supports four special n8n types that have complex structures:
 
 ### 1. **filter** (FilterValue)
+
 Complex filtering conditions with boolean operators, comparison operations, and nested logic.
 
 **Structure:**
+
 - `combinator`: "and" | "or" - How conditions are combined
 - `conditions`: Array of filter conditions
   - Each condition has: `leftValue`, `operator` (type + operation), `rightValue`
@@ -26,9 +28,11 @@ Complex filtering conditions with boolean operators, comparison operations, and 
 **Example Usage:** IF node, Switch node condition filtering
 
 ### 2. **resourceMapper** (ResourceMapperValue)
+
 Data mapping configuration for transforming data between different formats.
 
 **Structure:**
+
 - `mappingMode`: "defineBelow" | "autoMapInputData" | "mapManually"
 - `value`: Field mappings or expressions
 - `matchingColumns`: Column matching configuration
@@ -37,18 +41,22 @@ Data mapping configuration for transforming data between different formats.
 **Example Usage:** Google Sheets node, Airtable node data mapping
 
 ### 3. **assignmentCollection** (AssignmentCollectionValue)
+
 Variable assignments for setting multiple values at once.
 
 **Structure:**
+
 - `assignments`: Array of name-value pairs
   - Each assignment has: `name`, `value`, `type`
 
 **Example Usage:** Set node, Code node variable assignments
 
 ### 4. **resourceLocator** (INodeParameterResourceLocator)
+
 Resource selection with multiple lookup modes (ID, name, URL, etc.).
 
 **Structure:**
+
 - `mode`: "id" | "list" | "url" | "name"
 - `value`: Resource identifier (string, number, or expression)
 - `cachedResultName`: Optional cached display name
@@ -91,7 +99,7 @@ Structure validation is automatically applied during node configuration validati
 
 ### Validation Flow
 
-```
+```text
 User/AI provides node config
         ↓
 validate_node_operation (MCP tool)
@@ -108,14 +116,17 @@ Returns validation result with errors/warnings/suggestions
 ### Edge Cases Handled
 
 **1. Credential-Provided Fields**
+
 - Fields like Google Sheets `sheetId` that come from n8n credentials at runtime are excluded from validation
 - No false positives for fields that aren't in the configuration
 
 **2. Filter Operations**
+
 - Universal operations (`exists`, `notExists`, `isNotEmpty`) work across all data types
 - Type-specific operations validated (e.g., `regex` only for strings, `gt`/`lt` only for numbers)
 
 **3. Node-Specific Logic**
+
 - Custom validation logic for specific nodes (Google Sheets, Slack, etc.)
 - Context-aware error messages that understand the node's operation
 
@@ -124,6 +135,7 @@ Returns validation result with errors/warnings/suggestions
 ### Invalid Filter Structure
 
 **Configuration:**
+
 ```json
 {
   "conditions": {
@@ -143,6 +155,7 @@ Returns validation result with errors/warnings/suggestions
 ```
 
 **Validation Error:**
+
 ```json
 {
   "valid": false,
@@ -198,16 +211,19 @@ Returns validation result with errors/warnings/suggestions
 ### Testing Structure Validation
 
 **Run Unit Tests:**
+
 ```bash
 npm run test:unit -- tests/unit/services/enhanced-config-validator-type-structures.test.ts
 ```
 
 **Run Integration Tests:**
+
 ```bash
 npm run test:integration -- tests/integration/validation/real-world-structure-validation.test.ts
 ```
 
 **Run Full Validation:**
+
 ```bash
 npm run test:structure-validation
 ```

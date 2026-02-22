@@ -7,6 +7,7 @@ The n8n-mcp project maintains a database of workflow templates from n8n.io. This
 ## Current Database State
 
 As of the last update:
+
 - **2,598 templates** in database
 - Templates from the last 12 months
 - Latest template: September 12, 2025
@@ -14,6 +15,7 @@ As of the last update:
 ## Quick Commands
 
 ### Incremental Update (Recommended)
+
 ```bash
 # Build if needed
 npm run build
@@ -23,6 +25,7 @@ npm run fetch:templates:update
 ```
 
 ### Full Rebuild (Rare)
+
 ```bash
 # Rebuild entire database from scratch (30-40 minutes)
 npm run fetch:templates
@@ -59,16 +62,19 @@ The incremental update is **smart and efficient**:
 ## Command Options
 
 ### Basic Update
+
 ```bash
 npm run fetch:templates:update
 ```
 
 ### Full Rebuild
+
 ```bash
 npm run fetch:templates
 ```
 
 ### With Metadata Generation
+
 ```bash
 # Update templates and generate AI metadata
 npm run fetch:templates -- --update --generate-metadata
@@ -78,6 +84,7 @@ npm run fetch:templates -- --metadata-only
 ```
 
 ### Help
+
 ```bash
 npm run fetch:templates -- --help
 ```
@@ -85,6 +92,7 @@ npm run fetch:templates -- --help
 ## Update Frequency
 
 Recommended update schedule:
+
 - **Weekly**: Run incremental update to get latest templates
 - **Monthly**: Review database statistics
 - **As needed**: Rebuild only if database corruption suspected
@@ -92,6 +100,7 @@ Recommended update schedule:
 ## Template Filtering
 
 The fetcher automatically filters templates:
+
 - ✅ **Includes**: Templates from last 12 months
 - ✅ **Includes**: Templates with >10 views
 - ❌ **Excludes**: Templates with ≤10 views (too niche)
@@ -118,6 +127,7 @@ sqlite3 data/nodes.db "SELECT COUNT(*) FROM templates"
 ### After n8n Dependency Update
 
 When you update n8n dependencies, templates remain compatible:
+
 ```bash
 # 1. Update n8n (from MEMORY_N8N_UPDATE.md)
 npm run update:all
@@ -147,6 +157,7 @@ Templates are independent of n8n version - they're just workflow JSON data.
 ### No New Templates Found
 
 This is normal! It means:
+
 - All recent templates are already in your database
 - n8n.io hasn't published many new templates recently
 - Your database is up to date
@@ -159,6 +170,7 @@ This is normal! It means:
 ### API Rate Limiting
 
 If you hit rate limits:
+
 - The fetcher includes built-in delays (150ms between requests)
 - Wait a few minutes and try again
 - Use `--update` mode instead of full rebuild
@@ -166,6 +178,7 @@ If you hit rate limits:
 ### Database Corruption
 
 If you suspect corruption:
+
 ```bash
 # Full rebuild from scratch
 npm run fetch:templates
@@ -179,6 +192,7 @@ npm run fetch:templates
 ## Database Schema
 
 Templates are stored with:
+
 - Basic info (id, name, description, author, views, created_at)
 - Node types used (JSON array)
 - Complete workflow (gzip compressed, base64 encoded)
@@ -188,6 +202,7 @@ Templates are stored with:
 ## Metadata Generation
 
 Generate AI metadata for templates:
+
 ```bash
 # Requires OPENAI_API_KEY in .env
 export OPENAI_API_KEY="sk-..."
@@ -220,6 +235,7 @@ LIMIT 10"
 ```
 
 Metadata includes:
+
 - Categories
 - Complexity level (simple/medium/complex)
 - Use cases
@@ -241,11 +257,13 @@ If metadata generation fails:
 4. **Token limit**: 3000 tokens per request for detailed metadata
 
 The system will automatically:
+
 - Process error files and assign default metadata to failed templates
 - Save error details for debugging
 - Continue processing even if some templates fail
 
 **Example error handling**:
+
 ```bash
 # If you see: "No output file available for batch job"
 # Check: temp/batch/batch_*_error.jsonl for error details
@@ -255,6 +273,7 @@ The system will automatically:
 ## Environment Variables
 
 Optional configuration:
+
 ```bash
 # OpenAI for metadata generation
 OPENAI_API_KEY=sk-...
@@ -268,6 +287,7 @@ METADATA_LIMIT=100        # Max templates to process (0 = all)
 ## Statistics
 
 After update, check stats:
+
 ```bash
 # Template count
 sqlite3 data/nodes.db "SELECT COUNT(*) FROM templates"
@@ -289,6 +309,7 @@ sqlite3 data/nodes.db "SELECT COUNT(*),
 ## Integration with n8n-mcp
 
 Templates are available through MCP tools:
+
 - `list_templates`: List all templates
 - `get_template`: Get specific template with workflow
 - `search_templates`: Search by keyword
@@ -301,6 +322,7 @@ See `npm run test:templates` for usage examples.
 ## Time Estimates
 
 Typical incremental update:
+
 - Loading existing IDs: 1-2 seconds
 - Fetching template list: 2-3 minutes
 - Filtering new templates: instant
@@ -309,6 +331,7 @@ Typical incremental update:
 - **Total: 3-5 minutes**
 
 Full rebuild:
+
 - Fetching 8000+ templates: 25-30 minutes
 - Saving and indexing: 5-10 minutes
 - **Total: 30-40 minutes**
@@ -324,6 +347,7 @@ Full rebuild:
 ## Next Steps
 
 After updating templates:
+
 1. Test template search: `npm run test:templates`
 2. Verify MCP tools work: Test in Claude Desktop
 3. Check statistics in database

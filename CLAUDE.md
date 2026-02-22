@@ -6,8 +6,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 n8n-mcp is a comprehensive documentation and knowledge server that provides AI assistants with complete access to n8n node information through the Model Context Protocol (MCP). It serves as a bridge between n8n's workflow automation platform and AI models, enabling them to understand and work with n8n nodes effectively.
 
-### Current Architecture:
-```
+### Current Architecture
+
+```text
 src/
 ├── loaders/
 │   └── node-loader.ts         # NPM package loader for both packages
@@ -166,44 +167,52 @@ The MCP server exposes tools in several categories:
 ## Memories and Notes for Development
 
 ### Development Workflow Reminders
+
 - When you make changes to MCP server, you need to ask the user to reload it before you test
 - When the user asks to review issues, you should use GH CLI to get the issue and all the comments
 - When the task can be divided into separated subtasks, you should spawn separate sub-agents to handle them in parallel
 - Use the best sub-agent for the task as per their descriptions
 
 ### Testing Best Practices
+
 - Always run `npm run build` before testing changes
 - Use `npm run dev` to rebuild database after package updates
 - Check coverage with `npm run test:coverage`
 - Integration tests require a clean database state
 
 ### Common Pitfalls
+
 - The MCP server needs to be reloaded in Claude Desktop after changes
 - HTTP mode requires proper CORS and auth token configuration
 - Database rebuilds can take 2-3 minutes due to n8n package size
 - Always validate workflows before deployment to n8n
 
 ### Performance Considerations
+
 - Use `get_node_essentials()` instead of `get_node_info()` for faster responses
 - Batch validation operations when possible
 - The diff-based update system saves 80-90% tokens on workflow updates
 
 ### Agent Interaction Guidelines
+
 - Sub-agents are not allowed to spawn further sub-agents
 - When you use sub-agents, do not allow them to commit and push. That should be done by you
 
 ### Development Best Practices
+
 - Run typecheck and lint after every code change
 
 ### Session Persistence Feature (v2.24.1)
 
 **Location:**
+
 - Types: `src/types/session-state.ts`
 - Implementation: `src/http-server-single-session.ts` (lines 698-702, 1444-1584)
 - Wrapper: `src/mcp-engine.ts` (lines 123-169)
 - Tests: `tests/unit/http-server/session-persistence.test.ts`, `tests/unit/mcp-engine/session-persistence.test.ts`
 
 **Key Features:**
+
 - **Export/Restore API**: `exportSessionState()` and `restoreSessionState()` methods
 - **Multi-tenant support**: Enables zero-downtime deployments for SaaS platforms
 - **Security-first**: API keys exported as plaintext - downstream MUST encrypt
@@ -212,6 +221,7 @@ The MCP server exposes tools in several categories:
 - **MAX_SESSIONS limit**: Caps at 100 concurrent sessions (configurable via N8N_MCP_MAX_SESSIONS env var)
 
 **Important Implementation Notes:**
+
 - Only exports sessions with valid n8nApiUrl and n8nApiKey in context
 - Skips expired sessions during both export and restore
 - Uses `validateInstanceContext()` for data integrity checks
@@ -220,18 +230,21 @@ The MCP server exposes tools in several categories:
 - Transport and server objects are NOT persisted (recreated on-demand)
 
 **Testing:**
+
 - 22 unit tests covering export, restore, edge cases, and round-trip cycles
 - Tests use current timestamps to avoid expiration issues
 - Integration with multi-tenant backends documented in README.md
 
-# important-instruction-reminders
+## important-instruction-reminders
+
 Do what has been asked; nothing more, nothing less.
 NEVER create files unless they're absolutely necessary for achieving your goal.
 ALWAYS prefer editing an existing file to creating a new one.
 NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
+
 - When you make changes to MCP server, you need to ask the user to reload it before you test
 - When the user asks to review issues, you should use GH CLI to get the issue and all the comments
 - When the task can be divided into separated subtasks, you should spawn separate sub-agents to handle them in paralel
 - Use the best sub-agent for the task as per their descriptions
 - Do not use hyperbolic or dramatic language in comments and documentation
-- Add to every commit and PR: Concieved by Romuald Członkowski - and then link to www.aiadvisors.pl/en. Don't add it in conversations
+- Add to every commit and PR: Concieved by Romuald Członkowski - and then link to <https://www.aiadvisors.pl/en>. Don't add it in conversations

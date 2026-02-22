@@ -3,6 +3,7 @@
 This guide covers how to deploy n8n-MCP and connect it to your n8n instance. Whether you're testing locally or deploying to production, we'll show you how to set up n8n-MCP for use with n8n's MCP Client Tool node.
 
 ## Table of Contents
+
 - [Overview](#overview)
 - [Local Testing](#local-testing)
 - [Production Deployment](#production-deployment)
@@ -15,6 +16,7 @@ This guide covers how to deploy n8n-MCP and connect it to your n8n instance. Whe
 ## Overview
 
 n8n-MCP is a Model Context Protocol server that provides AI assistants with comprehensive access to n8n node documentation and management capabilities. When connected to n8n via the MCP Client Tool node, it enables:
+
 - AI-powered workflow creation and validation
 - Access to documentation for 500+ n8n nodes
 - Workflow management through the n8n API
@@ -40,6 +42,7 @@ npm run build
 ```
 
 This script will:
+
 1. Start a real n8n instance in Docker
 2. Start n8n-MCP server configured for n8n
 3. Guide you through API key setup for workflow management
@@ -54,6 +57,7 @@ For development or custom testing:
    - n8n API key (from n8n Settings → API)
 
 2. **Start n8n-MCP**:
+
 ```bash
 # Set environment variables
 export N8N_MODE=true
@@ -69,6 +73,7 @@ npm start
 ```
 
 3. **Verify it's running**:
+
 ```bash
 # Check health
 curl http://localhost:3001/health
@@ -96,6 +101,7 @@ curl http://localhost:3001/mcp
 ## Docker Build Changes (v2.9.2+)
 
 Starting with version 2.9.2, we use a single optimized Dockerfile for all deployments:
+
 - The previous `Dockerfile.n8n` has been removed as redundant
 - N8N_MODE functionality is enabled via the `N8N_MODE=true` environment variable
 - This reduces image size by 500MB+ and improves build times from 8+ minutes to 1-2 minutes
@@ -256,6 +262,7 @@ docker run -d \
    - **OS**: Ubuntu 22.04 LTS
 
 2. **Initial Setup**:
+
 ```bash
 # SSH into your server
 ssh root@your-server-ip
@@ -268,6 +275,7 @@ curl -fsSL https://get.docker.com | sh
 3. **Deploy n8n-MCP with SSL** (using Caddy for automatic HTTPS):
 
 **Using Docker Compose (Recommended)**
+
 ```bash
 # Create docker-compose.yml
 cat > docker-compose.yml << 'EOF'
@@ -318,6 +326,7 @@ EOF
 **Note**: The `pull_policy: always` ensures you always get the latest version.
 
 **Building from Source (if needed)**
+
 ```bash
 # Only if you need custom modifications
 git clone https://github.com/czlonkowski/n8n-mcp.git
@@ -365,6 +374,7 @@ EOF
 ```
 
 **Complete the Setup**
+
 ```bash
 # Create Caddyfile
 cat > Caddyfile << 'EOF'
@@ -393,15 +403,18 @@ docker compose up -d
 #### Cloud Provider Tips
 
 **AWS EC2**:
+
 - Security Group: Open port 3000 (or 443 with HTTPS)
 - Instance Type: t3.micro is sufficient
 - Use Elastic IP for stable addressing
 
 **DigitalOcean**:
+
 - Droplet: Basic ($6/month) is enough
 - Enable backups for production use
 
 **Google Cloud**:
+
 - Machine Type: e2-micro (free tier eligible)
 - Use Cloud Load Balancer for SSL
 
@@ -412,17 +425,18 @@ docker compose up -d
 1. **In your n8n workflow**, add the **MCP Client Tool** node
 
 2. **Configure the connection**:
-   ```
+
+   ```text
    Server URL (MUST include /mcp endpoint): 
    - Same server: http://localhost:3000/mcp
    - Docker network: http://n8n-mcp:3000/mcp
    - Different server: https://mcp.yourdomain.com/mcp
-   
+
    Auth Token: [Your MCP_AUTH_TOKEN/AUTH_TOKEN value]
-   
+
    Transport: HTTP Streamable (SSE)
    ```
-   
+
    ⚠️ **Critical**: The Server URL must include the `/mcp` endpoint path. Without this, the connection will fail.
 
 3. **Test the connection** by selecting a simple tool like `list_nodes`
@@ -432,6 +446,7 @@ docker compose up -d
 Once connected, you can use these MCP tools in n8n:
 
 **Documentation Tools** (No API key required):
+
 - `list_nodes` - List all n8n nodes with filtering
 - `search_nodes` - Search nodes by keyword
 - `get_node_info` - Get detailed node information
@@ -440,6 +455,7 @@ Once connected, you can use these MCP tools in n8n:
 - `get_node_documentation` - Get human-readable docs
 
 **Management Tools** (Requires n8n API key):
+
 - `n8n_create_workflow` - Create new workflows
 - `n8n_update_workflow` - Update existing workflows
 - `n8n_get_workflow` - Retrieve workflow details
@@ -454,7 +470,7 @@ Connect n8n-MCP to AI Agent nodes for intelligent automation:
 2. **Connect MCP Client Tool** to the Agent's tool input
 3. **Configure prompts** for workflow creation:
 
-```
+```text
 You are an n8n workflow expert. Use the MCP tools to:
 1. Search for appropriate nodes using search_nodes
 2. Get configuration details with get_node_essentials
@@ -465,16 +481,19 @@ You are an n8n workflow expert. Use the MCP tools to:
 ## Security & Best Practices
 
 ### Authentication
+
 - **MCP_AUTH_TOKEN**: Always use a strong, random token (32+ characters)
 - **N8N_API_KEY**: Only required for workflow management features
 - Store tokens in environment variables or secure vaults
 
 ### Network Security
+
 - **Use HTTPS** in production (Caddy/Nginx/Traefik)
 - **Firewall**: Only expose necessary ports (3000 or 443)
 - **IP Whitelisting**: Consider restricting access to known n8n instances
 
 ### Docker Security
+
 - **Always pull latest images**: Docker caches images locally, so run `docker pull` before deployment
 - Run containers with `--read-only` flag if possible
 - Use specific image versions instead of `:latest` in production
@@ -485,6 +504,7 @@ You are an n8n workflow expert. Use the MCP tools to:
 ### Docker Image Issues
 
 **Using Outdated Cached Images**
+
 - **Symptom**: Missing features, old bugs reappearing, features not working as documented
 - **Cause**: Docker uses locally cached images instead of pulling the latest version
 - **Solution**: Always run `docker pull ghcr.io/czlonkowski/n8n-mcp:latest` before deployment
@@ -493,16 +513,19 @@ You are an n8n workflow expert. Use the MCP tools to:
 ### Common Configuration Issues
 
 **Missing `MCP_MODE=http` Environment Variable**
+
 - **Symptom**: n8n MCP Client Tool cannot connect, server doesn't respond on `/mcp` endpoint
 - **Solution**: Add `MCP_MODE=http` to your environment variables
 - **Why**: Without this, the server runs in stdio mode which is incompatible with n8n
 
 **Server URL Missing `/mcp` Endpoint**
+
 - **Symptom**: "Connection refused" or "Invalid response" in n8n MCP Client Tool
 - **Solution**: Ensure your Server URL includes `/mcp` (e.g., `http://localhost:3000/mcp`)
 - **Why**: n8n connects to the `/mcp` endpoint specifically, not the root URL
 
 **Mismatched Auth Tokens**
+
 - **Symptom**: "Authentication failed" or "Invalid auth token"
 - **Solution**: Ensure both `MCP_AUTH_TOKEN` and `AUTH_TOKEN` have the same value
 - **Why**: Both variables must match for proper authentication
@@ -510,44 +533,50 @@ You are an n8n workflow expert. Use the MCP tools to:
 ### Connection Issues
 
 **"Connection refused" in n8n MCP Client Tool**
+
 1. **Check n8n-MCP is running**:
+
    ```bash
    # Docker
    docker ps | grep n8n-mcp
    docker logs n8n-mcp --tail 20
-   
+
    # Systemd
    systemctl status n8n-mcp
    journalctl -u n8n-mcp --tail 20
    ```
 
 2. **Verify endpoints are accessible**:
+
    ```bash
    # Health check (should return status info)
    curl http://your-server:3000/health
-   
+
    # MCP endpoint (should return protocol version)
    curl http://your-server:3000/mcp
    ```
 
 3. **Check firewall and networking**:
+
    ```bash
    # Test port accessibility from n8n server
    telnet your-mcp-server 3000
-   
+
    # Check firewall rules (Ubuntu/Debian)
    sudo ufw status
-   
+
    # Check if port is bound correctly
    netstat -tlnp | grep :3000
    ```
 
 **"Invalid auth token" or "Authentication failed"**
+
 1. **Verify token format**:
+
    ```bash
    # Check token length (should be 64 chars for hex-32)
    echo $MCP_AUTH_TOKEN | wc -c
-   
+
    # Verify both tokens match
    echo "MCP_AUTH_TOKEN: $MCP_AUTH_TOKEN"
    echo "AUTH_TOKEN: $AUTH_TOKEN"
@@ -560,7 +589,9 @@ You are an n8n workflow expert. Use the MCP tools to:
    - Special characters not properly escaped in environment files
 
 **"Cannot connect to n8n API"**
+
 1. **Verify n8n configuration**:
+
    ```bash
    # Test n8n API accessibility
    curl -H "X-N8N-API-KEY: your-api-key" \
@@ -576,11 +607,13 @@ You are an n8n workflow expert. Use the MCP tools to:
 ### Version Compatibility Issues
 
 **"Features Not Working as Expected"**
+
 - **Symptom**: Missing features, old bugs, or compatibility issues
 - **Solution**: Pull the latest image: `docker pull ghcr.io/czlonkowski/n8n-mcp:latest`
 - **Check**: Verify image date with `docker inspect ghcr.io/czlonkowski/n8n-mcp:latest | grep Created`
 
 **"Protocol version mismatch"**
+
 - n8n-MCP automatically uses version 2024-11-05 for n8n compatibility
 - Update to latest n8n-MCP version if issues persist
 - Verify `/mcp` endpoint returns correct version
@@ -588,6 +621,7 @@ You are an n8n workflow expert. Use the MCP tools to:
 ### Environment Variable Issues
 
 **Complete Environment Variable Checklist**:
+
 ```bash
 # Required for all deployments
 export N8N_MODE=true                                    # Enables n8n integration
@@ -607,6 +641,7 @@ export LOG_LEVEL=info                                  # Logging level
 ### Docker-Specific Issues
 
 **Container Build Failures**
+
 ```bash
 # Clear Docker cache and rebuild
 docker system prune -f
@@ -614,6 +649,7 @@ docker build --no-cache -t n8n-mcp:latest .
 ```
 
 **Container Runtime Issues**
+
 ```bash
 # Check container logs for detailed errors
 docker logs n8n-mcp -f --timestamps
@@ -628,6 +664,7 @@ docker exec n8n-mcp curl -f http://localhost:3000/health
 ### Network and SSL Issues
 
 **HTTPS/SSL Problems**
+
 ```bash
 # Test SSL certificate
 openssl s_client -connect mcp.yourdomain.com:443
@@ -637,6 +674,7 @@ docker logs caddy -f --tail 50
 ```
 
 **Docker Network Issues**
+
 ```bash
 # Check if containers can communicate
 docker network ls
@@ -649,6 +687,7 @@ docker exec n8n curl http://n8n-mcp:3000/health
 ### Debugging Steps
 
 1. **Enable comprehensive logging**:
+
 ```bash
 # For Docker
 docker run -d \
@@ -665,6 +704,7 @@ Environment="LOG_LEVEL=debug"
 ```
 
 2. **Test all endpoints systematically**:
+
 ```bash
 # 1. Health check (basic server functionality)
 curl -v http://localhost:3000/health
@@ -686,6 +726,7 @@ curl -X POST http://localhost:3000/mcp \
 ```
 
 3. **Common log patterns to look for**:
+
 ```bash
 # Success patterns
 grep "Server started" /var/log/n8n-mcp.log
@@ -702,6 +743,7 @@ grep -i "connection\|network" /var/log/n8n-mcp.log
 If you're still experiencing issues:
 
 1. **Gather diagnostic information**:
+
 ```bash
 # System info
 docker --version
@@ -720,6 +762,7 @@ docker stats n8n-mcp --no-stream
 ```
 
 2. **Create a minimal test setup**:
+
 ```bash
 # Test with minimal configuration
 docker run -d \

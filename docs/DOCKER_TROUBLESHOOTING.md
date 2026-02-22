@@ -3,6 +3,7 @@
 This guide helps resolve common issues when running n8n-mcp with Docker, especially when connecting to n8n instances.
 
 ## Table of Contents
+
 - [Common Issues](#common-issues)
   - [502 Bad Gateway Errors](#502-bad-gateway-errors)
   - [Custom Database Path Not Working](#custom-database-path-not-working-v27160)
@@ -17,6 +18,7 @@ This guide helps resolve common issues when running n8n-mcp with Docker, especia
 ### Docker Configuration File Not Working (v2.8.2+)
 
 **Symptoms:**
+
 - Config file mounted but environment variables not set
 - Container starts but ignores configuration
 - Getting "permission denied" errors
@@ -24,6 +26,7 @@ This guide helps resolve common issues when running n8n-mcp with Docker, especia
 **Solutions:**
 
 1. **Ensure file is mounted correctly:**
+
 ```bash
 # Correct - mount as read-only
 docker run -v $(pwd)/config.json:/app/config.json:ro ...
@@ -33,17 +36,20 @@ docker exec n8n-mcp cat /app/config.json
 ```
 
 2. **Verify JSON syntax:**
+
 ```bash
 # Validate JSON file
 cat config.json | jq .
 ```
 
 3. **Check Docker logs for parsing errors:**
+
 ```bash
 docker logs n8n-mcp | grep -i config
 ```
 
 4. **Common issues:**
+
 - Invalid JSON syntax (use a JSON validator)
 - File permissions (should be readable)
 - Wrong mount path (must be `/app/config.json`)
@@ -52,6 +58,7 @@ docker logs n8n-mcp | grep -i config
 ### Custom Database Path Not Working (v2.7.16+)
 
 **Symptoms:**
+
 - `NODE_DB_PATH` environment variable is set but ignored
 - Database always created at `/app/data/nodes.db`
 - Custom path setting has no effect
@@ -61,11 +68,13 @@ docker logs n8n-mcp | grep -i config
 **Solutions:**
 
 1. **Update to v2.7.16 or later:**
+
 ```bash
 docker pull ghcr.io/czlonkowski/n8n-mcp:latest
 ```
 
 2. **Ensure path ends with .db:**
+
 ```bash
 # Correct
 NODE_DB_PATH=/app/data/custom/my-nodes.db
@@ -75,6 +84,7 @@ NODE_DB_PATH=/app/data/custom/my-nodes
 ```
 
 3. **Use path within mounted volume for persistence:**
+
 ```yaml
 services:
   n8n-mcp:
@@ -87,6 +97,7 @@ services:
 ### 502 Bad Gateway Errors
 
 **Symptoms:**
+
 - `n8n_health_check` returns 502 error
 - All n8n management API calls fail
 - n8n web UI is accessible but API is not
@@ -116,6 +127,7 @@ Use Docker's special hostnames instead of `localhost`:
 ```
 
 **Alternative hostnames to try:**
+
 - `host.docker.internal` (Docker Desktop on macOS/Windows)
 - `172.17.0.1` (Default Docker bridge IP on Linux)
 - Your machine's actual IP address (e.g., `192.168.1.100`)
@@ -150,7 +162,7 @@ services:
       - n8n-net
     ports:
       - "5678:5678"
-  
+
   n8n-mcp:
     image: ghcr.io/czlonkowski/n8n-mcp:latest
     environment:
@@ -167,6 +179,7 @@ networks:
 ### Container Cleanup Issues (Fixed in v2.7.20+)
 
 **Symptoms:**
+
 - Containers accumulate after Claude Desktop restarts
 - Containers show as "unhealthy" but don't clean up
 - `--rm` flag doesn't work as expected
@@ -176,6 +189,7 @@ networks:
 **Solutions:**
 
 1. **Update to v2.7.20+ and use --init flag (Recommended):**
+
 ```json
 {
   "command": "docker",
@@ -187,18 +201,21 @@ networks:
 ```
 
 2. **Manual cleanup of old containers:**
+
 ```bash
 # Remove all stopped n8n-mcp containers
 docker ps -a | grep n8n-mcp | grep Exited | awk '{print $1}' | xargs -r docker rm
 ```
 
 3. **For versions before 2.7.20:**
+
 - Manually clean up containers periodically
 - Consider using HTTP mode instead
 
 ### Webhooks to Local n8n Fail (v2.16.3+)
 
 **Symptoms:**
+
 - `n8n_trigger_webhook_workflow` fails with "SSRF protection" error
 - Error message: "SSRF protection: Localhost access is blocked"
 - Webhooks work from n8n UI but not from n8n-MCP
@@ -225,6 +242,7 @@ services:
 ```
 
 **Security Modes Explained:**
+
 - `strict` (default): Blocks localhost + private IPs + cloud metadata (production)
 - `moderate`: Allows localhost, blocks private IPs + cloud metadata (local development)
 - `permissive`: Allows localhost + private IPs, blocks cloud metadata (testing only)
@@ -234,6 +252,7 @@ services:
 ### n8n API Connection Issues
 
 **Symptoms:**
+
 - API calls fail but n8n web UI works
 - Authentication errors
 - API endpoints return 404
@@ -245,6 +264,7 @@ services:
    - Ensure API key is valid and not expired
 
 2. **Test API directly:**
+
 ```bash
 # From host machine
 curl -H "X-N8N-API-KEY: your-key" http://localhost:5678/api/v1/workflows
@@ -256,6 +276,7 @@ docker run --rm curlimages/curl \
 ```
 
 3. **Check n8n environment variables:**
+
 ```yaml
 environment:
   - N8N_BASIC_AUTH_ACTIVE=true
@@ -297,6 +318,7 @@ ipconfig | findstr IPv4
 ## Quick Solutions
 
 ### Solution 1: Use Host Network (Linux only)
+
 ```json
 {
   "command": "docker",
@@ -310,6 +332,7 @@ ipconfig | findstr IPv4
 ```
 
 ### Solution 2: Use Your Machine's IP
+
 ```json
 {
   "N8N_API_URL": "http://192.168.1.100:5678"  // Replace with your IP
@@ -317,6 +340,7 @@ ipconfig | findstr IPv4
 ```
 
 ### Solution 3: HTTP Mode Deployment
+
 Deploy n8n-mcp as HTTP server to avoid stdio/Docker issues:
 
 ```bash
@@ -335,6 +359,7 @@ docker run -d \
 ## Debugging Steps
 
 ### 1. Enable Debug Logging
+
 ```json
 {
   "env": {
@@ -345,6 +370,7 @@ docker run -d \
 ```
 
 ### 2. Test Connectivity
+
 ```bash
 # Test from n8n-mcp container
 docker run --rm ghcr.io/czlonkowski/n8n-mcp:latest \
@@ -352,6 +378,7 @@ docker run --rm ghcr.io/czlonkowski/n8n-mcp:latest \
 ```
 
 ### 3. Check Docker Logs
+
 ```bash
 # View n8n-mcp logs
 docker logs $(docker ps -q -f ancestor=ghcr.io/czlonkowski/n8n-mcp:latest)
@@ -361,6 +388,7 @@ docker logs n8n
 ```
 
 ### 4. Validate Environment
+
 ```bash
 # Check what n8n-mcp sees
 docker run --rm ghcr.io/czlonkowski/n8n-mcp:latest \
@@ -368,6 +396,7 @@ docker run --rm ghcr.io/czlonkowski/n8n-mcp:latest \
 ```
 
 ### 5. Network Diagnostics
+
 ```bash
 # Check Docker networks
 docker network inspect bridge
@@ -379,16 +408,19 @@ docker run --rm busybox nslookup host.docker.internal
 ## Platform-Specific Notes
 
 ### Docker Desktop (macOS/Windows)
+
 - `host.docker.internal` works out of the box
 - Ensure Docker Desktop is running
 - Check Docker Desktop settings → Resources → Network
 
 ### Linux
+
 - `host.docker.internal` requires Docker 20.10+
 - Alternative: Use `--add-host=host.docker.internal:host-gateway`
 - Or use the Docker bridge IP: `172.17.0.1`
 
 ### Windows with WSL2
+
 - Use `host.docker.internal` or WSL2 IP
 - Check firewall rules for port 5678
 - Ensure n8n binds to `0.0.0.0` not `127.0.0.1`

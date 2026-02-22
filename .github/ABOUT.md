@@ -29,6 +29,7 @@
 ## 🔧 Use Cases
 
 Perfect for:
+
 - AI assistants building n8n workflows
 - Developers learning n8n
 - Teams using AI for automation

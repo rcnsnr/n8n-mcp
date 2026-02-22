@@ -5,6 +5,7 @@ This directory contains comprehensive integration tests for the Model Context Pr
 ## Test Structure
 
 ### Core Tests
+
 - **basic-connection.test.ts** - Tests basic MCP server functionality and tool execution
 - **protocol-compliance.test.ts** - Tests JSON-RPC 2.0 compliance and protocol specifications
 - **tool-invocation.test.ts** - Tests all MCP tool categories and their invocation
@@ -13,6 +14,7 @@ This directory contains comprehensive integration tests for the Model Context Pr
 - **performance.test.ts** - Performance benchmarks and stress tests
 
 ### Helper Files
+
 - **test-helpers.ts** - TestableN8NMCPServer wrapper for testing with custom transports
 
 ## Running Tests
@@ -31,6 +33,7 @@ npm test -- tests/integration/mcp-protocol/ --coverage
 ## Test Coverage
 
 These tests ensure:
+
 - ✅ JSON-RPC 2.0 protocol compliance
 - ✅ Proper request/response handling
 - ✅ All tool categories are tested

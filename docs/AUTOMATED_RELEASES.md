@@ -22,6 +22,7 @@ npm run prepare:release
 ```
 
 This script will:
+
 1. Prompt for the new version
 2. Update `package.json` and `package.runtime.json`
 3. Update the changelog
@@ -32,27 +33,30 @@ This script will:
 ### Manual Process
 
 1. **Update the version**:
+
    ```bash
    # Edit package.json version field
    vim package.json
-   
+
    # Sync to runtime package
    npm run sync:runtime-version
    ```
 
 2. **Update the changelog**:
+
    ```bash
    # Edit docs/CHANGELOG.md
    vim docs/CHANGELOG.md
    ```
 
 3. **Test and commit**:
+
    ```bash
    # Ensure everything works
    npm test
    npm run build
    npm run rebuild
-   
+
    # Commit changes
    git add package.json package.runtime.json docs/CHANGELOG.md
    git commit -m "chore: release vX.Y.Z"
@@ -79,30 +83,36 @@ Automatically extracts release notes from `docs/CHANGELOG.md` using the version 
 ## [2.10.0] - 2025-08-02
 
 ### Added
+
 - New feature descriptions
 
 ### Changed
+
 - Changed feature descriptions
 
 ### Fixed
+
 - Bug fix descriptions
 ```
 
 ### Release Artifacts
 
 #### GitHub Release
+
 - Created with extracted changelog content
 - Tagged with `vX.Y.Z` format
 - Includes installation instructions
 - Links to documentation
 
 #### NPM Package
+
 - Published as `n8n-mcp` on npmjs.com
 - Uses runtime-only dependencies (8 packages vs 50+ dev deps)
 - Optimized for `npx` usage
 - ~50MB vs 1GB+ with dev dependencies
 
 #### Docker Images
+
 - **Standard**: `ghcr.io/czlonkowski/n8n-mcp:vX.Y.Z`
 - **Railway**: `ghcr.io/czlonkowski/n8n-mcp-railway:vX.Y.Z`
 - Multi-platform: linux/amd64, linux/arm64
@@ -137,6 +147,7 @@ npm run test:release-automation
 ```
 
 This checks:
+
 - ✅ File existence and structure
 - ✅ Version detection logic
 - ✅ Changelog parsing
@@ -167,21 +178,25 @@ docker build -t test-image .
 ## Workflow Jobs
 
 ### 1. Version Detection
+
 - Compares current vs previous version in git history
 - Determines if it's a prerelease (alpha, beta, rc, dev)
 - Outputs version information for other jobs
 
 ### 2. Changelog Extraction
+
 - Parses `docs/CHANGELOG.md` for the current version
 - Extracts content between version headers
 - Provides formatted release notes
 
 ### 3. GitHub Release Creation
+
 - Creates annotated git tag
 - Creates GitHub release with changelog content
 - Handles prerelease flag for alpha/beta versions
 
 ### 4. Build and Test
+
 - Installs dependencies
 - Runs full test suite
 - Builds TypeScript
@@ -189,18 +204,21 @@ docker build -t test-image .
 - Type checking
 
 ### 5. NPM Publishing
+
 - Prepares optimized package structure
 - Uses `package.runtime.json` for dependencies
 - Publishes to npmjs.com registry
 - Automatic cleanup
 
 ### 6. Docker Building
+
 - Multi-platform builds (amd64, arm64)
 - Two image variants (standard, railway)
 - Semantic versioning tags
 - GitHub Container Registry
 
 ### 7. Documentation Updates
+
 - Updates version badges in README
 - Commits documentation changes
 - Automatic push back to repository
@@ -208,16 +226,19 @@ docker build -t test-image .
 ## Monitoring
 
 ### GitHub Actions
-Monitor releases at: https://github.com/czlonkowski/n8n-mcp/actions
+
+Monitor releases at: <https://github.com/czlonkowski/n8n-mcp/actions>
 
 ### Release Status
-- **GitHub Releases**: https://github.com/czlonkowski/n8n-mcp/releases
-- **NPM Package**: https://www.npmjs.com/package/n8n-mcp
-- **Docker Images**: https://github.com/czlonkowski/n8n-mcp/pkgs/container/n8n-mcp
+
+- **GitHub Releases**: <https://github.com/czlonkowski/n8n-mcp/releases>
+- **NPM Package**: <https://www.npmjs.com/package/n8n-mcp>
+- **Docker Images**: <https://github.com/czlonkowski/n8n-mcp/pkgs/container/n8n-mcp>
 
 ### Notifications
 
 The workflow provides comprehensive summaries:
+
 - ✅ Success notifications with links
 - ❌ Failure notifications with error details
 - 📊 Artifact information and installation commands
@@ -227,37 +248,48 @@ The workflow provides comprehensive summaries:
 ### Common Issues
 
 #### NPM Publishing Fails
-```
+
+```text
 Error: 401 Unauthorized
 ```
+
 **Solution**: Check NPM_TOKEN secret is valid and has publishing permissions.
 
 #### Docker Build Fails
-```
+
+```text
 Error: failed to solve: could not read from registry
 ```
+
 **Solution**: Check GitHub Container Registry permissions and GITHUB_TOKEN.
 
 #### Changelog Parsing Fails
-```
+
+```text
 No changelog entries found for version X.Y.Z
 ```
+
 **Solution**: Ensure changelog follows the correct format:
+
 ```markdown
 ## [X.Y.Z] - YYYY-MM-DD
 ```
 
 #### Version Detection Fails
-```
+
+```text
 Version not incremented
 ```
+
 **Solution**: Ensure new version is greater than the previous version.
 
 ### Recovery Steps
 
 #### Failed NPM Publish
+
 1. Check if version was already published
 2. If not, manually publish:
+
    ```bash
    npm run prepare:publish
    cd npm-publish-temp
@@ -265,33 +297,42 @@ Version not incremented
    ```
 
 #### Failed Docker Build
+
 1. Build locally to test:
+
    ```bash
    docker build -t test-build .
    ```
+
 2. Re-trigger workflow or push a fix
 
 #### Incomplete Release
+
 1. Delete the created tag if needed:
+
    ```bash
    git tag -d vX.Y.Z
    git push --delete origin vX.Y.Z
    ```
+
 2. Fix issues and push again
 
 ## Security
 
 ### Secrets Management
+
 - NPM_TOKEN has limited scope (publish only)
 - GITHUB_TOKEN has automatic scoping
 - No secrets are logged or exposed
 
 ### Package Security
+
 - Runtime package excludes development dependencies
 - No build tools or test frameworks in published package
 - Minimal attack surface (~50MB vs 1GB+)
 
 ### Docker Security
+
 - Multi-stage builds
 - Non-root user execution
 - Minimal base images
@@ -309,19 +350,23 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+
 - New features for next release
 
 ## [2.10.0] - 2025-08-02
 
 ### Added
+
 - Automated release system
 - Multi-platform Docker builds
 
 ### Changed
+
 - Improved version detection
 - Enhanced error handling
 
 ### Fixed
+
 - Fixed changelog parsing edge cases
 - Fixed Docker build optimization
 
@@ -333,11 +378,13 @@ All notable changes to this project will be documented in this file.
 ## Version Strategy
 
 ### Semantic Versioning
+
 - **MAJOR** (X.0.0): Breaking changes
 - **MINOR** (X.Y.0): New features, backward compatible
 - **PATCH** (X.Y.Z): Bug fixes, backward compatible
 
 ### Prerelease Versions
+
 - **Alpha**: `X.Y.Z-alpha.N` - Early development
 - **Beta**: `X.Y.Z-beta.N` - Feature complete, testing
 - **RC**: `X.Y.Z-rc.N` - Release candidate
@@ -347,6 +394,7 @@ Prerelease versions are automatically detected and marked appropriately.
 ## Best Practices
 
 ### Before Releasing
+
 1. ✅ Run `npm run test:release-automation`
 2. ✅ Update changelog with meaningful descriptions
 3. ✅ Test locally with `npm test && npm run build`
@@ -354,12 +402,14 @@ Prerelease versions are automatically detected and marked appropriately.
 5. ✅ Consider impact on users
 
 ### Version Bumping
+
 - Use `npm run prepare:release` for guided process
 - Follow semantic versioning strictly
 - Document breaking changes clearly
 - Consider backward compatibility
 
 ### Changelog Writing
+
 - Be specific about changes
 - Include migration notes for breaking changes
 - Credit contributors
@@ -368,12 +418,14 @@ Prerelease versions are automatically detected and marked appropriately.
 ## Contributing
 
 ### For Maintainers
+
 1. Use automated tools: `npm run prepare:release`
 2. Follow semantic versioning
 3. Update changelog thoroughly
 4. Test before releasing
 
 ### For Contributors
+
 - Breaking changes require MAJOR version bump
 - New features require MINOR version bump
 - Bug fixes require PATCH version bump

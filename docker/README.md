@@ -31,6 +31,7 @@ docker-compose up -d
 ### Method 3: Using a Configuration File
 
 Create a `config.json` file:
+
 ```json
 {
   "MCP_MODE": "http",
@@ -41,6 +42,7 @@ Create a `config.json` file:
 ```
 
 Run with the config file:
+
 ```bash
 docker run -d -p 3000:3000 \
   --name n8n-mcp-server \
@@ -61,6 +63,7 @@ docker run -d -p 3000:3000 \
 ## Important Notes
 
 1. **AUTH_TOKEN is required** for HTTP mode. Generate a secure token:
+
    ```bash
    openssl rand -base64 32
    ```
@@ -74,14 +77,17 @@ docker run -d -p 3000:3000 \
 ## Troubleshooting
 
 ### Container exits immediately
+
 - Check logs: `docker logs n8n-mcp-server`
 - Ensure AUTH_TOKEN is set for HTTP mode
 
 ### "n8n-mcp: not found" error
+
 - This has been fixed in the latest version
 - Use the full command: `node /app/dist/mcp/index.js` as a workaround
 
 ### Config file not working
+
 - Ensure the file is valid JSON
 - Mount as read-only: `-v $(pwd)/config.json:/app/config.json:ro`
 - Check that the config parser is present: `docker exec n8n-mcp-server ls -la /app/docker/`

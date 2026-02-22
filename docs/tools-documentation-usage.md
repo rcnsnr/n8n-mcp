@@ -42,6 +42,7 @@ Finds all tools related to validation, including their descriptions and use case
 ```
 
 Available categories:
+
 - **discovery**: Tools for finding and exploring nodes
 - **configuration**: Tools for configuring nodes
 - **validation**: Tools for validating configurations
@@ -90,6 +91,7 @@ The tool returns structured documentation with:
 ## Example: Learning About search_nodes
 
 Request:
+
 ```json
 {
   "name": "tools_documentation",
@@ -100,6 +102,7 @@ Request:
 ```
 
 Response includes:
+
 - How to search effectively (single words work best)
 - Performance characteristics (fast, cached)
 - Common searches (http, webhook, email, database, slack)
@@ -127,6 +130,7 @@ The documentation helps build workflows efficiently:
 ## Performance Optimization
 
 The documentation emphasizes performance:
+
 - Which tools are fast (essentials) vs slow (full info)
 - Optimal parameters (e.g., limit: 200+ for list_nodes)
 - Caching behavior

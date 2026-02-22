@@ -23,14 +23,16 @@ If you discover a security vulnerability in n8n-mcp, please report it by creatin
 
 ### 3. Code Security
 
-#### ❌ DON'T DO THIS:
+#### ❌ DON'T DO THIS
+
 ```typescript
 // NEVER hardcode credentials
 const apiKey = process.env.N8N_API_KEY || 'n8n_api_actual_key_here';
 const apiUrl = process.env.N8N_API_URL || 'https://production-url.com';
 ```
 
-#### ✅ DO THIS INSTEAD:
+#### ✅ DO THIS INSTEAD
+
 ```typescript
 // Always require environment variables
 const apiKey = process.env.N8N_API_KEY;
@@ -45,6 +47,7 @@ if (!apiKey || !apiUrl) {
 ### 4. Git Security
 
 Before committing, always check:
+
 ```bash
 # Check for tracked sensitive files
 git ls-files | grep -E "\.(env|pem|key|cert)$"

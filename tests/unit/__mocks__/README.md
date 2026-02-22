@@ -43,7 +43,7 @@ describe('Your test', () => {
   it('should get node description', () => {
     const registry = getNodeTypes();
     const slackNode = registry.getByName('slack');
-    
+
     expect(slackNode?.description.name).toBe('slack');
   });
 });
@@ -119,6 +119,7 @@ Each mock node implements the `INodeType` interface with:
 ### Testing Patterns
 
 1. **Unit Testing Node Logic**
+
    ```typescript
    const node = registry.getByName('slack');
    const result = await node.execute.call(mockContext);
@@ -126,6 +127,7 @@ Each mock node implements the `INodeType` interface with:
    ```
 
 2. **Testing Node Properties**
+
    ```typescript
    const node = registry.getByName('httpRequest');
    const methodProp = node.description.properties.find(p => p.name === 'method');
@@ -133,6 +135,7 @@ Each mock node implements the `INodeType` interface with:
    ```
 
 3. **Testing Conditional Nodes**
+
    ```typescript
    const ifNode = registry.getByName('if');
    const [trueOutput, falseOutput] = await ifNode.execute.call(mockContext);

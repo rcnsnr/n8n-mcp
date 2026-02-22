@@ -7,30 +7,35 @@
 The AI Agent node handles user prompts through two distinct modes controlled by `promptType`:
 
 #### Mode 1: Auto (Connected Chat Trigger)
+
 ```typescript
 {
   "promptType": "auto",
   "text": "={{ $json.chatInput }}"  // Default value
 }
 ```
+
 - **Behavior**: Expects input from Chat Trigger node via `main` connection
 - **User Message Source**: `$json.chatInput` from Chat Trigger
 - **Use Case**: Interactive chatbots with ongoing conversations
 - **Validation**: MUST have Chat Trigger → AI Agent main connection
 
 #### Mode 2: Define Below
+
 ```typescript
 {
   "promptType": "define",
   "text": "Your custom prompt or ={{ $json.someField }}"
 }
 ```
+
 - **Behavior**: User message defined in node parameters
 - **User Message Source**: Static text or expression from previous node
 - **Use Case**: Automated processing, data transformations, batch operations
 - **Validation**: Text field is REQUIRED when promptType="define"
 
 **Real-World Examples**:
+
 ```typescript
 // Example 1: WhatsApp message processing
 {
@@ -49,7 +54,8 @@ The AI Agent node handles user prompts through two distinct modes controlled by 
 
 System messages define the agent's **role, capabilities, constraints, and output format**. This is the most critical parameter for AI Agent behavior.
 
-#### System Message Structure Pattern:
+#### System Message Structure Pattern
+
 ```typescript
 {
   "options": {
@@ -73,9 +79,10 @@ System messages define the agent's **role, capabilities, constraints, and output
 }
 ```
 
-#### Real-World System Message Examples:
+#### Real-World System Message Examples
 
 **Example 1: Database Assistant** (Template 2985)
+
 ```typescript
 {
   "options": {
@@ -83,9 +90,11 @@ System messages define the agent's **role, capabilities, constraints, and output
   }
 }
 ```
+
 **Pattern**: Clear role, specific domain, behavior constraints
 
 **Example 2: Content Generator with Output Format** (Template 214907)
+
 ```typescript
 {
   "options": {
@@ -93,9 +102,11 @@ System messages define the agent's **role, capabilities, constraints, and output
   }
 }
 ```
+
 **Pattern**: Detailed rules, strict output format (JSON), validation constraints
 
 **Example 3: Multi-Step Process Agent** (Template 5296)
+
 ```typescript
 {
   "options": {
@@ -103,9 +114,11 @@ System messages define the agent's **role, capabilities, constraints, and output
   }
 }
 ```
+
 **Pattern**: Step-by-step process flow, tool usage instructions, aggregation logic
 
-#### System Message Best Practices:
+#### System Message Best Practices
+
 1. **Always define the role** - What is the agent's purpose?
 2. **Specify constraints** - What should it NOT do?
 3. **Define output format** - JSON, markdown, specific structure?
@@ -116,20 +129,23 @@ System messages define the agent's **role, capabilities, constraints, and output
 
 Fallback models provide automatic failover when the primary LLM fails (rate limits, errors, downtime).
 
-#### Configuration:
+#### Configuration
+
 ```typescript
 {
   "needsFallback": true  // Default: false, only in version 2.1+
 }
 ```
 
-#### Connection Pattern:
-```
+#### Connection Pattern
+
+```text
 [Primary LLM] --ai_languageModel[0]--> [AI Agent]
 [Fallback LLM] --ai_languageModel[1]--> [AI Agent]
 ```
 
-#### Validation Rules:
+#### Validation Rules
+
 ```typescript
 if (node.parameters.needsFallback === true) {
   const languageModelConnections = reverseConnections
@@ -157,7 +173,8 @@ if (node.parameters.needsFallback === true) {
 }
 ```
 
-#### When to Use Fallback Models:
+#### When to Use Fallback Models
+
 - **Production systems** with high availability requirements
 - **Multi-LLM strategies** (e.g., GPT-4 primary, Claude fallback)
 - **Cost optimization** (expensive primary, cheaper fallback)
@@ -167,25 +184,29 @@ if (node.parameters.needsFallback === true) {
 
 Output parsers ensure the LLM returns data in a specific, machine-readable format (JSON, XML, structured text).
 
-#### Configuration:
+#### Configuration
+
 ```typescript
 {
   "hasOutputParser": true  // Default: false
 }
 ```
 
-#### Connection Pattern:
-```
+#### Connection Pattern
+
+```text
 [Output Parser] --ai_outputParser--> [AI Agent]
 ```
 
-#### Available Output Parsers:
+#### Available Output Parsers
+
 - **Structured Output Parser**: JSON with strict schema validation
 - **Auto-fixing Output Parser**: Attempts to fix malformed JSON
 - **Markdown Output Parser**: Structured markdown
 - **Custom Output Parser**: User-defined format
 
-#### Validation Rules:
+#### Validation Rules
+
 ```typescript
 if (node.parameters.hasOutputParser === true) {
   const outputParserConnections = reverseConnections
@@ -206,7 +227,8 @@ if (node.parameters.hasOutputParser === true) {
 }
 ```
 
-#### Real-World Usage (Template 214907):
+#### Real-World Usage (Template 214907)
+
 ```typescript
 {
   "hasOutputParser": true,
@@ -236,6 +258,7 @@ The `options` collection contains advanced configuration:
 ```
 
 #### maxIterations
+
 ```typescript
 {
   "options": {
@@ -243,11 +266,13 @@ The `options` collection contains advanced configuration:
   }
 }
 ```
+
 - **Purpose**: Prevents infinite tool-calling loops
 - **Use Case**: Complex multi-tool workflows (e.g., research → search → summarize → verify)
 - **Validation**: Should be reasonable (1-50), warn if > 20
 
 #### returnIntermediateSteps
+
 ```typescript
 {
   "options": {
@@ -255,12 +280,14 @@ The `options` collection contains advanced configuration:
   }
 }
 ```
+
 - **Purpose**: Returns step-by-step reasoning and tool calls
 - **Use Case**: Debugging, transparency, audit trails
 - **Output**: Includes intermediate thoughts, tool inputs/outputs
 - **Performance**: Increases token usage and response time
 
 #### passthroughBinaryImages
+
 ```typescript
 {
   "options": {
@@ -268,11 +295,13 @@ The `options` collection contains advanced configuration:
   }
 }
 ```
+
 - **Purpose**: Enables vision models to process images
 - **Use Case**: Image analysis, OCR, visual question answering
 - **Requirement**: LLM must support vision (GPT-4 Vision, Claude 3 Opus)
 
 #### batching
+
 ```typescript
 {
   "options": {
@@ -283,6 +312,7 @@ The `options` collection contains advanced configuration:
   }
 }
 ```
+
 - **Purpose**: Process multiple inputs in parallel
 - **Use Case**: Bulk data processing, batch API calls
 - **Optimization**: Reduces total execution time
@@ -290,6 +320,7 @@ The `options` collection contains advanced configuration:
 ### 6. Version Differences and Migration
 
 #### Version 1.x (Legacy)
+
 ```typescript
 {
   "typeVersion": 1.7,
@@ -302,11 +333,13 @@ The `options` collection contains advanced configuration:
   }
 }
 ```
+
 - No `needsFallback` option
 - No `hasOutputParser` option
 - Limited options collection
 
 #### Version 2.1+ (Current)
+
 ```typescript
 {
   "typeVersion": 2.2,
@@ -325,12 +358,14 @@ The `options` collection contains advanced configuration:
   }
 }
 ```
+
 - Added `needsFallback` flag
 - Added `hasOutputParser` flag
 - Expanded options collection
 - Better streaming support
 
-#### Validation Considerations:
+#### Validation Considerations
+
 ```typescript
 function validateAIAgentVersion(node: WorkflowNode): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
@@ -433,7 +468,8 @@ interface AIAgentRequirements {
 
 Based on this analysis, MCP tools should return:
 
-#### For `get_node_info` / `get_node_essentials`:
+#### For `get_node_info` / `get_node_essentials`
+
 ```typescript
 {
   "essentials": {
@@ -474,7 +510,8 @@ Based on this analysis, MCP tools should return:
 }
 ```
 
-#### For `search_nodes` with query "AI Agent":
+#### For `search_nodes` with query "AI Agent"
+
 ```typescript
 {
   "results": [
@@ -503,20 +540,24 @@ Based on this analysis, MCP tools should return:
 }
 ```
 
-#### For `get_node_documentation`:
+#### For `get_node_documentation`
+
 ```markdown
 # AI Agent
 
 ## Overview
+
 The AI Agent node orchestrates complex workflows by combining language models, tools, and memory to solve multi-step problems.
 
 ## Critical Configuration
 
 ### 1. User Prompt
+
 - **promptType**: "auto" (from Chat Trigger) or "define" (custom)
 - **text**: User message (REQUIRED when promptType="define")
 
 ### 2. System Message (CRITICAL)
+
 - **Location**: options.systemMessage
 - **Purpose**: Defines agent's role, capabilities, constraints
 - **Best Practices**:
@@ -526,22 +567,26 @@ The AI Agent node orchestrates complex workflows by combining language models, t
   - Add behavioral constraints
 
 ### 3. Fallback Models (v2.1+)
+
 - **Flag**: needsFallback
 - **Requires**: 2 ai_languageModel connections
 - **Use Case**: Production reliability, rate limit handling
 
 ### 4. Output Parsers
+
 - **Flag**: hasOutputParser
 - **Requires**: 1 ai_outputParser connection
 - **Use Case**: JSON/XML structured output validation
 
 ## Connection Requirements
+
 - **ai_languageModel**: REQUIRED (1 or 2 if fallback enabled)
 - **ai_memory**: OPTIONAL (conversation context)
 - **ai_tool**: OPTIONAL (external capabilities)
 - **ai_outputParser**: OPTIONAL (output formatting)
 
 ## Common Mistakes
+
 1. Missing system message → Generic, unhelpful responses
 2. Too many maxIterations → Infinite loops, high costs
 3. hasOutputParser=true but no parser connected → Runtime error
@@ -554,7 +599,7 @@ The AI Agent node orchestrates complex workflows by combining language models, t
 
 Unlike standard n8n nodes where data flows FROM source TO target via `main` connections, **AI-specific connections flow TO the AI Agent/Chain nodes**, not from them:
 
-```
+```text
 Standard n8n pattern:
 [HTTP Request] --main--> [Set] --main--> [Slack]
 
@@ -567,11 +612,13 @@ AI pattern (REVERSED):
 ```
 
 **Why This Matters for Validation:**
+
 - Standard validation checks: `workflow.connections[sourceName][outputType]`
 - AI validation needs: **Reverse connection map** to check what connects TO each node
 - Must build: `Map<targetNodeName, Connection[]>` to validate AI nodes
 
 **Real Example from Template #2985:**
+
 ```json
 {
   "connections": {
@@ -598,6 +645,7 @@ Notice: Connections are defined in **source nodes** but flow **TO the AI Agent**
 ## Complete AI Tool Ecosystem
 
 We have **269 nodes total** that can be used as AI tools in our database:
+
 - **21 nodes** from `@n8n/n8n-nodes-langchain` (AI components)
 - **248 nodes** from `n8n-nodes-base` (regular nodes)
 
@@ -626,6 +674,7 @@ These are the **13 specialized tool nodes** from `@n8n/n8n-nodes-langchain` desi
 **248 regular nodes** from `n8n-nodes-base` can be used as AI tools when `N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE=true`:
 
 **Examples include**:
+
 - Action Network, ActiveCampaign, Adalo, Affinity, Agile CRM
 - Airtable, Airtop, AMQP Sender, Asana, Autopilot
 - AWS services (Lambda, SES, SNS, Textract, Transcribe)
@@ -637,6 +686,7 @@ These are the **13 specialized tool nodes** from `@n8n/n8n-nodes-langchain` desi
 - And 200+ more...
 
 **Generic Tool Validation** (applies to all 248 nodes):
+
 ```typescript
 interface RegularNodeAsToolValidation {
   connection: 'ai_tool';  // MUST connect via ai_tool output
@@ -657,6 +707,7 @@ interface RegularNodeAsToolValidation {
 ```
 
 **When to warn**: Regular node used as tool should have:
+
 1. Connection to AI Agent via `ai_tool` output
 2. Valid credentials configured (if required)
 3. Proper operation/resource selected
@@ -678,6 +729,7 @@ interface RegularNodeAsToolValidation {
 **Validation Rules**:
 
 1. **Language Model Requirement**:
+
 ```typescript
 if (node.parameters.needsFallback === true) {
   // MUST have exactly 2 ai_languageModel connections
@@ -693,6 +745,7 @@ if (node.parameters.needsFallback === true) {
 ```
 
 2. **Output Parser Requirement**:
+
 ```typescript
 if (node.parameters.hasOutputParser === true) {
   // MUST have exactly 1 ai_outputParser connection
@@ -703,12 +756,14 @@ if (node.parameters.hasOutputParser === true) {
 ```
 
 3. **Streaming Mode Rule**:
+
 ```typescript
 IF (Chat Trigger → AI Agent with responseMode="streaming")
 THEN (AI Agent MUST NOT have main output connections)
 ```
 
 4. **Prompt Type Rule**:
+
 ```typescript
 if (node.parameters.promptType === "auto") {
   // Should have Chat Trigger as input
@@ -742,7 +797,8 @@ if (node.parameters.promptType === "define") {
 | `ai_tool` (output) | Typical (1) | Tool → Agent | Should connect to AI Agent |
 
 **Chain Validation**:
-```
+
+```text
 Vector Store Tool
   ← ai_vectorStore ← Vector Store
     ← ai_embedding ← Embeddings Model
@@ -755,11 +811,13 @@ Vector Store Tool
 **Purpose**: Trigger node specifically designed for AI chatbot workflows. Provides a web interface for chat interactions.
 
 **Key Characteristics**:
+
 - **Is Trigger**: Yes (starts workflow)
 - **Is Webhook**: Yes (provides HTTP endpoint)
 - **Output Type**: `main` (connects to AI Agent or workflow logic)
 
 **Unique Features**:
+
 - Hosted chat UI (`mode: "hostedChat"`)
 - Embedded chat widget (`mode: "webhook"`)
 - File upload support
@@ -777,6 +835,7 @@ Vector Store Tool
 | | "webhook" | Embeddable chat widget |
 
 **Validation Requirements**:
+
 ```typescript
 function validateChatTrigger(
   node: WorkflowNode,
@@ -885,6 +944,7 @@ function validateChatTrigger(
 **Purpose**: Makes HTTP API requests with LLM-filled parameters, allowing AI agents to interact with external REST APIs dynamically.
 
 **Configuration Options**:
+
 - `toolDescription`: Description for LLM (REQUIRED)
 - `method`: HTTP method - GET, POST, PUT, DELETE, PATCH (default: GET)
 - `url`: API endpoint URL (REQUIRED, can contain {placeholders})
@@ -902,6 +962,7 @@ function validateChatTrigger(
 LLM dynamically fills `{placeholder}` values in URL, query, headers, and body based on user input.
 
 **Critical Requirements**:
+
 1. Every `{placeholder}` must be defined in `placeholderDefinitions`
 2. Placeholder names must match exactly (case-sensitive)
 3. Tool description should explain what API it accesses
@@ -1016,6 +1077,7 @@ function validateHTTPRequestTool(node: WorkflowNode): ValidationIssue[] {
 **Validation Examples**:
 
 ✅ **CORRECT - Simple GET Request**:
+
 ```json
 {
   "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
@@ -1038,6 +1100,7 @@ function validateHTTPRequestTool(node: WorkflowNode): ValidationIssue[] {
 ```
 
 ✅ **CORRECT - POST with Body and Headers**:
+
 ```json
 {
   "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
@@ -1081,6 +1144,7 @@ function validateHTTPRequestTool(node: WorkflowNode): ValidationIssue[] {
 ```
 
 ❌ **INCORRECT - Missing URL**:
+
 ```json
 {
   "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
@@ -1093,6 +1157,7 @@ function validateHTTPRequestTool(node: WorkflowNode): ValidationIssue[] {
 ```
 
 ❌ **INCORRECT - Placeholder Not Defined**:
+
 ```json
 {
   "parameters": {
@@ -1112,6 +1177,7 @@ function validateHTTPRequestTool(node: WorkflowNode): ValidationIssue[] {
 ```
 
 ❌ **INCORRECT - Missing Tool Description**:
+
 ```json
 {
   "parameters": {
@@ -1127,6 +1193,7 @@ function validateHTTPRequestTool(node: WorkflowNode): ValidationIssue[] {
 **Purpose**: Executes custom JavaScript or Python code as an AI tool, allowing the LLM to perform calculations, transformations, or business logic that isn't available through standard tools.
 
 **Configuration Options**:
+
 - `name` (string, REQUIRED): Function name that the LLM calls (must contain only letters, numbers, underscores)
 - `description` (string, REQUIRED): Explains to the LLM what the tool does and when to use it
 - `code` (string, REQUIRED): The actual JavaScript or Python code to execute
@@ -1140,12 +1207,14 @@ function validateHTTPRequestTool(node: WorkflowNode): ValidationIssue[] {
 The LLM calls the function by name with parameters. The code executes in a sandboxed environment and returns results to the LLM. For JavaScript, the code must return a value. For Python, use `return` statements.
 
 **Critical Requirements**:
+
 1. Function `name` must be valid identifier (letters, numbers, underscores only)
 2. `description` required to help LLM understand when to use the tool
 3. `code` must be syntactically valid and return a value
 4. Input schema HIGHLY RECOMMENDED to validate LLM-provided parameters
 
 **Validation Logic**:
+
 ```typescript
 function validateCodeTool(node: WorkflowNode): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
@@ -1276,6 +1345,7 @@ function validateCodeTool(node: WorkflowNode): ValidationIssue[] {
 **Validation Examples**:
 
 ✅ **Correct Example 1** - Simple calculation tool:
+
 ```typescript
 {
   type: 'toolCode',
@@ -1294,6 +1364,7 @@ function validateCodeTool(node: WorkflowNode): ValidationIssue[] {
 ```
 
 ✅ **Correct Example 2** - Python data transformation:
+
 ```typescript
 {
   type: 'toolCode',
@@ -1314,6 +1385,7 @@ return date_obj.strftime('%B %d, %Y')`,
 ```
 
 ✅ **Correct Example 3** - Business logic without schema:
+
 ```typescript
 {
   type: 'toolCode',
@@ -1332,6 +1404,7 @@ return total;`
 ```
 
 ❌ **Incorrect Example 1** - Invalid function name:
+
 ```typescript
 {
   type: 'toolCode',
@@ -1346,6 +1419,7 @@ return total;`
 ```
 
 ❌ **Incorrect Example 2** - Missing required fields:
+
 ```typescript
 {
   type: 'toolCode',
@@ -1361,6 +1435,7 @@ return total;`
 ```
 
 ❌ **Incorrect Example 3** - Invalid schema configuration:
+
 ```typescript
 {
   type: 'toolCode',
@@ -1378,6 +1453,7 @@ return total;`
 ```
 
 ❌ **Incorrect Example 4** - Invalid characters in name:
+
 ```typescript
 {
   type: 'toolCode',
@@ -1397,6 +1473,7 @@ return total;`
 **Purpose**: Enables the AI agent to perform semantic search over a knowledge base by querying a vector store. The LLM can retrieve relevant documents or data based on natural language queries.
 
 **Configuration Options**:
+
 - `name` (string, REQUIRED): Tool name that the LLM uses to invoke the search
 - `description` (string, REQUIRED): Explains what knowledge base is being searched and when to use it
 - `topK` (number): Number of most relevant results to return (default: 4)
@@ -1405,19 +1482,22 @@ return total;`
 The LLM calls this tool with a search query. The tool converts the query to embeddings, searches the vector store for similar embeddings, and returns the most relevant documents/chunks. This enables RAG (Retrieval Augmented Generation) patterns.
 
 **Critical Requirements**:
+
 1. MUST have `ai_vectorStore` connection to a Vector Store node (e.g., Pinecone, In-Memory Vector Store)
 2. Vector Store MUST have `ai_embedding` connection to an Embeddings node (e.g., Embeddings OpenAI)
 3. Vector Store SHOULD have `ai_document` connection to populate it with data
 4. `description` REQUIRED to help LLM understand what knowledge is searchable
 
 **Connection Architecture**:
-```
+
+```text
 [Document Loader] --ai_document--> [Vector Store] <--ai_vectorStore-- [Vector Store Tool]
 [Embeddings]      --ai_embedding--> [Vector Store]
                                      [Vector Store] --ai_vectorStore--> [AI Agent]
 ```
 
 **Validation Logic**:
+
 ```typescript
 function validateVectorStoreTool(
   node: WorkflowNode,
@@ -1511,6 +1591,7 @@ function validateVectorStoreTool(
 **Validation Examples**:
 
 ✅ **Correct Example 1** - Complete RAG setup:
+
 ```typescript
 {
   type: 'toolVectorStore',
@@ -1529,6 +1610,7 @@ function validateVectorStoreTool(
 ```
 
 ✅ **Correct Example 2** - Pinecone integration:
+
 ```typescript
 {
   type: 'toolVectorStore',
@@ -1547,6 +1629,7 @@ function validateVectorStoreTool(
 ```
 
 ✅ **Correct Example 3** - Minimal setup:
+
 ```typescript
 {
   type: 'toolVectorStore',
@@ -1562,6 +1645,7 @@ function validateVectorStoreTool(
 ```
 
 ❌ **Incorrect Example 1** - Missing vector store connection:
+
 ```typescript
 {
   type: 'toolVectorStore',
@@ -1576,6 +1660,7 @@ function validateVectorStoreTool(
 ```
 
 ❌ **Incorrect Example 2** - Vector store missing embeddings:
+
 ```typescript
 {
   type: 'toolVectorStore',
@@ -1591,6 +1676,7 @@ function validateVectorStoreTool(
 ```
 
 ❌ **Incorrect Example 3** - Missing required fields:
+
 ```typescript
 {
   type: 'toolVectorStore',
@@ -1605,6 +1691,7 @@ function validateVectorStoreTool(
 ```
 
 ❌ **Incorrect Example 4** - Invalid topK:
+
 ```typescript
 {
   type: 'toolVectorStore',
@@ -1624,6 +1711,7 @@ function validateVectorStoreTool(
 **Purpose**: Executes another n8n workflow as a tool, allowing complex reusable logic to be packaged as agent capabilities.
 
 **Configuration Options**:
+
 - `source`: "database" (existing workflow) or "parameter" (inline workflow JSON)
 - `workflowId`: ID of workflow to execute (when source="database")
 - `workflowJson`: Inline workflow definition (when source="parameter")
@@ -1768,6 +1856,7 @@ function validateWorkflowTool(node: WorkflowNode): ValidationIssue[] {
 **Validation Examples**:
 
 ✅ **CORRECT - Database Source**:
+
 ```json
 {
   "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
@@ -1783,6 +1872,7 @@ function validateWorkflowTool(node: WorkflowNode): ValidationIssue[] {
 ```
 
 ✅ **CORRECT - Parameter Source**:
+
 ```json
 {
   "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
@@ -1803,6 +1893,7 @@ function validateWorkflowTool(node: WorkflowNode): ValidationIssue[] {
 ```
 
 ❌ **INCORRECT - Missing workflowId**:
+
 ```json
 {
   "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
@@ -1815,6 +1906,7 @@ function validateWorkflowTool(node: WorkflowNode): ValidationIssue[] {
 ```
 
 ❌ **INCORRECT - Sub-workflow missing Execute Workflow Trigger**:
+
 ```json
 {
   "parameters": {
@@ -1837,6 +1929,7 @@ function validateWorkflowTool(node: WorkflowNode): ValidationIssue[] {
 **Purpose**: Performs Google searches via the SerpApi service, returning web search results to the AI agent. Provides access to current web information and search results.
 
 **Configuration Options**:
+
 - `description` (string, OPTIONAL): Custom description for when to use Google search
 - Credentials: SerpApi API key (REQUIRED)
 
@@ -1844,17 +1937,20 @@ function validateWorkflowTool(node: WorkflowNode): ValidationIssue[] {
 The LLM provides a search query. The tool uses SerpApi to perform a Google search and returns relevant search results including titles, snippets, and URLs.
 
 **Use Cases**:
+
 - Finding current information not in LLM training data
 - Web research and fact-checking
 - Finding specific websites or resources
 - News and trending topics
 
 **Critical Requirements**:
+
 1. MUST have valid SerpApi credentials configured
 2. Requires active SerpApi subscription with available credits
 3. Custom description recommended to differentiate from other search tools
 
 **Validation Logic**:
+
 ```typescript
 function validateSerpApiTool(node: WorkflowNode): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
@@ -1882,6 +1978,7 @@ function validateSerpApiTool(node: WorkflowNode): ValidationIssue[] {
 **Validation Examples**:
 
 ✅ **Correct Example**:
+
 ```typescript
 {
   type: '@n8n/n8n-nodes-langchain.toolSerpApi',
@@ -1897,6 +1994,7 @@ function validateSerpApiTool(node: WorkflowNode): ValidationIssue[] {
 ```
 
 ❌ **Incorrect Example**:
+
 ```typescript
 {
   type: '@n8n/n8n-nodes-langchain.toolSerpApi',
@@ -1911,6 +2009,7 @@ function validateSerpApiTool(node: WorkflowNode): ValidationIssue[] {
 **Purpose**: Searches and retrieves information from Wikipedia, providing the AI agent access to encyclopedia knowledge on a wide range of topics.
 
 **Configuration Options**:
+
 - `description` (string, OPTIONAL): Custom description for when to use Wikipedia
 - `language` (string): Wikipedia language code (default: "en")
 - `returnType` (string): "summary" or "full" article content
@@ -1919,6 +2018,7 @@ function validateSerpApiTool(node: WorkflowNode): ValidationIssue[] {
 The LLM provides a topic or search query. The tool searches Wikipedia and returns article content, either as a summary or full text.
 
 **Use Cases**:
+
 - General knowledge queries
 - Historical information
 - Biographies and notable figures
@@ -1926,11 +2026,13 @@ The LLM provides a topic or search query. The tool searches Wikipedia and return
 - Geographic information
 
 **Critical Requirements**:
+
 1. No credentials required (public API)
 2. Best for factual, encyclopedic information
 3. Not ideal for current events (Wikipedia has lag time)
 
 **Validation Logic**:
+
 ```typescript
 function validateWikipediaTool(node: WorkflowNode): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
@@ -1961,6 +2063,7 @@ function validateWikipediaTool(node: WorkflowNode): ValidationIssue[] {
 **Validation Examples**:
 
 ✅ **Correct Example 1** - Default English:
+
 ```typescript
 {
   type: '@n8n/n8n-nodes-langchain.toolWikipedia',
@@ -1973,6 +2076,7 @@ function validateWikipediaTool(node: WorkflowNode): ValidationIssue[] {
 ```
 
 ✅ **Correct Example 2** - Multilingual:
+
 ```typescript
 {
   type: '@n8n/n8n-nodes-langchain.toolWikipedia',
@@ -1990,6 +2094,7 @@ function validateWikipediaTool(node: WorkflowNode): ValidationIssue[] {
 **Purpose**: Searches using a self-hosted SearXNG metasearch engine, providing privacy-focused web search aggregated from multiple search engines.
 
 **Configuration Options**:
+
 - `description` (string, OPTIONAL): Custom description for when to use SearXNG
 - Credentials: SearXNG instance URL and optional API key (REQUIRED)
 - `categories` (array): Search categories (general, images, news, etc.)
@@ -1998,18 +2103,21 @@ function validateWikipediaTool(node: WorkflowNode): ValidationIssue[] {
 The LLM provides a search query. The tool queries your SearXNG instance which aggregates results from multiple search engines (Google, Bing, DuckDuckGo, etc.) and returns combined results.
 
 **Use Cases**:
+
 - Privacy-focused web search
 - Aggregated results from multiple sources
 - Self-hosted search infrastructure
 - Custom search engine configuration
 
 **Critical Requirements**:
+
 1. MUST have SearXNG instance URL configured
 2. Instance must be accessible from n8n
 3. Optional API key if instance requires authentication
 4. Requires self-hosted or third-party SearXNG instance
 
 **Validation Logic**:
+
 ```typescript
 function validateSearXngTool(node: WorkflowNode): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
@@ -2037,6 +2145,7 @@ function validateSearXngTool(node: WorkflowNode): ValidationIssue[] {
 **Validation Examples**:
 
 ✅ **Correct Example**:
+
 ```typescript
 {
   type: '@n8n/n8n-nodes-langchain.toolSearXng',
@@ -2053,6 +2162,7 @@ function validateSearXngTool(node: WorkflowNode): ValidationIssue[] {
 ```
 
 ❌ **Incorrect Example**:
+
 ```typescript
 {
   type: '@n8n/n8n-nodes-langchain.toolSearXng',
@@ -2067,6 +2177,7 @@ function validateSearXngTool(node: WorkflowNode): ValidationIssue[] {
 **Purpose**: Queries Wolfram|Alpha computational knowledge engine for mathematical computations, scientific data, statistics, and factual queries.
 
 **Configuration Options**:
+
 - `description` (string, OPTIONAL): Custom description for when to use Wolfram|Alpha
 - Credentials: Wolfram|Alpha API key (REQUIRED)
 
@@ -2074,6 +2185,7 @@ function validateSearXngTool(node: WorkflowNode): ValidationIssue[] {
 The LLM provides a computational or factual query. The tool sends it to Wolfram|Alpha's API and returns computed results, data, or answers.
 
 **Use Cases**:
+
 - Complex mathematical computations
 - Scientific calculations and conversions
 - Statistical data queries
@@ -2082,11 +2194,13 @@ The LLM provides a computational or factual query. The tool sends it to Wolfram|
 - Factual data (population, dates, distances, etc.)
 
 **Critical Requirements**:
+
 1. MUST have valid Wolfram|Alpha App ID (API key)
 2. Best for computational and scientific queries
 3. Not ideal for general web search or current news
 
 **Validation Logic**:
+
 ```typescript
 function validateWolframAlphaTool(node: WorkflowNode): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
@@ -2114,6 +2228,7 @@ function validateWolframAlphaTool(node: WorkflowNode): ValidationIssue[] {
 **Validation Examples**:
 
 ✅ **Correct Example**:
+
 ```typescript
 {
   type: '@n8n/n8n-nodes-langchain.toolWolframAlpha',
@@ -2129,6 +2244,7 @@ function validateWolframAlphaTool(node: WorkflowNode): ValidationIssue[] {
 ```
 
 ❌ **Incorrect Example**:
+
 ```typescript
 {
   type: '@n8n/n8n-nodes-langchain.toolWolframAlpha',
@@ -2145,23 +2261,27 @@ function validateWolframAlphaTool(node: WorkflowNode): ValidationIssue[] {
 **Purpose**: Performs mathematical calculations and arithmetic operations. The LLM can use this tool when it needs to compute exact numerical results.
 
 **Configuration Options**:
+
 - `description` (string, OPTIONAL): Custom description for when the LLM should use this calculator
 
 **How Calculator Tool Works**:
 The LLM calls this tool with mathematical expressions as strings. The tool evaluates the expression and returns the numerical result. Handles basic arithmetic, exponents, and mathematical functions.
 
 **Use Cases**:
+
 - Precise arithmetic calculations
 - Financial computations
 - Unit conversions requiring math
 - Any task requiring exact numerical results
 
 **Critical Requirements**:
+
 1. No special configuration required - works out of the box
 2. No AI connections needed (self-contained)
 3. Custom description optional but can help guide LLM usage
 
 **Validation Logic**:
+
 ```typescript
 function validateCalculatorTool(node: WorkflowNode): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
@@ -2184,6 +2304,7 @@ function validateCalculatorTool(node: WorkflowNode): ValidationIssue[] {
 **Validation Examples**:
 
 ✅ **Correct Example 1** - Default calculator:
+
 ```typescript
 {
   type: '@n8n/n8n-nodes-langchain.toolCalculator',
@@ -2193,6 +2314,7 @@ function validateCalculatorTool(node: WorkflowNode): ValidationIssue[] {
 ```
 
 ✅ **Correct Example 2** - Custom description:
+
 ```typescript
 {
   type: '@n8n/n8n-nodes-langchain.toolCalculator',
@@ -2209,12 +2331,14 @@ function validateCalculatorTool(node: WorkflowNode): ValidationIssue[] {
 **Purpose**: Gives the AI agent time to think, reason, and plan before taking action. The agent can "think out loud" to work through complex problems step by step.
 
 **Configuration Options**:
+
 - `description` (string, OPTIONAL): Custom description for when the LLM should pause to think
 
 **How Think Tool Works**:
 When the LLM calls this tool, it returns the thinking content back to the agent. This creates a feedback loop where the agent can reason through problems, consider alternatives, and plan multi-step approaches before executing actions.
 
 **Use Cases**:
+
 - Complex problem-solving requiring multi-step reasoning
 - Planning sequences of actions
 - Considering trade-offs and alternatives
@@ -2222,11 +2346,13 @@ When the LLM calls this tool, it returns the thinking content back to the agent.
 - Self-correction and validation
 
 **Critical Requirements**:
+
 1. No special configuration required
 2. No AI connections needed (self-contained)
 3. Most useful when agent faces complex, multi-step problems
 
 **Validation Logic**:
+
 ```typescript
 function validateThinkTool(node: WorkflowNode): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
@@ -2249,6 +2375,7 @@ function validateThinkTool(node: WorkflowNode): ValidationIssue[] {
 **Validation Examples**:
 
 ✅ **Correct Example 1** - Default think tool:
+
 ```typescript
 {
   type: '@n8n/n8n-nodes-langchain.toolThink',
@@ -2258,6 +2385,7 @@ function validateThinkTool(node: WorkflowNode): ValidationIssue[] {
 ```
 
 ✅ **Correct Example 2** - Custom description for complex reasoning:
+
 ```typescript
 {
   type: '@n8n/n8n-nodes-langchain.toolThink',
@@ -2270,6 +2398,7 @@ function validateThinkTool(node: WorkflowNode): ValidationIssue[] {
 ```
 
 ✅ **Correct Example 3** - Problem-solving focus:
+
 ```typescript
 {
   type: '@n8n/n8n-nodes-langchain.toolThink',
@@ -2286,6 +2415,7 @@ function validateThinkTool(node: WorkflowNode): ValidationIssue[] {
 **Purpose**: Creates a nested AI agent that functions as a tool for a parent AI agent. Enables complex agent hierarchies where specialized sub-agents handle specific tasks, each with their own model, tools, and capabilities.
 
 **Configuration Options**:
+
 - `name` (string, REQUIRED): Tool name that the parent agent uses to invoke this sub-agent
 - `description` (string, REQUIRED): Explains the sub-agent's capabilities and when the parent should use it
 - `promptType` (string): "auto" or "define" - how to construct prompts for this sub-agent
@@ -2298,11 +2428,13 @@ function validateThinkTool(node: WorkflowNode): ValidationIssue[] {
 The parent AI agent can invoke this sub-agent as a tool. The sub-agent has its own language model, tools, and configuration. It processes the request independently and returns results to the parent. This creates hierarchical agent architectures.
 
 **Use Cases**:
+
 - Specialized experts (e.g., "SQL Query Expert" sub-agent with database tools)
 - Complex multi-step workflows (e.g., "Research Assistant" that uses search + summarization)
 - Domain-specific processing (e.g., "Financial Analysis Agent" with calculation tools)
 
 **Critical Requirements**:
+
 1. MUST have exactly 1 `ai_languageModel` connection (the sub-agent's model)
 2. `name` and `description` REQUIRED for parent agent to invoke properly
 3. Can have its own `ai_tool` connections (sub-agent's toolset)
@@ -2310,13 +2442,15 @@ The parent AI agent can invoke this sub-agent as a tool. The sub-agent has its o
 5. Should have clear systemMessage defining sub-agent's specialized role
 
 **Connection Architecture**:
-```
+
+```text
 [Language Model] --ai_languageModel--> [AI Agent Tool] --ai_tool--> [Parent AI Agent]
 [Tool 1]         --ai_tool-----------> [AI Agent Tool]
 [Tool 2]         --ai_tool-----------> [AI Agent Tool]
 ```
 
 **Validation Logic**:
+
 ```typescript
 function validateAIAgentTool(
   node: WorkflowNode,
@@ -2408,6 +2542,7 @@ function validateAIAgentTool(
 **Validation Examples**:
 
 ✅ **Correct Example 1** - Specialized SQL expert sub-agent:
+
 ```typescript
 {
   type: '@n8n/n8n-nodes-langchain.agentTool',
@@ -2427,6 +2562,7 @@ function validateAIAgentTool(
 ```
 
 ✅ **Correct Example 2** - Research assistant sub-agent:
+
 ```typescript
 {
   type: '@n8n/n8n-nodes-langchain.agentTool',
@@ -2447,6 +2583,7 @@ function validateAIAgentTool(
 ```
 
 ✅ **Correct Example 3** - Minimal sub-agent:
+
 ```typescript
 {
   type: '@n8n/n8n-nodes-langchain.agentTool',
@@ -2465,6 +2602,7 @@ function validateAIAgentTool(
 ```
 
 ❌ **Incorrect Example 1** - Missing language model:
+
 ```typescript
 {
   type: '@n8n/n8n-nodes-langchain.agentTool',
@@ -2479,6 +2617,7 @@ function validateAIAgentTool(
 ```
 
 ❌ **Incorrect Example 2** - Missing required fields:
+
 ```typescript
 {
   type: '@n8n/n8n-nodes-langchain.agentTool',
@@ -2493,6 +2632,7 @@ function validateAIAgentTool(
 ```
 
 ❌ **Incorrect Example 3** - Multiple language models:
+
 ```typescript
 {
   type: '@n8n/n8n-nodes-langchain.agentTool',
@@ -2509,6 +2649,7 @@ function validateAIAgentTool(
 ```
 
 ❌ **Incorrect Example 4** - Invalid promptType configuration:
+
 ```typescript
 {
   type: '@n8n/n8n-nodes-langchain.agentTool',
@@ -2528,6 +2669,7 @@ function validateAIAgentTool(
 **Purpose**: Connects to Model Context Protocol (MCP) servers to access external tools and resources, allowing AI agents to use MCP-compliant tools.
 
 **Configuration Options**:
+
 - `mcpServer`: MCP server connection configuration (REQUIRED)
   - Can reference existing server or define new one
 - `tool`: Specific MCP tool to use from the server (REQUIRED)
@@ -2536,6 +2678,7 @@ function validateAIAgentTool(
 - `useCustomInputSchema`: Whether to override tool's input schema
 
 **MCP Server Configuration**:
+
 - `transport`: "stdio" or "sse" (Server-Sent Events)
 - `command`: Executable command (for stdio)
 - `args`: Command arguments (for stdio)
@@ -2543,6 +2686,7 @@ function validateAIAgentTool(
 - `env`: Environment variables
 
 **Critical Requirements**:
+
 1. MCP server must be properly configured and accessible
 2. Selected tool must exist on the MCP server
 3. Tool parameters must match the tool's input schema
@@ -2678,6 +2822,7 @@ function validateMCPClientTool(node: WorkflowNode): ValidationIssue[] {
 **Validation Examples**:
 
 ✅ **CORRECT - Stdio Transport**:
+
 ```json
 {
   "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
@@ -2697,6 +2842,7 @@ function validateMCPClientTool(node: WorkflowNode): ValidationIssue[] {
 ```
 
 ✅ **CORRECT - SSE Transport**:
+
 ```json
 {
   "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
@@ -2715,6 +2861,7 @@ function validateMCPClientTool(node: WorkflowNode): ValidationIssue[] {
 ```
 
 ✅ **CORRECT - With Custom Input Schema**:
+
 ```json
 {
   "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
@@ -2736,6 +2883,7 @@ function validateMCPClientTool(node: WorkflowNode): ValidationIssue[] {
 ```
 
 ❌ **INCORRECT - Missing MCP Server**:
+
 ```json
 {
   "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
@@ -2748,6 +2896,7 @@ function validateMCPClientTool(node: WorkflowNode): ValidationIssue[] {
 ```
 
 ❌ **INCORRECT - Stdio Without Command**:
+
 ```json
 {
   "parameters": {
@@ -2761,6 +2910,7 @@ function validateMCPClientTool(node: WorkflowNode): ValidationIssue[] {
 ```
 
 ❌ **INCORRECT - SSE Without URL**:
+
 ```json
 {
   "parameters": {
@@ -2774,6 +2924,7 @@ function validateMCPClientTool(node: WorkflowNode): ValidationIssue[] {
 ```
 
 ❌ **INCORRECT - Missing Tool Selection**:
+
 ```json
 {
   "parameters": {
@@ -2790,6 +2941,7 @@ function validateMCPClientTool(node: WorkflowNode): ValidationIssue[] {
 **Common MCP Server Configurations**:
 
 **Filesystem Server**:
+
 ```json
 {
   "transport": "stdio",
@@ -2799,6 +2951,7 @@ function validateMCPClientTool(node: WorkflowNode): ValidationIssue[] {
 ```
 
 **GitHub Server**:
+
 ```json
 {
   "transport": "stdio",
@@ -2811,6 +2964,7 @@ function validateMCPClientTool(node: WorkflowNode): ValidationIssue[] {
 ```
 
 **PostgreSQL Server**:
+
 ```json
 {
   "transport": "stdio",
@@ -2820,6 +2974,7 @@ function validateMCPClientTool(node: WorkflowNode): ValidationIssue[] {
 ```
 
 **Puppeteer Server**:
+
 ```json
 {
   "transport": "stdio",
@@ -2829,6 +2984,7 @@ function validateMCPClientTool(node: WorkflowNode): ValidationIssue[] {
 ```
 
 **Remote SSE Server**:
+
 ```json
 {
   "transport": "sse",
@@ -2926,16 +3082,19 @@ function validateAllToolNodes(
 ## Summary: Validation Coverage
 
 ✅ **Complete Coverage**:
+
 - AI Agent (required connections, streaming mode, prompt type)
 - Basic LLM Chain (required connections, forbidden connections)
 - Chat Trigger (response mode, downstream compatibility)
 - All 13 AI tool sub-nodes with specific validation rules
 
 ✅ **Connection Direction Enforcement**:
+
 - Reverse connection mapping to validate incoming connections
 - Proper validation of ai_languageModel, ai_memory, ai_tool, etc.
 
 ✅ **Tool-Specific Rules**:
+
 - HTTP Request Tool: Placeholder validation
 - Code Tool: Function name and schema validation
 - Vector Store Tool: Complete chain validation (Tool → VectorStore → Embedding)
@@ -2978,12 +3137,14 @@ function validateAllToolNodes(
 ### What We Can Validate
 
 ✅ **Connection Architecture**:
+
 - All 8 AI connection types (ai_languageModel, ai_memory, ai_tool, etc.)
 - Connection direction enforcement (connections flow TO AI Agent)
 - Reverse connection mapping
 - Streaming mode constraints
 
 ✅ **Purpose-Built Tool Nodes** (13 nodes with specific rules):
+
 - HTTP Request Tool: Placeholder validation
 - Code Tool: Function name, input schema validation
 - Vector Store Tool: Complete chain validation (vectorStore → embedding)
@@ -2992,6 +3153,7 @@ function validateAllToolNodes(
 - All others with appropriate rules
 
 ✅ **Regular Nodes as Tools** (248 nodes):
+
 - Node type lookup from database
 - Property validation using node schema
 - Credential requirement checking
@@ -2999,12 +3161,14 @@ function validateAllToolNodes(
 - Tool description recommendations
 
 ✅ **AI Agent Workflows**:
+
 - Required ai_languageModel connection
 - Optional ai_memory, ai_tool, ai_outputParser connections
 - Chat Trigger integration (streaming mode, prompt type)
 - Tool connectivity and descriptions
 
 ✅ **Basic LLM Chain Workflows**:
+
 - Required ai_languageModel connection
 - Forbidden ai_memory and ai_tool connections
 - Optional ai_outputParser connection
@@ -3012,12 +3176,14 @@ function validateAllToolNodes(
 ### Implementation Priority
 
 **Phase 1: Core Infrastructure** ✅
+
 - [x] Document complete AI tool ecosystem (269 nodes)
 - [ ] Update `WorkflowConnection` interface with all AI connection types
 - [ ] Implement `buildReverseConnectionMap()` utility
 - [ ] Add helper functions for node type checking
 
 **Phase 2: AI Agent & Chain Validation** (CRITICAL)
+
 - [ ] Implement `validateAIAgent()` with:
   - Required ai_languageModel check
   - Streaming mode validation
@@ -3031,6 +3197,7 @@ function validateAllToolNodes(
   - Downstream node validation
 
 **Phase 3: Purpose-Built Tool Validation** (HIGH PRIORITY)
+
 - [ ] Implement `validateHTTPRequestTool()` with placeholder checking
 - [ ] Implement `validateCodeTool()` with schema validation
 - [ ] Implement `validateVectorStoreTool()` with chain validation
@@ -3039,12 +3206,14 @@ function validateAllToolNodes(
 - [ ] Implement remaining tool-specific validators
 
 **Phase 4: Generic Tool Validation** (MEDIUM PRIORITY)
+
 - [ ] Implement generic tool connection validator
 - [ ] Validate tool descriptions (toolDescription or description field)
 - [ ] Check credentials configured for regular nodes used as tools
 - [ ] Validate node parameters using database schema
 
 **Phase 5: Testing & Documentation**
+
 - [ ] Write unit tests for each validation function
 - [ ] Write integration tests with real workflow templates (2985, 3680, 5296)
 - [ ] Test with all 13 purpose-built tool nodes
@@ -3055,11 +3224,13 @@ function validateAllToolNodes(
 ## Implementation Checklist
 
 ### Core Infrastructure ✅
+
 - [ ] Update `WorkflowConnection` interface with all AI connection types
 - [ ] Implement `buildReverseConnectionMap()` utility
 - [ ] Add helper functions for node type checking
 
 ### AI Agent Validation (Enhanced with Deep Understanding) 🎯
+
 - [ ] Implement `validateAIAgent()` with:
   - [x] **Prompt type validation** (auto vs define)
   - [x] **Text field requirement** check (when promptType='define')
@@ -3074,20 +3245,24 @@ function validateAllToolNodes(
   - [ ] Tool connection validation (0-N ai_tool)
 
 ### Other AI Node Validation
+
 - [ ] Implement `validateBasicLLMChain()`
 - [ ] Implement `validateChatTrigger()`
 - [ ] Implement `validateAllToolNodes()` with all 13 sub-validations
 - [ ] Implement generic regular node as tool validation (248 nodes)
 
 ### Integration
+
 - [ ] Add validation calls in main `validateWorkflow()` method
 - [ ] Leverage database for node schema validation (269 nodes total)
 
 ### Testing
+
 - [ ] Write unit tests for each validation function
 - [ ] Write integration tests with real workflow templates (2985, 3680, 5296)
 
 ### Documentation
+
 - [x] **Complete AI Agent deep architecture analysis**
 - [x] **Document prompt construction (auto vs define)**
 - [x] **Document system message patterns and best practices**
@@ -3102,7 +3277,9 @@ function validateAllToolNodes(
 ## Key Insights for Implementation
 
 ### 1. AI Agent is NOT a Simple Node
+
 The AI Agent node is the most complex node in n8n with:
+
 - **2 prompt modes** (auto from Chat Trigger vs custom defined)
 - **Dynamic connection requirements** (1-2 LLMs based on fallback setting)
 - **Critical system message** that defines entire behavior
@@ -3111,7 +3288,9 @@ The AI Agent node is the most complex node in n8n with:
 - **Streaming mode constraints** (no main output when Chat Trigger streams)
 
 ### 2. Validation Must Be Context-Aware
+
 Validation rules change based on:
+
 - `promptType` setting → affects text field requirement
 - `needsFallback` flag → affects LLM connection count requirement
 - `hasOutputParser` flag → affects output parser connection requirement
@@ -3119,6 +3298,7 @@ Validation rules change based on:
 - Upstream Chat Trigger's `responseMode` → affects downstream connection rules
 
 ### 3. System Message is the Most Important Field
+
 - Defines agent's role, capabilities, constraints
 - Controls tool usage behavior
 - Specifies output format requirements
@@ -3126,19 +3306,23 @@ Validation rules change based on:
 - Real-world templates show detailed, structured system messages
 
 ### 4. Fallback Models Are Production-Critical
+
 - Automatic failover for reliability
 - Rate limit mitigation
 - Cost optimization strategies
 - Must validate 2 LLM connections when enabled
 
 ### 5. Output Parsers Enforce Structure
+
 - JSON/XML schema validation
 - Required for structured data extraction
 - System message should define format, parser enforces it
 - Must validate connection when flag is set
 
 ### 6. MCP Tools Need Enhancement
+
 Current MCP tools should return:
+
 - **Prompt configuration details** (auto vs define modes)
 - **System message importance and best practices**
 - **Fallback model feature documentation**

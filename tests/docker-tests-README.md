@@ -51,6 +51,7 @@ This directory contains comprehensive tests for the Docker config file support f
 ## Running the Tests
 
 ### Prerequisites
+
 - Node.js and npm installed
 - Docker installed (for integration tests)
 - Build the project first: `npm run build`
@@ -75,6 +76,7 @@ npm run test:docker:security
 ```
 
 ### Individual test files
+
 ```bash
 # Run a specific test file
 npm test -- tests/unit/docker/parse-config.test.ts
@@ -118,6 +120,7 @@ The tests cover:
 ## CI/CD Considerations
 
 Integration tests are skipped by default unless:
+
 - Running in CI (CI=true environment variable)
 - Explicitly enabled (RUN_DOCKER_TESTS=true)
 
@@ -126,6 +129,7 @@ This prevents test failures on developer machines without Docker.
 ## Security Notes
 
 The config parser implements defense in depth:
+
 1. All values are wrapped in single quotes for shell safety
 2. Single quotes within values are escaped as '"'"'
 3. No variable expansion occurs within single quotes
@@ -135,6 +139,7 @@ The config parser implements defense in depth:
 ## Troubleshooting
 
 If tests fail:
+
 1. Ensure Docker is running (for integration tests)
 2. Check that the project is built (`npm run build`)
 3. Verify no containers are left running: `docker ps -a | grep n8n-mcp-test`

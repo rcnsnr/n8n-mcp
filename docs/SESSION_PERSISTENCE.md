@@ -44,6 +44,7 @@ exportSessionState(): SessionState[]
 **Returns:** Array of session state objects containing metadata and credentials
 
 **Example:**
+
 ```typescript
 const sessions = engine.exportSessionState();
 // sessions = [
@@ -64,6 +65,7 @@ const sessions = engine.exportSessionState();
 ```
 
 **Key Behaviors:**
+
 - Exports only non-expired sessions (within sessionTimeout)
 - Detects and warns about duplicate session IDs
 - Logs security event with session count
@@ -78,11 +80,13 @@ restoreSessionState(sessions: SessionState[]): number
 ```
 
 **Parameters:**
+
 - `sessions`: Array of session state objects from `exportSessionState()`
 
 **Returns:** Number of sessions successfully restored
 
 **Example:**
+
 ```typescript
 const sessions = await loadFromEncryptedStorage();
 const count = engine.restoreSessionState(sessions);
@@ -90,6 +94,7 @@ console.log(`Restored ${count} sessions`);
 ```
 
 **Key Behaviors:**
+
 - Validates session metadata (timestamps, required fields)
 - Skips expired sessions (age > sessionTimeout)
 - Skips duplicate sessions (idempotent)
@@ -171,6 +176,7 @@ async function decryptSessionData(
 ### Key Management
 
 Store encryption keys securely:
+
 - **Kubernetes:** Use Kubernetes Secrets with encryption at rest
 - **AWS:** Use AWS Secrets Manager or Parameter Store with KMS
 - **Azure:** Use Azure Key Vault
@@ -181,7 +187,7 @@ Store encryption keys securely:
 
 All session persistence operations are logged with `[SECURITY]` prefix:
 
-```
+```text
 [SECURITY] session_export { timestamp, count }
 [SECURITY] session_restore { timestamp, sessionId, instanceId }
 [SECURITY] session_restore_failed { timestamp, sessionId, reason }
@@ -251,6 +257,7 @@ app.listen(3000);
 ### 2. Kubernetes Deployment with Init Container
 
 **deployment.yaml:**
+
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -312,6 +319,7 @@ spec:
 ```
 
 **restore-sessions.sh:**
+
 ```bash
 #!/bin/bash
 set -e
@@ -330,6 +338,7 @@ fi
 ```
 
 **export-sessions.sh:**
+
 ```bash
 #!/bin/bash
 set -e
@@ -345,6 +354,7 @@ echo "Sessions exported successfully"
 ### 3. Docker Compose with Redis
 
 **docker-compose.yml:**
+
 ```yaml
 version: '3.8'
 
@@ -378,6 +388,7 @@ volumes:
 ```
 
 **Application code:**
+
 ```typescript
 import { N8NMCPEngine } from 'n8n-mcp';
 import Redis from 'ioredis';
@@ -447,18 +458,21 @@ sessionTimeout: 7200000 - 14400000
 ### 2. Storage Backend Selection
 
 **Redis (Recommended for Production)**
+
 - Fast read/write for session data
 - TTL support for automatic cleanup
 - Pub/sub for distributed coordination
 - Atomic operations for consistency
 
 **Database (PostgreSQL/MySQL)**
+
 - JSONB column for session state
 - Good for audit requirements
 - Slower than Redis
 - Requires periodic cleanup
 
 **S3/Cloud Storage**
+
 - Good for disaster recovery backups
 - Not suitable for hot session restore
 - High latency
@@ -490,6 +504,7 @@ metrics.gauge('mcp.sessions.age_seconds', info.age || 0);
 ```
 
 Alert on:
+
 - Export failures (should be rare)
 - Low restore success rate (<95%)
 - MAX_SESSIONS limit reached
@@ -543,6 +558,7 @@ const count2 = engine.restoreSessionState(sessions);
 ```
 
 This is safe for:
+
 - Init container retries
 - Manual recovery operations
 - Disaster recovery scenarios
@@ -605,6 +621,7 @@ const restored = engine.restoreSessionState(sessions);
 ```
 
 For higher session limits:
+
 - Set `N8N_MCP_MAX_SESSIONS=1000` (or desired limit)
 - Monitor memory usage as sessions consume resources
 - Alternatively, deploy multiple containers with session routing/sharding
@@ -614,16 +631,19 @@ For higher session limits:
 ### Issue: No sessions restored
 
 **Symptoms:**
-```
+
+```text
 Restored 0 sessions
 ```
 
 **Causes:**
+
 1. All sessions expired (age > sessionTimeout)
 2. Invalid date format in metadata
 3. Missing required context fields
 
 **Debug:**
+
 ```typescript
 const sessions = await loadFromEncryptedStorage();
 console.log('Loaded sessions:', sessions.length);
@@ -638,16 +658,19 @@ sessions.forEach((s, i) => {
 ### Issue: Restore fails with "invalid context"
 
 **Symptoms:**
-```
+
+```text
 [SECURITY] session_restore_failed { sessionId: '...', reason: 'invalid context: ...' }
 ```
 
 **Causes:**
+
 1. Missing n8nApiUrl or n8nApiKey
 2. Invalid URL format
 3. Corrupted session data
 
 **Fix:**
+
 ```typescript
 // Validate before restore
 const valid = sessions.filter(s => {
@@ -670,7 +693,8 @@ const count = engine.restoreSessionState(valid);
 ### Issue: MAX_SESSIONS limit hit
 
 **Symptoms:**
-```
+
+```text
 Reached MAX_SESSIONS limit (100), skipping remaining sessions
 ```
 
@@ -695,7 +719,8 @@ const count = engine.restoreSessionState(recentSessions);
 ### Issue: Duplicate session IDs
 
 **Symptoms:**
-```
+
+```text
 Duplicate sessionId detected during export: 550e8400-...
 ```
 
@@ -710,6 +735,7 @@ Duplicate sessionId detected during export: 550e8400-...
 **Cause:** Too many sessions for container resources
 
 **Solution:**
+
 ```typescript
 // Restore in batches
 async function restoreInBatches(sessions: SessionState[], batchSize = 25) {
@@ -750,9 +776,10 @@ async function restoreInBatches(sessions: SessionState[], batchSize = 25) {
 ## Support
 
 For issues or questions:
-- GitHub Issues: https://github.com/czlonkowski/n8n-mcp/issues
-- Documentation: https://github.com/czlonkowski/n8n-mcp#readme
+
+- GitHub Issues: <https://github.com/czlonkowski/n8n-mcp/issues>
+- Documentation: <https://github.com/czlonkowski/n8n-mcp#readme>
 
 ---
 
-Conceived by Romuald Członkowski - https://www.aiadvisors.pl/en
+Conceived by Romuald Członkowski - <https://www.aiadvisors.pl/en>

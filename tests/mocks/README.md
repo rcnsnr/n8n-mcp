@@ -4,7 +4,7 @@ This directory contains the MSW infrastructure for mocking n8n API responses in 
 
 ## Structure
 
-```
+```text
 mocks/
 ├── n8n-api/
 │   ├── handlers.ts       # Default MSW handlers for n8n API endpoints
@@ -29,10 +29,10 @@ import { N8nApiClient } from '@/services/n8n-api-client';
 describe('My Integration Test', () => {
   it('should work with mocked n8n API', async () => {
     const client = new N8nApiClient({ baseUrl: 'http://localhost:5678' });
-    
+
     // This will hit the MSW mock, not the real API
     const workflows = await client.getWorkflows();
-    
+
     expect(workflows).toBeDefined();
   });
 });
@@ -52,7 +52,7 @@ it('should handle custom response', async () => {
       });
     })
   );
-  
+
   // Your test code here
 });
 ```
@@ -67,13 +67,13 @@ it('should test with factory data', async () => {
     method: 'POST',
     url: 'https://example.com/api'
   });
-  
+
   useHandlers(
     http.get('*/api/v1/workflows/test-id', () => {
       return HttpResponse.json({ data: workflow });
     })
   );
-  
+
   // Your test code here
 });
 ```
@@ -89,15 +89,15 @@ describe('Integration Tests', () => {
   beforeAll(() => {
     mswTestServer.start({ onUnhandledRequest: 'error' });
   });
-  
+
   afterAll(() => {
     mswTestServer.stop();
   });
-  
+
   afterEach(() => {
     mswTestServer.reset();
   });
-  
+
   it('should test workflow creation', async () => {
     // Use helper to mock workflow creation
     mswTestServer.use(
@@ -106,7 +106,7 @@ describe('Integration Tests', () => {
         name: 'Created Workflow'
       })
     );
-    
+
     // Your test code here
   });
 });
@@ -133,6 +133,7 @@ This will log all intercepted requests and responses.
 ### Common Patterns
 
 #### Testing Success Scenarios
+
 ```typescript
 useHandlers(
   http.get('*/api/v1/workflows/:id', ({ params }) => {
@@ -144,6 +145,7 @@ useHandlers(
 ```
 
 #### Testing Error Scenarios
+
 ```typescript
 useHandlers(
   http.get('*/api/v1/workflows/:id', () => {
@@ -156,6 +158,7 @@ useHandlers(
 ```
 
 #### Testing Pagination
+
 ```typescript
 const workflows = Array.from({ length: 150 }, (_, i) => 
   workflowFactory.custom({ id: `workflow_${i}` })
@@ -166,10 +169,10 @@ useHandlers(
     const url = new URL(request.url);
     const limit = parseInt(url.searchParams.get('limit') || '100');
     const cursor = url.searchParams.get('cursor');
-    
+
     const start = cursor ? parseInt(cursor) : 0;
     const data = workflows.slice(start, start + limit);
-    
+
     return HttpResponse.json({
       data,
       nextCursor: start + limit < workflows.length ? String(start + limit) : null

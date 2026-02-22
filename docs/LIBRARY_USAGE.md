@@ -184,11 +184,13 @@ new N8NMCPEngine(options?: {
 Process a single MCP request with optional instance context.
 
 **Parameters:**
+
 - `req`: Express request object
 - `res`: Express response object
 - `context` (optional): InstanceContext with per-instance configuration
 
 **Example:**
+
 ```typescript
 const context: InstanceContext = {
   n8nApiUrl: 'https://instance1.n8n.cloud',
@@ -204,6 +206,7 @@ await engine.processRequest(req, res, context);
 Get engine health status for monitoring.
 
 **Returns:** `EngineHealth`
+
 ```typescript
 {
   status: 'healthy' | 'unhealthy';
@@ -219,6 +222,7 @@ Get engine health status for monitoring.
 ```
 
 **Example:**
+
 ```typescript
 app.get('/health', async (req, res) => {
   const health = await engine.healthCheck();
@@ -231,6 +235,7 @@ app.get('/health', async (req, res) => {
 Get current session information for debugging.
 
 **Returns:**
+
 ```typescript
 {
   active: boolean;
@@ -255,6 +260,7 @@ Start the engine (for standalone mode). Not needed when using `processRequest()`
 Graceful shutdown for service lifecycle management.
 
 **Example:**
+
 ```typescript
 process.on('SIGTERM', async () => {
   await engine.shutdown();
@@ -287,6 +293,7 @@ interface InstanceContext {
 Validate and sanitize instance context.
 
 **Returns:**
+
 ```typescript
 {
   valid: boolean;
@@ -295,6 +302,7 @@ Validate and sanitize instance context.
 ```
 
 **Example:**
+
 ```typescript
 import { validateInstanceContext } from 'n8n-mcp';
 
@@ -309,6 +317,7 @@ if (!validation.valid) {
 Type guard to check if an object is a valid InstanceContext.
 
 **Example:**
+
 ```typescript
 import { isInstanceContext } from 'n8n-mcp';
 
@@ -638,6 +647,7 @@ spec:
 ### Complete Multi-Tenant SaaS Example
 
 For a complete implementation example, see:
+
 - [n8n-mcp-backend](https://github.com/czlonkowski/n8n-mcp-backend) - Full hosted service implementation
 
 ### Migration from Single-Player
@@ -645,6 +655,7 @@ For a complete implementation example, see:
 If you're migrating from single-player (CLI/Docker) to multi-tenant:
 
 1. **Keep backward compatibility** - Use environment fallback:
+
 ```typescript
 const context: InstanceContext = {
   n8nApiUrl: instanceUrl || process.env.N8N_API_URL,
@@ -654,6 +665,7 @@ const context: InstanceContext = {
 ```
 
 2. **Gradual rollout** - Start with a feature flag:
+
 ```typescript
 const isMultiTenant = process.env.ENABLE_MULTI_TENANT === 'true';
 

@@ -22,6 +22,7 @@ Watch the complete setup process: [n8n-MCP Windsurf Setup Tutorial](https://www.
 Copy the configuration from this repository and add it to your MCP config:
 
 **Basic configuration (documentation tools only):**
+
 ```json
 {
   "mcpServers": {
@@ -39,6 +40,7 @@ Copy the configuration from this repository and add it to your MCP config:
 ```
 
 **Full configuration (with n8n management tools):**
+
 ```json
 {
   "mcpServers": {

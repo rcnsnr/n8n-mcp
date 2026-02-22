@@ -19,6 +19,7 @@ npm run fetch:templates
 ```
 
 This command will:
+
 1. Connect to n8n.io API
 2. Fetch all templates from the last 6 months
 3. Download complete workflow JSON for each template
@@ -64,6 +65,7 @@ The following tools are available via MCP:
 ### Database Schema
 
 Templates are stored in a dedicated table with:
+
 - Workflow metadata (name, description, author)
 - Node usage tracking
 - View counts for popularity

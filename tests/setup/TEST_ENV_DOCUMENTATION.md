@@ -5,6 +5,7 @@ This document describes the test environment configuration system for the n8n-mc
 ## Overview
 
 The test environment configuration system provides:
+
 - Centralized environment variable management for tests
 - Type-safe access to configuration values
 - Automatic loading of test-specific settings
@@ -14,9 +15,11 @@ The test environment configuration system provides:
 ## Configuration Files
 
 ### `.env.test`
+
 The main test environment configuration file. Contains all test-specific environment variables with sensible defaults. This file is committed to the repository.
 
 ### `.env.test.local` (optional)
+
 Local overrides for sensitive values or developer-specific settings. This file should be added to `.gitignore` and never committed.
 
 ## Usage
@@ -28,11 +31,11 @@ import { getTestConfig, getTestTimeout, isFeatureEnabled } from '@tests/setup/te
 
 describe('My Test Suite', () => {
   const config = getTestConfig();
-  
+
   it('should run with proper timeout', () => {
     // Test code here
   }, { timeout: getTestTimeout('integration') });
-  
+
   it.skipIf(!isFeatureEnabled('mockExternalApis'))('should mock external APIs', () => {
     // This test only runs if FEATURE_MOCK_EXTERNAL_APIS=true
   });
@@ -190,19 +193,19 @@ import { getTestConfig } from '@tests/setup/test-env';
 
 describe('My Feature', () => {
   const config = getTestConfig();
-  
+
   beforeAll(() => {
     // Use test configuration
     if (config.features.mockExternalApis) {
       // Set up mocks
     }
   });
-  
+
   it('should respect performance thresholds', async () => {
     const start = performance.now();
-    
+
     // Your test code
-    
+
     const duration = performance.now() - start;
     expect(duration).toBeLessThan(config.performance.thresholds.apiResponse);
   });
@@ -214,6 +217,7 @@ describe('My Feature', () => {
 ### Tests failing with "Missing required test environment variables"
 
 Ensure `.env.test` exists and contains all required variables. Run:
+
 ```bash
 cp .env.test.example .env.test
 ```
@@ -227,11 +231,13 @@ cp .env.test.example .env.test
 ### Type errors with process.env
 
 Make sure to include the type definitions:
+
 ```typescript
 /// <reference types="../types/test-env" />
 ```
 
 Or add to your `tsconfig.json`:
+
 ```json
 {
   "compilerOptions": {

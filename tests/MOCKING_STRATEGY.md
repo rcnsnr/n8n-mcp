@@ -67,7 +67,7 @@ beforeEach(() => {
     },
     defaults: { baseURL: 'http://test.n8n.local/api/v1' }
   };
-  
+
   (axios.create as any).mockReturnValue(mockAxiosInstance);
 });
 ```
@@ -109,7 +109,8 @@ const workflow = { nodes: [...], connections: {...} }; // Avoid
 
 **Dependencies**: NodeSpecificValidators (circular)
 
-**Strategy**: 
+**Strategy**:
+
 - Test base validation logic without mocking
 - Mock NodeSpecificValidators only when testing integration points
 - Use real property definitions from fixtures
@@ -132,6 +133,7 @@ it('validates required properties', () => {
 **Dependencies**: NodeRepository, EnhancedConfigValidator, ExpressionValidator
 
 **Strategy**:
+
 - Mock NodeRepository with comprehensive fixtures
 - Use real EnhancedConfigValidator for integration testing
 - Mock only for isolated unit tests
@@ -155,6 +157,7 @@ const validator = new WorkflowValidator(
 **Dependencies**: axios, n8n-validation
 
 **Strategy**:
+
 - Mock axios completely
 - Use real n8n-validation functions
 - Test each endpoint with success/error scenarios
@@ -168,7 +171,7 @@ describe('workflow operations', () => {
     mockAxios.patch.mockResolvedValueOnce({ 
       data: workflowFixture 
     });
-    
+
     const result = await client.updateWorkflow('123', workflow);
     expect(mockAxios.patch).toHaveBeenCalled();
   });
@@ -180,6 +183,7 @@ describe('workflow operations', () => {
 **Dependencies**: n8n-validation
 
 **Strategy**:
+
 - Use real validation functions
 - Create comprehensive workflow fixtures
 - Test state transitions with snapshots
@@ -191,7 +195,7 @@ it('applies node operations in correct order', async () => {
     { type: 'addNode', node: nodeFactory.httpRequest() },
     { type: 'addConnection', source: 'trigger', target: 'HTTP Request' }
   ];
-  
+
   const result = await engine.applyDiff(workflow, { operations });
   expect(result.workflow).toMatchSnapshot();
 });
@@ -202,6 +206,7 @@ it('applies node operations in correct order', async () => {
 **Dependencies**: None (pure functions)
 
 **Strategy**:
+
 - No mocking needed
 - Test with comprehensive expression fixtures
 - Focus on edge cases and error scenarios
@@ -225,7 +230,7 @@ const expressionFixtures = {
 
 ### 1. Fixture Organization
 
-```
+```text
 tests/fixtures/
 ├── nodes/
 │   ├── http-request.json
@@ -264,6 +269,7 @@ const slackNode = loadFixture('nodes/slack.json');
 ## Anti-Patterns to Avoid
 
 ### 1. Over-Mocking
+
 ```typescript
 // Bad: Mocking internal methods
 validator._checkRequiredProperties = vi.fn();
@@ -273,6 +279,7 @@ const result = validator.validate(...);
 ```
 
 ### 2. Brittle Mocks
+
 ```typescript
 // Bad: Exact call matching
 expect(mockFn).toHaveBeenCalledWith(exact, args, here);
@@ -284,6 +291,7 @@ expect(mockFn).toHaveBeenCalledWith(
 ```
 
 ### 3. Mock Leakage
+
 ```typescript
 // Bad: Global mocks without cleanup
 vi.mock('axios'); // At file level
@@ -310,10 +318,10 @@ describe('Validation Pipeline Integration', () => {
       nodeRepo,
       EnhancedConfigValidator // Real validator
     );
-    
+
     const workflow = workflowFactory.withValidationErrors();
     const result = await workflowValidator.validateWorkflow(workflow);
-    
+
     // Test that all validators work together correctly
     expect(result.errors).toContainEqual(
       expect.objectContaining({ 
@@ -325,6 +333,7 @@ describe('Validation Pipeline Integration', () => {
 ```
 
 This mocking strategy ensures tests are:
+
 - Fast (no real I/O)
 - Reliable (no external dependencies)
 - Maintainable (clear boundaries)

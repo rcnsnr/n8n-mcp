@@ -17,6 +17,7 @@ Watch the complete setup process: [n8n-MCP Cursor Setup Tutorial](https://www.yo
 3. Copy the configuration from this repository
 
 **Basic configuration (documentation tools only):**
+
 ```json
 {
   "mcpServers": {
@@ -34,6 +35,7 @@ Watch the complete setup process: [n8n-MCP Cursor Setup Tutorial](https://www.yo
 ```
 
 **Full configuration (with n8n management tools):**
+
 ```json
 {
   "mcpServers": {
@@ -70,4 +72,3 @@ Watch the complete setup process: [n8n-MCP Cursor Setup Tutorial](https://www.yo
 2. Name the rule (e.g., "n8n-mcp")
 3. Set rule type to "always"
 4. Copy the Claude Project instructions from the [main README's Claude Project Setup section](../README.md#-claude-project-setup)
-

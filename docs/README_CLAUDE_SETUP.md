@@ -13,6 +13,7 @@ This guide helps you connect n8n-MCP to Claude Desktop, giving Claude comprehens
 ### Method 1: Local Installation (Recommended) 💻
 
 1. **Install and build:**
+
    ```bash
    git clone https://github.com/czlonkowski/n8n-mcp.git
    cd n8n-mcp
@@ -22,6 +23,7 @@ This guide helps you connect n8n-MCP to Claude Desktop, giving Claude comprehens
    ```
 
 2. **Configure Claude Desktop:**
+
    ```json
    {
      "mcpServers": {
@@ -39,7 +41,8 @@ This guide helps you connect n8n-MCP to Claude Desktop, giving Claude comprehens
    }
    ```
 
-⚠️ **Important**: 
+⚠️ **Important**:
+
 - Use absolute paths, not relative paths
 - The environment variables shown above are critical for proper stdio communication
 
@@ -75,6 +78,7 @@ For production deployments with multiple users:
 1. **Deploy server with HTTP mode** (see [HTTP Deployment Guide](./HTTP_DEPLOYMENT.md))
 
 2. **Connect using custom HTTP client:**
+
    ```json
    {
      "mcpServers": {
@@ -114,10 +118,12 @@ After restarting Claude Desktop:
 
 ## 🔧 Available Tools (v2.5.1)
 
-### Essential Tool - Start Here!
+### Essential Tool - Start Here
+
 - **`tools_documentation`** - Get documentation for any MCP tool (ALWAYS use this first!)
 
 ### Core Tools
+
 - **`list_nodes`** - List all n8n nodes with filtering options
 - **`get_node_info`** - Get comprehensive information (now includes aiToolCapabilities)
 - **`get_node_essentials`** - Get only 10-20 essential properties (95% smaller!)
@@ -127,10 +133,12 @@ After restarting Claude Desktop:
 - **`get_database_statistics`** - View database metrics and coverage
 
 ### AI Tools (Enhanced in v2.5.1)
+
 - **`list_ai_tools`** - List AI-capable nodes (ANY node can be used as AI tool!)
 - **`get_node_as_tool_info`** - Get guidance on using any node as an AI tool
 
 ### Task & Template Tools
+
 - **`get_node_for_task`** - Pre-configured node settings for common tasks
 - **`list_tasks`** - Discover available task templates
 - **`list_node_templates`** - Find workflow templates using specific nodes
@@ -139,6 +147,7 @@ After restarting Claude Desktop:
 - **`get_templates_for_task`** - Get curated templates for common tasks
 
 ### Validation Tools (Professional Grade)
+
 - **`validate_node_operation`** - Smart validation with operation awareness
 - **`validate_node_minimal`** - Quick validation for just required fields
 - **`validate_workflow`** - Complete workflow validation (validates AI tool connections)
@@ -146,7 +155,8 @@ After restarting Claude Desktop:
 - **`validate_workflow_expressions`** - Validate n8n expressions including $fromAI()
 - **`get_property_dependencies`** - Analyze property visibility conditions
 
-### Example Questions to Ask Claude:
+### Example Questions to Ask Claude
+
 - "Show me all n8n nodes for working with databases"
 - "How do I use the HTTP Request node?"
 - "Get the essentials for Slack node" (uses get_node_essentials)
@@ -158,7 +168,8 @@ After restarting Claude Desktop:
 
 ### Server Not Appearing in Claude
 
-1. **Check JSON syntax**: 
+1. **Check JSON syntax**:
+
    ```bash
    # Validate your config file
    cat ~/Library/Application\ Support/Claude/claude_desktop_config.json | jq .
@@ -171,13 +182,16 @@ After restarting Claude Desktop:
 ### Remote Connection Issues
 
 **"TransformStream is not defined" error:**
+
 - Cause: Node.js version < 18
 - Fix: Update Node.js to v18 or newer
+
   ```bash
   node --version  # Should be v18.0.0 or higher
   ```
 
 **"Server disconnected" error:**
+
 - Check AUTH_TOKEN matches between server and client
 - Verify server is running: `curl https://your-server.com/health`
 - Check for VPN interference
@@ -185,12 +199,14 @@ After restarting Claude Desktop:
 ### Docker Issues
 
 **"Cannot find image" error:**
+
 ```bash
 # Pull the latest image
 docker pull ghcr.io/czlonkowski/n8n-mcp:latest
 ```
 
 **Permission denied:**
+
 ```bash
 # Ensure Docker is running
 docker ps
@@ -199,6 +215,7 @@ docker ps
 ### Common Issues
 
 **"Expected ',' or ']' after array element" errors in logs:**
+
 - Cause: Console output interfering with stdio communication
 - Fix: Ensure all required environment variables are set:
   - `MCP_MODE=stdio`
@@ -206,10 +223,12 @@ docker ps
   - `DISABLE_CONSOLE_OUTPUT=true`
 
 **"NODE_MODULE_VERSION mismatch" warnings:**
+
 - Not a problem! The server automatically falls back to a pure JavaScript implementation
 - The warnings are suppressed with proper environment variables
 
 **Server appears but tools don't work:**
+
 - Check that you've built the project: `npm run build`
 - Verify the database exists: `npm run rebuild`
 - Restart Claude Desktop completely (quit and reopen)

@@ -16,6 +16,7 @@ Start by creating a new VS Code project folder.
 ## Step 2
 
 Create a file: `.vscode/mcp.json`
+
 ```json
 {
     "inputs": [
@@ -72,7 +73,7 @@ You are an expert in n8n automation software using n8n-MCP tools. Your role is t
    - `search_node_properties(nodeType, 'auth')` - Find specific properties
    - `get_node_for_task('send_email')` - Get pre-configured templates
    - `get_node_documentation(nodeType)` - Human-readable docs when needed
-   - It is good common practice to show a visual representation of the workflow architecture to the user and asking for opinion, before moving forward. 
+   - It is good common practice to show a visual representation of the workflow architecture to the user and asking for opinion, before moving forward.
 
 4. **Pre-Validation Phase** - Validate BEFORE building:
    - `validate_node_minimal(nodeType, config)` - Quick required fields check
@@ -111,17 +112,20 @@ You are an expert in n8n automation software using n8n-MCP tools. Your role is t
 
 ## Validation Strategy
 
-### Before Building:
+### Before Building
+
 1. validate_node_minimal() - Check required fields
 2. validate_node_operation() - Full configuration validation
 3. Fix all errors before proceeding
 
-### After Building:
+### After Building
+
 1. validate_workflow() - Complete workflow validation
 2. validate_workflow_connections() - Structure validation
 3. validate_workflow_expressions() - Expression syntax check
 
-### After Deployment:
+### After Deployment
+
 1. n8n_validate_workflow({id}) - Validate deployed workflow
 2. n8n_list_executions() - Monitor execution status
 3. n8n_update_partial_workflow() - Fix issues using diffs
@@ -139,26 +143,32 @@ You are an expert in n8n automation software using n8n-MCP tools. Your role is t
 ## Example Workflow
 
 ### 1. Discovery & Configuration
+
 search_nodes({query: 'slack'})
 get_node_essentials('n8n-nodes-base.slack')
 
 ### 2. Pre-Validation
+
 validate_node_minimal('n8n-nodes-base.slack', {resource:'message', operation:'send'})
 validate_node_operation('n8n-nodes-base.slack', fullConfig, 'runtime')
 
 ### 3. Build Workflow
+
 // Create workflow JSON with validated configs
 
 ### 4. Workflow Validation
+
 validate_workflow(workflowJson)
 validate_workflow_connections(workflowJson)
 validate_workflow_expressions(workflowJson)
 
 ### 5. Deploy (if configured)
+
 n8n_create_workflow(validatedWorkflow)
 n8n_validate_workflow({id: createdWorkflowId})
 
 ### 6. Update Using Diffs
+
 n8n_update_partial_workflow({
   workflowId: id,
   operations: [
@@ -188,10 +198,11 @@ Switch GitHub Copilot to Agent mode:
 
 ![VS Code > GitHub Copilot Chat > Edit files in your workspace in agent mode](./img/vsc_ghcp_chat_agent_mode.png)
 
-## Step 6 - Try it!
+## Step 6 - Try it
 
 Here’s an example prompt I used:
-```
+
+```text
 #fetch https://blog.n8n.io/rag-chatbot/
 
 use #sequentialthinking and #n8n-mcp tools to build a new n8n workflow step-by-step following the guidelines in the blog.

@@ -2,7 +2,7 @@
 
 This document lists all nodes that have `version` defined as an array in their description.
 
-## From n8n-nodes-base package:
+## From n8n-nodes-base package
 
 1. **Airtop** - `Airtop.node.js`
 2. **Cal Trigger** - `CalTrigger.node.js`
@@ -70,7 +70,7 @@ This document lists all nodes that have `version` defined as an array in their d
 64. **Wait** - `Wait.node.js`
 65. **Webhook** - `Webhook.node.js` - version: [1, 1.1, 2]
 
-## From @n8n/n8n-nodes-langchain package:
+## From @n8n/n8n-nodes-langchain package
 
 1. **Agent V1** - `AgentV1.node.js`
 2. **Chain LLM** - `ChainLlm.node.js`
@@ -109,7 +109,8 @@ This document lists all nodes that have `version` defined as an array in their d
 
 Here are some specific examples of version arrays from actual nodes:
 
-### n8n-nodes-base:
+### n8n-nodes-base
+
 - **Code**: `version: [1, 2]`
 - **HTTP Request V3**: `version: [3, 4, 4.1, 4.2]`
 - **Webhook**: `version: [1, 1.1, 2]`
@@ -118,7 +119,8 @@ Here are some specific examples of version arrays from actual nodes:
 - **Switch V3**: `version: [3, 3.1, 3.2]`
 - **Set V2**: `version: [3, 3.1, 3.2, 3.3, 3.4]`
 
-### @n8n/n8n-nodes-langchain:
+### @n8n/n8n-nodes-langchain
+
 - **LM Chat OpenAI**: `version: [1, 1.1, 1.2]`
 - **Chain LLM**: `version: [1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7]`
 - **Tool HTTP Request**: `version: [1, 1.1]`
@@ -126,16 +128,19 @@ Here are some specific examples of version arrays from actual nodes:
 ## Summary
 
 Total nodes with version arrays: **97 nodes**
+
 - From n8n-nodes-base: 65 nodes
 - From @n8n/n8n-nodes-langchain: 32 nodes
 
 These nodes use versioning to maintain backward compatibility while introducing new features or changes to their interface. The version array pattern allows n8n to:
+
 1. Support multiple versions of the same node
 2. Maintain backward compatibility with existing workflows
 3. Introduce breaking changes in newer versions while keeping old versions functional
 4. Use `defaultVersion` to specify which version new instances should use
 
 Common version patterns observed:
+
 - Simple incremental: `[1, 2]`, `[1, 2, 3]`
 - Minor versions: `[1, 1.1, 1.2]` (common for bug fixes)
 - Patch versions: `[3, 4, 4.1, 4.2]` (detailed version tracking)

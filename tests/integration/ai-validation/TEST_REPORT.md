@@ -60,6 +60,7 @@ Created **32 comprehensive integration tests** across **5 test suites** that val
 ### Validation Features Tested ✅
 
 #### AI Agent (7 tests)
+
 - ✅ Missing language model detection (MISSING_LANGUAGE_MODEL)
 - ✅ Language model connection validation (1 or 2 for fallback)
 - ✅ Tool connection detection (NO false warnings)
@@ -69,6 +70,7 @@ Created **32 comprehensive integration tests** across **5 test suites** that val
 - ✅ Complete workflow with all components
 
 #### Chat Trigger (5 tests)
+
 - ✅ Streaming to non-AI-Agent detection (STREAMING_WRONG_TARGET)
 - ✅ Missing connections detection (MISSING_CONNECTIONS)
 - ✅ Valid streaming setup
@@ -76,6 +78,7 @@ Created **32 comprehensive integration tests** across **5 test suites** that val
 - ✅ Streaming agent with output (error)
 
 #### Basic LLM Chain (6 tests)
+
 - ✅ Missing language model detection
 - ✅ Missing prompt text detection (MISSING_PROMPT_TEXT)
 - ✅ Complete LLM Chain validation
@@ -84,6 +87,7 @@ Created **32 comprehensive integration tests** across **5 test suites** that val
 - ✅ Tools connection detection (TOOLS_NOT_SUPPORTED)
 
 #### AI Tools (9 tests)
+
 - ✅ HTTP Request Tool: toolDescription + URL validation
 - ✅ Code Tool: code requirement validation
 - ✅ Vector Store Tool: toolDescription validation
@@ -91,6 +95,7 @@ Created **32 comprehensive integration tests** across **5 test suites** that val
 - ✅ Calculator Tool: no configuration needed
 
 #### End-to-End (5 tests)
+
 - ✅ Complex workflow creation (7 nodes)
 - ✅ Multiple error detection (5+ errors)
 - ✅ Streaming workflow validation
@@ -124,6 +129,7 @@ All tests verify correct error code detection:
 **Test**: `e2e-validation.test.ts` - Test 5
 
 **Bug**: Incorrect node type comparison causing false "no tools" warnings:
+
 ```typescript
 // BEFORE (BUG):
 sourceNode.type === 'nodes-langchain.chatTrigger'  // ❌ Never matches @n8n/n8n-nodes-langchain.chatTrigger
@@ -133,6 +139,7 @@ NodeTypeNormalizer.normalizeToFullForm(sourceNode.type) === 'nodes-langchain.cha
 ```
 
 **Test Validation**:
+
 1. Creates workflow: AI Agent + OpenAI Model + HTTP Request Tool
 2. Connects tool via ai_tool connection
 3. Validates workflow is VALID
@@ -145,6 +152,7 @@ NodeTypeNormalizer.normalizeToFullForm(sourceNode.type) === 'nodes-langchain.cha
 ### Helper Functions (19 total)
 
 #### Node Creators
+
 - `createAIAgentNode()` - AI Agent with all options
 - `createChatTriggerNode()` - Chat Trigger with streaming modes
 - `createBasicLLMChainNode()` - Basic LLM Chain
@@ -158,11 +166,13 @@ NodeTypeNormalizer.normalizeToFullForm(sourceNode.type) === 'nodes-langchain.cha
 - `createRespondNode()` - Respond to Webhook
 
 #### Connection Helpers
+
 - `createAIConnection()` - AI connection (reversed for langchain)
 - `createMainConnection()` - Standard n8n connection
 - `mergeConnections()` - Merge multiple connection objects
 
 #### Workflow Builders
+
 - `createAIWorkflow()` - Complete workflow builder
 - `waitForWorkflow()` - Wait for operations
 
@@ -192,6 +202,7 @@ NodeTypeNormalizer.normalizeToFullForm(sourceNode.type) === 'nodes-langchain.cha
 ## Running the Tests
 
 ### Prerequisites
+
 ```bash
 # Environment variables required
 export N8N_API_URL=http://localhost:5678
@@ -203,6 +214,7 @@ npm run build
 ```
 
 ### Run Commands
+
 ```bash
 # Run all AI validation tests
 npm test -- tests/integration/ai-validation --run
@@ -216,6 +228,7 @@ npm test -- tests/integration/ai-validation/e2e-validation.test.ts --run
 ```
 
 ### Expected Results
+
 - **Total Tests**: 32
 - **Expected Pass**: 32
 - **Expected Fail**: 0
@@ -224,6 +237,7 @@ npm test -- tests/integration/ai-validation/e2e-validation.test.ts --run
 ## Test Quality Metrics
 
 ### Coverage
+
 - ✅ **100% of AI validation rules** covered
 - ✅ **All error codes** validated
 - ✅ **All AI node types** tested
@@ -231,6 +245,7 @@ npm test -- tests/integration/ai-validation/e2e-validation.test.ts --run
 - ✅ **Connection patterns** fully validated
 
 ### Edge Cases
+
 - ✅ Empty/missing required fields
 - ✅ Invalid configurations
 - ✅ Multiple connections (when not allowed)
@@ -240,6 +255,7 @@ npm test -- tests/integration/ai-validation/e2e-validation.test.ts --run
 - ✅ Complex workflows with all components
 
 ### Reliability
+
 - ✅ Deterministic (no flakiness)
 - ✅ Independent (no test dependencies)
 - ✅ Clean (automatic resource cleanup)
@@ -306,12 +322,14 @@ npm test -- tests/integration/ai-validation/e2e-validation.test.ts --run
 ### 🎯 Key Achievement
 
 **These tests would have caught the node type normalization bug** that was fixed in v2.17.0. The test suite validates that:
+
 - AI tools are correctly detected
 - No false "no tools connected" warnings
 - Node type normalization works properly
 - All validation rules function end-to-end
 
 This comprehensive test suite provides confidence that:
+
 1. All AI validation operations work correctly
 2. Future changes won't break existing functionality
 3. New bugs will be caught before deployment
@@ -319,7 +337,7 @@ This comprehensive test suite provides confidence that:
 
 ## Files Created
 
-```
+```text
 tests/integration/ai-validation/
 ├── helpers.ts                          # 19 utility functions
 ├── ai-agent-validation.test.ts         # 7 tests

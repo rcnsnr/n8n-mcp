@@ -5,6 +5,7 @@ This guide demonstrates how to use the `n8n_update_partial_workflow` tool for ef
 ## Overview
 
 The `n8n_update_partial_workflow` tool allows you to make targeted changes to workflows without sending the entire workflow JSON. This results in:
+
 - 80-90% reduction in token usage
 - More precise edits
 - Clearer intent
@@ -29,6 +30,7 @@ The `n8n_update_partial_workflow` tool allows you to make targeted changes to wo
 ### 1. Node Operations
 
 #### Add Node
+
 ```json
 {
   "type": "addNode",
@@ -47,6 +49,7 @@ The `n8n_update_partial_workflow` tool allows you to make targeted changes to wo
 ```
 
 #### Remove Node
+
 ```json
 {
   "type": "removeNode",
@@ -56,6 +59,7 @@ The `n8n_update_partial_workflow` tool allows you to make targeted changes to wo
 ```
 
 #### Update Node
+
 ```json
 {
   "type": "updateNode",
@@ -74,6 +78,7 @@ The `n8n_update_partial_workflow` tool allows you to make targeted changes to wo
 ```
 
 #### Move Node
+
 ```json
 {
   "type": "moveNode",
@@ -84,6 +89,7 @@ The `n8n_update_partial_workflow` tool allows you to make targeted changes to wo
 ```
 
 #### Enable/Disable Node
+
 ```json
 {
   "type": "disableNode",
@@ -95,6 +101,7 @@ The `n8n_update_partial_workflow` tool allows you to make targeted changes to wo
 ### 2. Connection Operations
 
 #### Add Connection
+
 ```json
 {
   "type": "addConnection",
@@ -107,6 +114,7 @@ The `n8n_update_partial_workflow` tool allows you to make targeted changes to wo
 ```
 
 #### Remove Connection
+
 ```json
 {
   "type": "removeConnection",
@@ -117,6 +125,7 @@ The `n8n_update_partial_workflow` tool allows you to make targeted changes to wo
 ```
 
 #### Rewire Connection
+
 ```json
 {
   "type": "rewireConnection",
@@ -128,6 +137,7 @@ The `n8n_update_partial_workflow` tool allows you to make targeted changes to wo
 ```
 
 #### Smart Parameters for IF Nodes
+
 ```json
 {
   "type": "addConnection",
@@ -149,6 +159,7 @@ The `n8n_update_partial_workflow` tool allows you to make targeted changes to wo
 ```
 
 #### Smart Parameters for Switch Nodes
+
 ```json
 {
   "type": "addConnection",
@@ -162,6 +173,7 @@ The `n8n_update_partial_workflow` tool allows you to make targeted changes to wo
 ### 3. Workflow Metadata Operations
 
 #### Update Workflow Name
+
 ```json
 {
   "type": "updateName",
@@ -171,6 +183,7 @@ The `n8n_update_partial_workflow` tool allows you to make targeted changes to wo
 ```
 
 #### Update Settings
+
 ```json
 {
   "type": "updateSettings",
@@ -184,6 +197,7 @@ The `n8n_update_partial_workflow` tool allows you to make targeted changes to wo
 ```
 
 #### Manage Tags
+
 ```json
 {
   "type": "addTag",
@@ -195,6 +209,7 @@ The `n8n_update_partial_workflow` tool allows you to make targeted changes to wo
 ## Complete Examples
 
 ### Example 1: Add Slack Notification to Workflow
+
 ```json
 {
   "id": "workflow-123",
@@ -223,6 +238,7 @@ The `n8n_update_partial_workflow` tool allows you to make targeted changes to wo
 ```
 
 ### Example 2: Update Multiple Webhook Paths
+
 ```json
 {
   "id": "workflow-456",
@@ -250,6 +266,7 @@ The `n8n_update_partial_workflow` tool allows you to make targeted changes to wo
 ```
 
 ### Example 3: Refactor Workflow Structure
+
 ```json
 {
   "id": "workflow-789",
@@ -285,6 +302,7 @@ The `n8n_update_partial_workflow` tool allows you to make targeted changes to wo
 ```
 
 ### Example 4: Add Error Handling
+
 ```json
 {
   "id": "workflow-999",
@@ -326,6 +344,7 @@ The `n8n_update_partial_workflow` tool allows you to make targeted changes to wo
 ```
 
 ### Example 5: Large Batch Workflow Refactoring
+
 Demonstrates handling many operations in a single request - no longer limited to 5 operations!
 
 ```json
@@ -523,6 +542,7 @@ This example shows 26 operations in a single request, creating a complete data p
 ## Common Patterns
 
 ### Add Processing Step
+
 ```json
 {
   "operations": [
@@ -555,6 +575,7 @@ This example shows 26 operations in a single request, creating a complete data p
 ```
 
 ### Replace Node
+
 ```json
 {
   "operations": [

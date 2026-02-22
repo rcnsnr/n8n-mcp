@@ -12,7 +12,7 @@ Without MCP, I was basically playing a guessing game. "Is it `scheduleTrigger` o
 
 **Interviewer:** What changed when you used the MCP?
 
-**Claude:** Everything just... worked. Instead of guessing, I could ask `get_node_essentials()` and get exactly what I needed - not a 100KB JSON dump, but the actual 5-10 properties that matter. 
+**Claude:** Everything just... worked. Instead of guessing, I could ask `get_node_essentials()` and get exactly what I needed - not a 100KB JSON dump, but the actual 5-10 properties that matter.
 
 The real "aha moment" was when I discovered features I didn't even know existed. Like the `neverError` option on HTTP requests, or the proper way to handle duplicate checking with Google Sheets. These aren't things you stumble upon - they're buried deep in documentation you'd never think to look for.
 
@@ -50,7 +50,7 @@ Also, the property dependency detection. Did you know that some properties only 
 
 **Interviewer:** Any final thoughts?
 
-**Claude:** The n8n community has built something special here. This isn't just documentation - it's institutional knowledge, codified and made accessible. It's the difference between having a manual and having an expert sitting next to you. 
+**Claude:** The n8n community has built something special here. This isn't just documentation - it's institutional knowledge, codified and made accessible. It's the difference between having a manual and having an expert sitting next to you.
 
 If I had to sum it up: **Before MCP, I was translating. Now I'm composing.** And that changes everything about how we can build automation.
 

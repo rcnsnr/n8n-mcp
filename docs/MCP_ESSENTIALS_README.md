@@ -10,13 +10,15 @@ The n8n MCP has been enhanced with new tools that dramatically improve the AI ag
 
 **Purpose**: Get only the 10-20 most important properties for a node instead of 200+
 
-**When to use**: 
+**When to use**:
+
 - Starting to configure a new node
 - Need quick access to common properties
 - Want working examples
 - Building basic workflows
 
 **Example usage**:
+
 ```json
 {
   "name": "get_node_essentials",
@@ -27,6 +29,7 @@ The n8n MCP has been enhanced with new tools that dramatically improve the AI ag
 ```
 
 **Response structure**:
+
 ```json
 {
   "nodeType": "nodes-base.httpRequest",
@@ -74,6 +77,7 @@ The n8n MCP has been enhanced with new tools that dramatically improve the AI ag
 ```
 
 **Benefits**:
+
 - 95% smaller response (5KB vs 100KB+)
 - Only shows properties you actually need
 - Includes working examples
@@ -85,12 +89,14 @@ The n8n MCP has been enhanced with new tools that dramatically improve the AI ag
 **Purpose**: Find specific properties within a node without downloading everything
 
 **When to use**:
+
 - Looking for authentication options
 - Finding specific configuration like headers or body
 - Exploring what options are available
 - Need to configure advanced features
 
 **Example usage**:
+
 ```json
 {
   "name": "search_node_properties",
@@ -102,6 +108,7 @@ The n8n MCP has been enhanced with new tools that dramatically improve the AI ag
 ```
 
 **Response structure**:
+
 ```json
 {
   "nodeType": "nodes-base.httpRequest",
@@ -131,48 +138,55 @@ The n8n MCP has been enhanced with new tools that dramatically improve the AI ag
 
 ## Recommended Workflow
 
-### For Basic Configuration:
+### For Basic Configuration
 
 1. **Start with essentials**:
-   ```
+
+   ```text
    get_node_essentials("nodes-base.httpRequest")
    ```
-   
+
 2. **Use the provided examples**:
    - Start with `minimal` example
    - Upgrade to `common` for typical use cases
    - Modify based on your needs
 
 3. **Search for specific features** (if needed):
-   ```
+
+   ```text
    search_node_properties("nodes-base.httpRequest", "header")
    ```
 
-### For Complex Configuration:
+### For Complex Configuration
 
 1. **Get documentation first**:
-   ```
+
+   ```text
    get_node_documentation("nodes-base.httpRequest")
    ```
 
 2. **Get essentials for the basics**:
-   ```
+
+   ```text
    get_node_essentials("nodes-base.httpRequest")
    ```
 
 3. **Search for advanced properties**:
-   ```
+
+   ```text
    search_node_properties("nodes-base.httpRequest", "proxy")
    ```
 
 4. **Only use get_node_info if absolutely necessary**:
-   ```
+
+   ```text
    get_node_info("nodes-base.httpRequest")  // Last resort - 100KB+ response
    ```
 
 ## Common Patterns
 
-### Making API Calls:
+### Making API Calls
+
 ```javascript
 // Start with essentials
 const essentials = get_node_essentials("nodes-base.httpRequest");
@@ -185,7 +199,8 @@ config.url = "https://api.myservice.com/endpoint";
 config.jsonBody = JSON.stringify({ my: "data" });
 ```
 
-### Setting up Webhooks:
+### Setting up Webhooks
+
 ```javascript
 // Get webhook essentials
 const essentials = get_node_essentials("nodes-base.webhook");
@@ -195,7 +210,8 @@ const config = essentials.examples.minimal;
 config.path = "my-webhook-endpoint";
 ```
 
-### Database Operations:
+### Database Operations
+
 ```javascript
 // Get database essentials
 const essentials = get_node_essentials("nodes-base.postgres");
@@ -245,7 +261,8 @@ Based on testing with top 10 nodes:
 
 If you're currently using `get_node_info`, here's how to migrate:
 
-### Before:
+### Before
+
 ```javascript
 const node = get_node_info("nodes-base.httpRequest");
 // Parse through 200+ properties
@@ -253,7 +270,8 @@ const node = get_node_info("nodes-base.httpRequest");
 // Deal with duplicates and conditionals
 ```
 
-### After:
+### After
+
 ```javascript
 const essentials = get_node_essentials("nodes-base.httpRequest");
 // Use essentials.requiredProperties
@@ -278,6 +296,7 @@ A: Check `metadata.totalProperties` to see how many are available, then search f
 ## Future Improvements
 
 Planned enhancements:
+
 - Task-based configurations (e.g., "post_json_with_auth")
 - Configuration validation
 - Property dependency resolution

@@ -23,6 +23,7 @@ npx vitest bench tests/benchmarks/node-loading.bench.ts
 ### CI/CD
 
 Benchmarks run automatically on:
+
 - Every push to `main` branch
 - Every pull request
 - Manual workflow dispatch
@@ -30,11 +31,13 @@ Benchmarks run automatically on:
 ## Benchmark Suites
 
 ### 1. Node Loading Performance (`node-loading.bench.ts`)
+
 - Package loading (n8n-nodes-base, @n8n/n8n-nodes-langchain)
 - Individual node file loading
 - Package.json parsing
 
 ### 2. Database Query Performance (`database-queries.bench.ts`)
+
 - Node retrieval by type
 - Category filtering
 - Search operations (OR, AND, FUZZY modes)
@@ -42,6 +45,7 @@ Benchmarks run automatically on:
 - Insert/update operations
 
 ### 3. Search Operations (`search-operations.bench.ts`)
+
 - Single and multi-word searches
 - Exact phrase matching
 - Fuzzy search performance
@@ -49,12 +53,14 @@ Benchmarks run automatically on:
 - Complex filtering operations
 
 ### 4. Validation Performance (`validation-performance.bench.ts`)
+
 - Node configuration validation (minimal, strict, ai-friendly)
 - Expression validation
 - Workflow validation
 - Property dependency resolution
 
 ### 5. MCP Tool Execution (`mcp-tools.bench.ts`)
+
 - Tool execution overhead
 - Response formatting
 - Complex query handling
@@ -74,7 +80,7 @@ Benchmarks run automatically on:
 ## Benchmark Results
 
 - Results are tracked over time using GitHub Actions
-- Historical data available at: https://czlonkowski.github.io/n8n-mcp/benchmarks/
+- Historical data available at: <https://czlonkowski.github.io/n8n-mcp/benchmarks/>
 - Performance regressions >10% trigger automatic alerts
 - PR comments show benchmark comparisons
 
@@ -106,16 +112,19 @@ describe('My Performance Suite', () => {
 ## Troubleshooting
 
 ### Inconsistent Results
+
 - Increase `warmupIterations` and `warmupTime`
 - Run benchmarks in isolation
 - Check for background processes
 
 ### Memory Issues
+
 - Reduce `iterations` for memory-intensive operations
 - Add cleanup in `afterEach` hooks
 - Monitor memory usage during benchmarks
 
 ### CI Failures
+
 - Check benchmark timeout settings
 - Verify GitHub Actions runner resources
 - Review alert thresholds for false positives

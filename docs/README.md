@@ -5,16 +5,19 @@ Welcome to the n8n-MCP documentation. This directory contains comprehensive guid
 ## 📚 Documentation Index
 
 ### Getting Started
+
 - **[Installation Guide](./INSTALLATION.md)** - Comprehensive installation guide covering all methods
 - **[Claude Desktop Setup](./README_CLAUDE_SETUP.md)** - Step-by-step guide for Claude Desktop configuration
 - **[Quick Start Tutorial](../README.md)** - Basic overview and quick start instructions
 
 ### Deployment
+
 - **[HTTP Deployment Guide](./HTTP_DEPLOYMENT.md)** - Deploy n8n-MCP as an HTTP server for remote access
 - **[Docker Deployment](./DOCKER_README.md)** - Complete Docker deployment and configuration guide
 - **[Release Guide](./RELEASE_GUIDE.md)** - How to create releases and manage Docker tags
 
 ### Reference
+
 - **[Troubleshooting Guide](./TROUBLESHOOTING.md)** - Solutions for common issues and errors
 - **[HTTP Server Fix Documentation](./HTTP_SERVER_FINAL_FIX.md)** - Technical details of v2.3.2 HTTP server fixes
 - **[Docker Optimization Guide](./DOCKER_OPTIMIZATION_GUIDE.md)** - Reference for optimized Docker builds (~150MB)
@@ -23,12 +26,14 @@ Welcome to the n8n-MCP documentation. This directory contains comprehensive guid
 ## 🚀 Quick Links
 
 ### For Users
+
 - [Install n8n-MCP](./INSTALLATION.md)
 - [Configure Claude Desktop](./README_CLAUDE_SETUP.md)
 - [Deploy with Docker](./DOCKER_README.md)
 - [Troubleshoot Issues](./TROUBLESHOOTING.md)
 
 ### For Developers
+
 - [HTTP Server Architecture](./HTTP_SERVER_FINAL_FIX.md)
 - [Docker Build Optimization](./DOCKER_OPTIMIZATION_GUIDE.md)
 - [Release Process](./RELEASE_GUIDE.md)

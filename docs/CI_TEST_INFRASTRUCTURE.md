@@ -15,7 +15,8 @@ Integration tests fail for external contributor PRs with "No response from n8n s
 ### Evidence
 
 From CI logs (PR #343):
-```
+
+```text
 [CI-DEBUG] Global setup complete, N8N_API_URL: http://localhost:3001/mock-api
 ❌ No response from n8n server (repeated 60+ times across 20 tests)
 ```
@@ -25,11 +26,13 @@ The tests ARE using the correct mock URL, but MSW isn't intercepting the request
 ### Why This Happens
 
 **For External PRs:**
+
 - GitHub Actions doesn't expose repository secrets for security reasons
 - Prevents malicious PRs from exfiltrating secrets
 - MSW setup runs but requests don't get intercepted in CI
 
 **Test Configuration:**
+
 - `.env.test` line 19: `N8N_API_URL=http://localhost:3001/mock-api`
 - `.env.test` line 67: `MSW_ENABLED=true`
 - CI workflow line 75-80: Secrets set but empty for external PRs
@@ -82,6 +85,7 @@ The tests ARE using the correct mock URL, but MSW isn't intercepting the request
 **Status**: Documented but not fixed
 
 **Rationale**:
+
 - Integration test infrastructure refactoring is separate concern from code quality
 - External PRs are relatively rare compared to internal development
 - Unit tests provide sufficient coverage for most changes
@@ -90,6 +94,7 @@ The tests ARE using the correct mock URL, but MSW isn't intercepting the request
 ### Testing Strategy
 
 **For External Contributor PRs:**
+
 1. ✅ Unit tests must pass
 2. ✅ TypeScript compilation must pass
 3. ✅ Build must succeed
@@ -97,6 +102,7 @@ The tests ARE using the correct mock URL, but MSW isn't intercepting the request
 5. ✅ Maintainer verifies locally before merge
 
 **For Internal PRs:**
+
 1. ✅ All tests must pass (unit + integration)
 2. ✅ Full CI validation
 

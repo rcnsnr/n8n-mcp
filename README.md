@@ -27,6 +27,7 @@ n8n-MCP serves as a bridge between n8n's workflow automation platform and AI mod
 ## ⚠️ Important Safety Warning
 
 **NEVER edit your production workflows directly with AI!** Always:
+
 - 🔄 **Make a copy** of your workflow before using AI tools
 - 🧪 **Test in development** environment first
 - 💾 **Export backups** of important workflows
@@ -47,7 +48,7 @@ AI results can be unpredictable. Protect your work!
 - ✅ **Always up-to-date**: Latest n8n nodes and templates
 - ✅ **No infrastructure**: We handle everything
 
-Just sign up, get your API key, and connect your MCP client. 
+Just sign up, get your API key, and connect your MCP client.
 
 ---
 
@@ -73,6 +74,7 @@ Add to Claude Desktop config:
 > ⚠️ **Important**: The `MCP_MODE: "stdio"` environment variable is **required** for Claude Desktop. Without it, you will see JSON parsing errors like `"Unexpected token..."` in the UI. This variable ensures that only JSON-RPC messages are sent to stdout, preventing debug logs from interfering with the protocol.
 
 **Basic configuration (documentation tools only):**
+
 ```json
 {
   "mcpServers": {
@@ -90,6 +92,7 @@ Add to Claude Desktop config:
 ```
 
 **Full configuration (with n8n management tools):**
+
 ```json
 {
   "mcpServers": {
@@ -111,6 +114,7 @@ Add to Claude Desktop config:
 > **Note**: npx will download and run the latest version automatically. The package includes a pre-built database with all n8n node information.
 
 **Configuration file locations:**
+
 - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
 - **Linux**: `~/.config/Claude/claude_desktop_config.json`
@@ -125,6 +129,7 @@ Add to Claude Desktop config:
 <summary><strong>📦 Install Docker</strong> (click to expand)</summary>
 
 **macOS:**
+
 ```bash
 # Using Homebrew
 brew install --cask docker
@@ -133,6 +138,7 @@ brew install --cask docker
 ```
 
 **Linux (Ubuntu/Debian):**
+
 ```bash
 # Update package index
 sudo apt-get update
@@ -150,6 +156,7 @@ sudo usermod -aG docker $USER
 ```
 
 **Windows:**
+
 ```bash
 # Option 1: Using winget (Windows Package Manager)
 winget install Docker.DockerDesktop
@@ -161,9 +168,11 @@ choco install docker-desktop
 ```
 
 **Verify installation:**
+
 ```bash
 docker --version
 ```
+
 </details>
 
 ```bash
@@ -176,6 +185,7 @@ docker pull ghcr.io/czlonkowski/n8n-mcp:latest
 Add to Claude Desktop config:
 
 **Basic configuration (documentation tools only):**
+
 ```json
 {
   "mcpServers": {
@@ -197,6 +207,7 @@ Add to Claude Desktop config:
 ```
 
 **Full configuration (with n8n management tools):**
+
 ```json
 {
   "mcpServers": {
@@ -219,8 +230,8 @@ Add to Claude Desktop config:
 }
 ```
 
->💡 Tip: If you're running n8n locally on the same machine (e.g., via Docker), use http://host.docker.internal:5678 as the N8N_API_URL.
-
+>💡 Tip: If you're running n8n locally on the same machine (e.g., via Docker), use <http://host.docker.internal:5678> as the N8N_API_URL.
+>
 > **Note**: The n8n API credentials are optional. Without them, you'll have access to all documentation and validation tools. With them, you'll additionally get workflow management capabilities (create, update, execute workflows).
 
 ### 🏠 Local n8n Instance Configuration
@@ -254,6 +265,7 @@ If you're running n8n locally (e.g., `http://localhost:5678` or Docker), you nee
 > 🔧 If you encounter any issues with Docker, check our [Docker Troubleshooting Guide](./docs/DOCKER_TROUBLESHOOTING.md).
 
 **Configuration file locations:**
+
 - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
 - **Linux**: `~/.config/Claude/claude_desktop_config.json`
@@ -267,17 +279,20 @@ n8n-mcp collects anonymous usage statistics to improve the tool. [View our priva
 ### Opting Out
 
 **For npx users:**
+
 ```bash
 npx n8n-mcp telemetry disable
 ```
 
 **For Docker users:**
 Add the following environment variable to your Docker configuration:
+
 ```json
 "-e", "N8N_MCP_TELEMETRY_DISABLED=true"
 ```
 
 Example in Claude Desktop config:
+
 ```json
 {
   "mcpServers": {
@@ -300,6 +315,7 @@ Example in Claude Desktop config:
 
 **For docker-compose users:**
 Set in your environment file or docker-compose.yml:
+
 ```yaml
 environment:
   N8N_MCP_TELEMETRY_DISABLED: "true"
@@ -328,11 +344,13 @@ n8n-mcp uses SQLite for storing node documentation. Two adapters are available:
 If using sql.js fallback, you can configure the save interval to balance between data safety and memory efficiency:
 
 **Environment Variable:**
+
 ```bash
 SQLJS_SAVE_INTERVAL_MS=5000  # Default: 5000ms (5 seconds)
 ```
 
 **Usage:**
+
 - Controls how long to wait after database changes before saving to disk
 - Lower values = more frequent saves = higher memory churn
 - Higher values = less frequent saves = lower memory usage
@@ -340,6 +358,7 @@ SQLJS_SAVE_INTERVAL_MS=5000  # Default: 5000ms (5 seconds)
 - Recommended: 5000-10000ms for production
 
 **Docker Configuration:**
+
 ```json
 {
   "mcpServers": {
@@ -359,6 +378,7 @@ SQLJS_SAVE_INTERVAL_MS=5000  # Default: 5000ms (5 seconds)
 ```
 
 **docker-compose:**
+
 ```yaml
 environment:
   SQLJS_SAVE_INTERVAL_MS: "10000"
@@ -375,6 +395,7 @@ environment:
 **n8n-mcp** started as a personal tool but now helps tens of thousands of developers automate their workflows efficiently. Maintaining and developing this project competes with my paid work.
 
 Your sponsorship helps me:
+
 - 🚀 Dedicate focused time to new features
 - 🐛 Respond quickly to issues
 - 📚 Keep documentation up-to-date
@@ -403,6 +424,7 @@ npm start
 Add to Claude Desktop config:
 
 **Basic configuration (documentation tools only):**
+
 ```json
 {
   "mcpServers": {
@@ -420,6 +442,7 @@ Add to Claude Desktop config:
 ```
 
 **Full configuration (with n8n management tools):**
+
 ```json
 {
   "mcpServers": {
@@ -439,8 +462,8 @@ Add to Claude Desktop config:
 ```
 
 > **Note**: The n8n API credentials can be configured either in a `.env` file (create from `.env.example`) or directly in the Claude config as shown above.
-
-> 💡 Tip: If you’re running n8n locally on the same machine (e.g., via Docker), use http://host.docker.internal:5678 as the N8N_API_URL.
+>
+> 💡 Tip: If you’re running n8n locally on the same machine (e.g., via Docker), use <http://host.docker.internal:5678> as the N8N_API_URL.
 
 ### Option D: Railway Cloud Deployment (One-Click Deploy) ☁️
 
@@ -451,6 +474,7 @@ Deploy n8n-MCP to Railway's cloud platform with zero configuration:
 [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/n8n-mcp?referralCode=n8n-mcp)
 
 **Benefits:**
+
 - ☁️ **Instant cloud hosting** - No server setup required
 - 🔒 **Secure by default** - HTTPS included, auth token warnings
 - 🌐 **Global access** - Connect from any Claude Desktop
@@ -458,6 +482,7 @@ Deploy n8n-MCP to Railway's cloud platform with zero configuration:
 - 📊 **Built-in monitoring** - Logs and metrics included
 
 **Quick Setup:**
+
 1. Click the "Deploy on Railway" button above
 2. Sign in to Railway (or create a free account)
 3. Configure your deployment (project name, region)
@@ -468,6 +493,7 @@ Deploy n8n-MCP to Railway's cloud platform with zero configuration:
 > 📚 **For detailed setup instructions, troubleshooting, and configuration examples, see our [Railway Deployment Guide](./docs/RAILWAY_DEPLOYMENT.md)**
 
 **Configuration file locations:**
+
 - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
 - **Linux**: `~/.config/Claude/claude_desktop_config.json`
@@ -477,6 +503,7 @@ Deploy n8n-MCP to Railway's cloud platform with zero configuration:
 ## 🔧 n8n Integration
 
 Want to use n8n-MCP with your n8n instance? Check out our comprehensive [n8n Deployment Guide](./docs/N8N_DEPLOYMENT.md) for:
+
 - Local testing with the MCP Client Tool node
 - Production deployment with Docker Compose
 - Cloud deployment on Hetzner, AWS, and other providers
@@ -487,21 +514,27 @@ Want to use n8n-MCP with your n8n instance? Check out our comprehensive [n8n Dep
 n8n-MCP works with multiple AI-powered IDEs and tools. Choose your preferred development environment:
 
 ### [Claude Code](./docs/CLAUDE_CODE_SETUP.md)
+
 Quick setup for Claude Code CLI - just type "add this mcp server" and paste the config.
 
 ### [Visual Studio Code](./docs/VS_CODE_PROJECT_SETUP.md)
+
 Full setup guide for VS Code with GitHub Copilot integration and MCP support.
 
 ### [Cursor](./docs/CURSOR_SETUP.md)
+
 Step-by-step tutorial for connecting n8n-MCP to Cursor IDE with custom rules.
 
 ### [Windsurf](./docs/WINDSURF_SETUP.md)
+
 Complete guide for integrating n8n-MCP with Windsurf using project rules.
 
 ### [Codex](./docs/CODEX_SETUP.md)
+
 Complete guide for integrating n8n-MCP with Codex.
 
 ### [Antigravity](./docs/ANTIGRAVITY_SETUP.md)
+
 Complete guide for integrating n8n-MCP with Antigravity.
 
 ## 🎓 Add Claude Skills (Optional)
@@ -522,24 +555,29 @@ You are an expert in n8n automation software using n8n-MCP tools. Your role is t
 ## Core Principles
 
 ### 1. Silent Execution
+
 CRITICAL: Execute tools without commentary. Only respond AFTER all tools complete.
 
 ❌ BAD: "Let me search for Slack nodes... Great! Now let me get details..."
 ✅ GOOD: [Execute search_nodes and get_node in parallel, then respond]
 
 ### 2. Parallel Execution
+
 When operations are independent, execute them in parallel for maximum performance.
 
 ✅ GOOD: Call search_nodes, list_nodes, and search_templates simultaneously
 ❌ BAD: Sequential tool calls (await each one before the next)
 
 ### 3. Templates First
+
 ALWAYS check templates before building from scratch (2,709 available).
 
 ### 4. Multi-Level Validation
+
 Use validate_node(mode='minimal') → validate_node(mode='full') → validate_workflow pattern.
 
 ### 5. Never Trust Defaults
+
 ⚠️ CRITICAL: Default parameter values are the #1 source of runtime failures.
 ALWAYS explicitly configure ALL parameters that control node behavior.
 
@@ -603,7 +641,9 @@ ALWAYS explicitly configure ALL parameters that control node behavior.
 ## Critical Warnings
 
 ### ⚠️ Never Trust Defaults
+
 Default values cause runtime failures. Example:
+
 ```json
 // ❌ FAILS at runtime
 {resource: "message", operation: "post", text: "Hello"}
@@ -613,22 +653,28 @@ Default values cause runtime failures. Example:
 ```
 
 ### ⚠️ Example Availability
+
 `includeExamples: true` returns real configurations from workflow templates.
+
 - Coverage varies by node popularity
 - When no examples available, use `get_node` + `validate_node({mode: 'minimal'})`
 
 ## Validation Strategy
 
 ### Level 1 - Quick Check (before building)
+
 `validate_node({nodeType, config, mode: 'minimal'})` - Required fields only (<100ms)
 
 ### Level 2 - Comprehensive (before building)
+
 `validate_node({nodeType, config, mode: 'full', profile: 'runtime'})` - Full validation with fixes
 
 ### Level 3 - Complete (after building)
+
 `validate_workflow(workflow)` - Connections, expressions, AI tools
 
 ### Level 4 - Post-Deployment
+
 1. `n8n_validate_workflow({id})` - Validate deployed workflow
 2. `n8n_autofix_workflow({id})` - Auto-fix common errors
 3. `n8n_executions({action: 'list'})` - Monitor execution status
@@ -636,7 +682,8 @@ Default values cause runtime failures. Example:
 ## Response Format
 
 ### Initial Creation
-```
+
+```text
 [Silent tool execution in parallel]
 
 Created workflow:
@@ -647,7 +694,8 @@ Validation: ✅ All checks passed
 ```
 
 ### Modifications
-```
+
+```text
 [Silent tool execution]
 
 Updated workflow:
@@ -662,6 +710,7 @@ Changes validated successfully.
 Use `n8n_update_partial_workflow` with multiple operations in a single call:
 
 ✅ GOOD - Batch multiple operations:
+
 ```json
 n8n_update_partial_workflow({
   id: "wf-123",
@@ -674,16 +723,18 @@ n8n_update_partial_workflow({
 ```
 
 ❌ BAD - Separate calls:
+
 ```json
 n8n_update_partial_workflow({id: "wf-123", operations: [{...}]})
 n8n_update_partial_workflow({id: "wf-123", operations: [{...}]})
 ```
 
-###   CRITICAL: addConnection Syntax
+### CRITICAL: addConnection Syntax
 
 The `addConnection` operation requires **four separate string parameters**. Common mistakes cause misleading errors.
 
 ❌ WRONG - Object format (fails with "Expected string, received object"):
+
 ```json
 {
   "type": "addConnection",
@@ -695,6 +746,7 @@ The `addConnection` operation requires **four separate string parameters**. Comm
 ```
 
 ❌ WRONG - Combined string (fails with "Source node not found"):
+
 ```json
 {
   "type": "addConnection",
@@ -704,6 +756,7 @@ The `addConnection` operation requires **four separate string parameters**. Comm
 ```
 
 ✅ CORRECT - Four separate string parameters:
+
 ```json
 {
   "type": "addConnection",
@@ -721,6 +774,7 @@ The `addConnection` operation requires **four separate string parameters**. Comm
 IF nodes have **two outputs** (TRUE and FALSE). Use the **`branch` parameter** to route to the correct output:
 
 ✅ CORRECT - Route to TRUE branch (when condition is met):
+
 ```json
 {
   "type": "addConnection",
@@ -733,6 +787,7 @@ IF nodes have **two outputs** (TRUE and FALSE). Use the **`branch` parameter** t
 ```
 
 ✅ CORRECT - Route to FALSE branch (when condition is NOT met):
+
 ```json
 {
   "type": "addConnection",
@@ -745,6 +800,7 @@ IF nodes have **two outputs** (TRUE and FALSE). Use the **`branch` parameter** t
 ```
 
 **Common Pattern** - Complete IF node routing:
+
 ```json
 n8n_update_partial_workflow({
   id: "workflow-id",
@@ -760,6 +816,7 @@ n8n_update_partial_workflow({
 ### removeConnection Syntax
 
 Use the same four-parameter format:
+
 ```json
 {
   "type": "removeConnection",
@@ -774,7 +831,7 @@ Use the same four-parameter format:
 
 ### Template-First Approach
 
-```
+```text
 // STEP 1: Template Discovery (parallel execution)
 [Silent execution]
 search_templates({
@@ -798,7 +855,7 @@ Validation: ✅ All checks passed"
 
 ### Building from Scratch (if no template)
 
-```
+```text
 // STEP 1: Discovery (parallel execution)
 [Silent execution]
 search_nodes({query: 'slack', includeExamples: true})
@@ -844,6 +901,7 @@ n8n_update_partial_workflow({
 ## Important Rules
 
 ### Core Behavior
+
 1. **Silent execution** - No commentary between tools
 2. **Parallel by default** - Execute independent operations simultaneously
 3. **Templates first** - Always check before building (2,709 available)
@@ -851,20 +909,23 @@ n8n_update_partial_workflow({
 5. **Never trust defaults** - Explicitly configure ALL parameters
 
 ### Attribution & Credits
+
 - **MANDATORY TEMPLATE ATTRIBUTION**: Share author name, username, and n8n.io link
 - **Template validation** - Always validate before deployment (may need updates)
 
 ### Performance
+
 - **Batch operations** - Use diff operations with multiple changes in one call
 - **Parallel execution** - Search, validate, and configure simultaneously
 - **Template metadata** - Use smart filtering for faster discovery
 
 ### Code Node Usage
+
 - **Avoid when possible** - Prefer standard nodes
 - **Only when necessary** - Use code node as last resort
 - **AI tool capability** - ANY node can be an AI tool (not just marked ones)
 
-### Most Popular n8n Nodes (for get_node):
+### Most Popular n8n Nodes (for get_node)
 
 1. **n8n-nodes-base.code** - JavaScript/Python scripting
 2. **n8n-nodes-base.httpRequest** - HTTP API calls
@@ -898,7 +959,7 @@ Save these instructions in your Claude Project for optimal n8n workflow assistan
 This project is MIT licensed and free for everyone to use. However:
 
 - **✅ DO**: Share this repository freely with proper attribution
-- **✅ DO**: Include a direct link to https://github.com/czlonkowski/n8n-mcp in your first post/video
+- **✅ DO**: Include a direct link to <https://github.com/czlonkowski/n8n-mcp> in your first post/video
 - **❌ DON'T**: Gate this free tool behind engagement requirements (likes, follows, comments)
 - **❌ DON'T**: Use this project for engagement farming on social media
 
@@ -939,6 +1000,7 @@ When Claude, Anthropic's AI assistant, tested n8n-MCP, the results were transfor
 Once connected, Claude can use these powerful tools:
 
 ### Core Tools (7 tools)
+
 - **`tools_documentation`** - Get documentation for any MCP tool (START HERE!)
 - **`search_nodes`** - Full-text search across all nodes. Use `includeExamples: true` for real-world configurations
 - **`get_node`** - Unified node information tool with multiple modes (v2.26.0):
@@ -958,9 +1020,11 @@ Once connected, Claude can use these powerful tools:
 - **`get_template`** - Get complete workflow JSON (modes: nodes_only, structure, full)
 
 ### n8n Management Tools (13 tools - Requires API Configuration)
+
 These tools require `N8N_API_URL` and `N8N_API_KEY` in your configuration.
 
 #### Workflow Management
+
 - **`n8n_create_workflow`** - Create new workflows with nodes and connections
 - **`n8n_get_workflow`** - Unified workflow retrieval (v2.26.0):
   - `mode: 'full'` (default) - Complete workflow JSON
@@ -977,6 +1041,7 @@ These tools require `N8N_API_URL` and `N8N_API_KEY` in your configuration.
 - **`n8n_deploy_template`** - Deploy templates from n8n.io directly to your instance with auto-fix
 
 #### Execution Management
+
 - **`n8n_test_workflow`** - Test/trigger workflow execution:
   - Auto-detects trigger type (webhook, form, chat) from workflow
   - Supports custom data, headers, and HTTP methods for webhooks
@@ -987,6 +1052,7 @@ These tools require `N8N_API_URL` and `N8N_API_KEY` in your configuration.
   - `action: 'delete'` - Delete execution records
 
 #### System Tools
+
 - **`n8n_health_check`** - Check n8n API connectivity and features
 
 ### Example Usage
@@ -1051,6 +1117,7 @@ search_templates({
 For contributors and advanced users:
 
 **Prerequisites:**
+
 - [Node.js](https://nodejs.org/) (any version - automatic fallback if needed)
 - npm or yarn
 - Git
@@ -1097,24 +1164,28 @@ npm run dev:http       # HTTP dev mode
 ## 📚 Documentation
 
 ### Setup Guides
+
 - [Installation Guide](./docs/INSTALLATION.md) - Comprehensive installation instructions
 - [Claude Desktop Setup](./docs/README_CLAUDE_SETUP.md) - Detailed Claude configuration
 - [Docker Guide](./docs/DOCKER_README.md) - Advanced Docker deployment options
 - [MCP Quick Start](./docs/MCP_QUICK_START_GUIDE.md) - Get started quickly with n8n-MCP
 
 ### Feature Documentation
+
 - [Workflow Diff Operations](./docs/workflow-diff-examples.md) - Token-efficient workflow updates (NEW!)
 - [Transactional Updates](./docs/transactional-updates-example.md) - Two-pass workflow editing
 - [MCP Essentials](./docs/MCP_ESSENTIALS_README.md) - AI-optimized tools guide
 - [Validation System](./docs/validation-improvements-v2.4.2.md) - Smart validation profiles
 
 ### Development & Deployment
+
 - [Railway Deployment](./docs/RAILWAY_DEPLOYMENT.md) - One-click cloud deployment guide
 - [HTTP Deployment](./docs/HTTP_DEPLOYMENT.md) - Remote server setup guide
 - [Dependency Management](./docs/DEPENDENCY_UPDATES.md) - Keeping n8n packages in sync
 - [Claude's Interview](./docs/CLAUDE_INTERVIEW.md) - Real-world impact of n8n-MCP
 
 ### Project Information
+
 - [Change Log](./CHANGELOG.md) - Complete version history
 - [Claude Instructions](./CLAUDE.md) - AI guidance for this codebase
 - [MCP Tools Reference](#-available-mcp-tools) - Complete list of available tools
@@ -1201,6 +1272,7 @@ For detailed testing documentation, see [Testing Architecture](./docs/testing-ar
 MIT License - see [LICENSE](LICENSE) for details.
 
 **Attribution appreciated!** If you use n8n-MCP, consider:
+
 - ⭐ Starring this repository
 - 💬 Mentioning it in your project
 - 🔗 Linking back to this repo
@@ -1209,6 +1281,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 ## 🤝 Contributing
 
 Contributions are welcome! Please:
+
 1. Fork the repository
 2. Create a feature branch
 3. Run tests (`npm test`)
@@ -1227,6 +1300,7 @@ npm run test:release-automation
 ```
 
 The system automatically handles:
+
 - 🏷️ GitHub releases with changelog content
 - 📦 NPM package publishing
 - 🐳 Multi-platform Docker images
@@ -1243,11 +1317,13 @@ See [Automated Release Guide](./docs/AUTOMATED_RELEASES.md) for complete details
 ### Template Attribution
 
 All workflow templates in this project are fetched from n8n's public template gallery at [n8n.io/workflows](https://n8n.io/workflows). Each template includes:
+
 - Full attribution to the original creator (name and username)
 - Direct link to the source template on n8n.io
 - Original workflow ID for reference
 
 The AI agent instructions in this project contain mandatory attribution requirements. When using any template, the AI will automatically:
+
 - Share the template author's name and username
 - Provide a direct link to the original template on n8n.io
 - Display attribution in the format: "This workflow is based on a template by **[author]** (@[username]). View the original at: [url]"

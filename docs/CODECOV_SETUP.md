@@ -4,7 +4,7 @@ This guide explains how to set up and configure Codecov for the n8n-MCP project.
 
 ## Prerequisites
 
-1. A Codecov account (sign up at https://codecov.io)
+1. A Codecov account (sign up at <https://codecov.io>)
 2. Repository admin access to add the CODECOV_TOKEN secret
 
 ## Setup Steps
@@ -39,6 +39,7 @@ Note: The token in the badge URL is a read-only token and safe to commit.
 ### codecov.yml
 
 The configuration file sets:
+
 - **Target coverage**: 80% for both project and patch
 - **Coverage precision**: 2 decimal places
 - **Comment behavior**: Comments on all PRs with coverage changes
@@ -47,6 +48,7 @@ The configuration file sets:
 ### GitHub Actions
 
 The workflow:
+
 1. Runs tests with coverage using `npm run test:coverage`
 2. Generates LCOV format coverage report
 3. Uploads to Codecov using the official action
@@ -55,6 +57,7 @@ The workflow:
 ### Vitest Configuration
 
 Coverage settings in `vitest.config.ts`:
+
 - **Provider**: V8 (fast and accurate)
 - **Reporters**: text, json, html, and lcov
 - **Thresholds**: 80% lines, 80% functions, 75% branches, 80% statements
@@ -73,7 +76,7 @@ open coverage/index.html
 
 ### Online Coverage
 
-1. Visit https://codecov.io/gh/czlonkowski/n8n-mcp
+1. Visit <https://codecov.io/gh/czlonkowski/n8n-mcp>
 2. View detailed reports, graphs, and file-by-file coverage
 3. Check PR comments for coverage changes
 
@@ -94,6 +97,7 @@ open coverage/index.html
 ### Low Coverage Areas
 
 Current areas with lower coverage that could be improved:
+
 - HTTP server implementations
 - MCP index files
 - Some edge cases in validators

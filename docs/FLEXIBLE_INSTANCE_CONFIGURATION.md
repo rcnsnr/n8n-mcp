@@ -39,6 +39,7 @@ New environment variables for cache configuration:
 - `INSTANCE_CACHE_TTL_MINUTES` - Cache TTL in minutes (default: 30, min: 1, max: 1440/24 hours)
 
 Example:
+
 ```bash
 # Increase cache size for high-volume deployments
 export INSTANCE_CACHE_MAX=500
@@ -193,31 +194,36 @@ if (!validation.valid) {
 ## Security Features
 
 ### 1. Cache Key Hashing
+
 - All cache keys use SHA-256 hashing with memoization
 - Prevents sensitive data exposure in logs
 - Example: `sha256(url:key:instance)` → 64-char hex string
 - Memoization cache limited to 1000 entries
 
 ### 2. Enhanced Input Validation
+
 - Field-specific error messages with detailed reasons
 - URL protocol restrictions (HTTP/HTTPS only)
 - API key placeholder detection (case-insensitive)
 - Numeric range validation with specific error messages
-- Example: "Invalid n8nApiUrl: ftp://example.com - URL must use HTTP or HTTPS protocol"
+- Example: "Invalid n8nApiUrl: <ftp://example.com> - URL must use HTTP or HTTPS protocol"
 
 ### 3. Secure Logging
+
 - Only first 8 characters of cache keys logged
 - No sensitive data in debug logs
 - URL sanitization (domain only, no paths)
 - Configuration fallback logging for debugging
 
 ### 4. Memory Management
+
 - Configurable LRU cache with automatic eviction
 - TTL-based expiration (configurable, default 30 minutes)
 - Dispose callbacks for cleanup
 - Maximum cache size limits with bounds checking
 
 ### 5. Concurrency Protection
+
 - Mutex-based locking for cache operations
 - Prevents duplicate client creation
 - Simple lock checking with timeout
@@ -226,6 +232,7 @@ if (!validation.valid) {
 ## Performance Optimization
 
 ### Cache Strategy
+
 - **Max Size**: Configurable via `INSTANCE_CACHE_MAX` (default: 100)
 - **TTL**: Configurable via `INSTANCE_CACHE_TTL_MINUTES` (default: 30)
 - **Update on Access**: Age refreshed on each use
@@ -233,7 +240,9 @@ if (!validation.valid) {
 - **Memoization**: Hash creation uses memoization for frequently used keys
 
 ### Cache Metrics
+
 The system tracks comprehensive metrics:
+
 - Cache hits and misses
 - Hit rate percentage
 - Eviction count
@@ -241,12 +250,14 @@ The system tracks comprehensive metrics:
 - Operation timing
 
 Retrieve metrics using:
+
 ```typescript
 import { getInstanceCacheStatistics } from './mcp/handlers-n8n-manager';
 console.log(getInstanceCacheStatistics());
 ```
 
 ### Benefits
+
 - **Performance**: ~12ms average response time
 - **Memory Efficient**: Minimal footprint per instance
 - **Thread Safe**: Mutex protection for concurrent operations
@@ -282,6 +293,7 @@ npm test -- tests/unit/mcp/handlers-n8n-manager-simple.test.ts
 ```
 
 ### Test Coverage Areas
+
 - Input validation edge cases
 - Cache behavior and eviction
 - Security (hashing, sanitization)
@@ -292,17 +304,20 @@ npm test -- tests/unit/mcp/handlers-n8n-manager-simple.test.ts
 ## Migration Guide
 
 ### For Existing Deployments
+
 No changes required - environment variables continue to work.
 
 ### For Multi-Instance Support
 
 1. **Update HTTP Server** (if using HTTP mode):
+
 ```typescript
 // Add context extraction from headers
 const context = extractInstanceContext(req);
 ```
 
 2. **Pass Context to Handlers**:
+
 ```typescript
 // Old way (still works)
 await handleListWorkflows(params);
@@ -312,6 +327,7 @@ await handleListWorkflows(params, context);
 ```
 
 3. **Configure Clients** to send instance information:
+
 ```typescript
 // Client sends instance info in headers
 headers: {
@@ -324,6 +340,7 @@ headers: {
 ## Monitoring
 
 ### Metrics to Track
+
 - Cache hit/miss ratio
 - Instance count in cache
 - Average TTL utilization
@@ -331,7 +348,9 @@ headers: {
 - API client creation rate
 
 ### Debug Logging
+
 Enable debug logs to monitor cache behavior:
+
 ```bash
 LOG_LEVEL=debug npm start
 ```
@@ -365,6 +384,7 @@ Potential improvements for future versions:
 ## Support
 
 For issues or questions about flexible instance configuration:
+
 1. Check validation errors for specific problems
 2. Enable debug logging for detailed diagnostics
 3. Review test files for usage examples

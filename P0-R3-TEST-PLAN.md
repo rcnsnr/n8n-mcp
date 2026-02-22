@@ -5,6 +5,7 @@
 This document outlines comprehensive test coverage for the P0-R3 feature (Template-based Configuration Examples). The feature adds real-world configuration examples from popular templates to node search and essentials tools.
 
 **Feature Overview:**
+
 - New database table: `template_node_configs` (197 pre-extracted configurations)
 - Enhanced tools: `search_nodes({includeExamples: true})` and `get_node_essentials({includeExamples: true})`
 - Breaking changes: Removed `get_node_for_task` tool
@@ -14,9 +15,11 @@ This document outlines comprehensive test coverage for the P0-R3 feature (Templa
 ### Unit Tests
 
 #### 1. `/tests/unit/scripts/fetch-templates-extraction.test.ts` ✅
+
 **Purpose:** Test template extraction logic from `fetch-templates.ts`
 
 **Coverage:**
+
 - `extractNodeConfigs()` - 90%+ coverage
   - Valid workflows with multiple nodes
   - Empty workflows
@@ -44,9 +47,11 @@ This document outlines comprehensive test coverage for the P0-R3 feature (Templa
 ---
 
 #### 2. `/tests/unit/mcp/search-nodes-examples.test.ts` ✅
+
 **Purpose:** Test `search_nodes` tool with includeExamples parameter
 
 **Coverage:**
+
 - includeExamples parameter behavior
   - false: no examples returned
   - undefined: no examples returned (default)
@@ -65,9 +70,11 @@ This document outlines comprehensive test coverage for the P0-R3 feature (Templa
 ---
 
 #### 3. `/tests/unit/mcp/get-node-essentials-examples.test.ts` ✅
+
 **Purpose:** Test `get_node_essentials` tool with includeExamples parameter
 
 **Coverage:**
+
 - includeExamples parameter behavior
 - Full metadata structure
   - configuration object
@@ -88,9 +95,11 @@ This document outlines comprehensive test coverage for the P0-R3 feature (Templa
 ### Integration Tests
 
 #### 4. `/tests/integration/database/template-node-configs.test.ts` ✅
+
 **Purpose:** Test database schema, migrations, and operations
 
 **Coverage:**
+
 - Schema validation
   - Table creation
   - All columns present
@@ -121,9 +130,11 @@ This document outlines comprehensive test coverage for the P0-R3 feature (Templa
 ---
 
 #### 5. `/tests/integration/mcp/template-examples-e2e.test.ts` ✅
+
 **Purpose:** End-to-end integration testing
 
 **Coverage:**
+
 - Direct SQL queries
   - Top 2 examples for search_nodes
   - Top 3 examples with metadata for get_node_essentials
@@ -150,9 +161,11 @@ This document outlines comprehensive test coverage for the P0-R3 feature (Templa
 ### Test Fixtures
 
 #### 6. `/tests/fixtures/template-configs.ts` ✅
+
 **Purpose:** Reusable test data
 
 **Provides:**
+
 - `sampleConfigs`: 7 realistic node configurations
   - simpleWebhook
   - webhookWithAuth
@@ -183,6 +196,7 @@ This document outlines comprehensive test coverage for the P0-R3 feature (Templa
 ### High Priority
 
 #### 1. `tests/unit/mcp/parameter-validation.test.ts`
+
 **Line 480:** Remove `get_node_for_task` from legacyValidationTools array
 
 ```typescript
@@ -195,6 +209,7 @@ This document outlines comprehensive test coverage for the P0-R3 feature (Templa
 ---
 
 #### 2. `tests/unit/mcp/tools.test.ts`
+
 **Update:** Remove `get_node_for_task` from templates category
 
 ```typescript
@@ -226,6 +241,7 @@ it('should have includeExamples parameter in get_node_essentials', () => {
 ---
 
 #### 3. `tests/integration/mcp-protocol/session-management.test.ts`
+
 **Remove:** Test case calling `get_node_for_task` with invalid task
 
 ```typescript
@@ -238,6 +254,7 @@ client.callTool({ name: 'get_node_for_task', arguments: { task: 'invalid_task' }
 ---
 
 #### 4. `tests/integration/mcp-protocol/tool-invocation.test.ts`
+
 **Remove:** Entire `get_node_for_task` describe block
 
 **Add:** Tests for new includeExamples functionality
@@ -287,6 +304,7 @@ describe('get_node_essentials with includeExamples', () => {
 ### Medium Priority
 
 #### 5. `tests/unit/services/task-templates.test.ts`
+
 **Status:** ✅ No changes needed (TaskTemplates marked as deprecated but not removed)
 
 **Note:** TaskTemplates remains for backward compatibility. Tests should continue to pass.
@@ -296,6 +314,7 @@ describe('get_node_essentials with includeExamples', () => {
 ## Test Execution Plan
 
 ### Phase 1: Unit Tests
+
 ```bash
 # Run new unit tests
 npm test tests/unit/scripts/fetch-templates-extraction.test.ts
@@ -306,6 +325,7 @@ npm test tests/unit/mcp/get-node-essentials-examples.test.ts
 ```
 
 ### Phase 2: Integration Tests
+
 ```bash
 # Run new integration tests
 npm test tests/integration/database/template-node-configs.test.ts
@@ -315,6 +335,7 @@ npm test tests/integration/mcp/template-examples-e2e.test.ts
 ```
 
 ### Phase 3: Update Existing Tests
+
 ```bash
 # Update files as outlined above, then run:
 npm test tests/unit/mcp/parameter-validation.test.ts
@@ -326,6 +347,7 @@ npm test tests/integration/mcp-protocol/tool-invocation.test.ts
 ```
 
 ### Phase 4: Full Test Suite
+
 ```bash
 # Run all tests
 npm test
@@ -365,12 +387,15 @@ npm run test:coverage
 ## Test Infrastructure
 
 ### Dependencies Required
+
 All dependencies already present in `package.json`:
+
 - vitest (test runner)
 - better-sqlite3 (database)
 - @vitest/coverage-v8 (coverage)
 
 ### Test Utilities Used
+
 - TestDatabase helper (from existing test utils)
 - createTestDatabaseAdapter (from existing test utils)
 - Standard vitest matchers
@@ -403,6 +428,7 @@ All dependencies already present in `package.json`:
 ## CI/CD Integration
 
 ### GitHub Actions Updates
+
 No changes required. Existing test commands will run new tests:
 
 ```yaml
@@ -411,7 +437,9 @@ No changes required. Existing test commands will run new tests:
 ```
 
 ### Coverage Thresholds
+
 Current thresholds maintained. Expected improvements:
+
 - Lines: +2%
 - Functions: +3%
 - Branches: +2%
@@ -437,6 +465,7 @@ Current thresholds maintained. Expected improvements:
 If issues are detected:
 
 1. **Database Rollback:**
+
    ```sql
    DROP TABLE IF EXISTS template_node_configs;
    DROP VIEW IF EXISTS ranked_node_configs;
@@ -457,12 +486,14 @@ If issues are detected:
 ## Success Metrics
 
 ### Test Metrics
+
 - ✅ 85+ new tests added
 - ✅ 0 tests failing after updates
 - ✅ Coverage increase 2%+
 - ✅ All performance tests pass
 
 ### Feature Metrics
+
 - ✅ 197 template configs extracted
 - ✅ Top 2/3 examples returned correctly
 - ✅ Query performance <10ms
@@ -473,6 +504,7 @@ If issues are detected:
 ## Conclusion
 
 This test plan provides **comprehensive coverage** for the P0-R3 feature with:
+
 - **85+ new tests** across unit, integration, and E2E levels
 - **Complete coverage** of extraction, storage, and retrieval
 - **Backward compatibility** protection

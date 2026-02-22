@@ -91,6 +91,7 @@ npm run update:all
 ```
 
 This single command will:
+
 1. ✅ Check for n8n updates and ask for confirmation
 2. ✅ Update all n8n dependencies to latest compatible versions
 3. ✅ Run all 1,182 tests (933 unit + 249 integration)
@@ -147,7 +148,9 @@ git push origin main
 ## What the Commands Do
 
 ### `npm run update:all`
+
 This comprehensive command:
+
 1. Checks current branch and git status
 2. Shows current versions and checks for updates
 3. Updates all n8n dependencies to compatible versions
@@ -160,7 +163,9 @@ This comprehensive command:
 10. Provides next steps for GitHub release and npm publish
 
 ### `npm run update:n8n`
+
 This command:
+
 1. Checks for the latest n8n version
 2. Updates n8n and all its required dependencies (n8n-core, n8n-workflow, @n8n/n8n-nodes-langchain)
 3. Runs `npm install` to update package-lock.json
@@ -169,11 +174,13 @@ This command:
 6. Shows you exactly what versions were updated
 
 ### `npm run validate`
+
 - Validates critical nodes (httpRequest, code, slack, agent)
 - Shows database statistics
 - Confirms everything is working correctly
 
 ### `npm test`
+
 - Runs all 1,182 tests
 - Unit tests: 933 tests across 30 files
 - Integration tests: 249 tests across 14 files
@@ -201,6 +208,7 @@ As of July 2025, GitHub's push protection may block database pushes if they cont
 ## Time Estimate
 
 ### Fast Workflow (Recommended)
+
 - Local work: ~2-3 minutes
   - npm install and database rebuild: ~2-3 minutes
   - File edits (CHANGELOG, README, package.json): ~30 seconds
@@ -213,6 +221,7 @@ As of July 2025, GitHub's push protection may block database pushes if they cont
 **Total hands-on time: ~3 minutes** (then wait for CI)
 
 ### Full Workflow with Local Tests
+
 - Total time: ~5-7 minutes
 - Test suite: ~2.5 minutes
 - npm install and database rebuild: ~2-3 minutes
@@ -223,17 +232,21 @@ As of July 2025, GitHub's push protection may block database pushes if they cont
 ## Troubleshooting
 
 If tests fail:
+
 1. Check the test output for specific failures
 2. Run `npm run test:unit` or `npm run test:integration` separately
 3. Fix any issues before proceeding with the update
 
 If validation fails:
+
 1. Check the error message - usually it's a node type reference issue
 2. The update script handles most compatibility issues automatically
 3. If needed, check the GitHub Actions logs for the dependency update workflow
 
 ## Alternative: Check First
+
 To see what would be updated without making changes:
+
 ```bash
 npm run update:n8n:check
 ```
@@ -243,6 +256,7 @@ This shows you the available updates without modifying anything.
 ## Publishing to npm
 
 After updating:
+
 ```bash
 # Prepare for publish (runs tests automatically)
 npm run prepare:publish
@@ -255,6 +269,7 @@ npm publish --otp=YOUR_OTP_CODE
 ## Creating a GitHub Release
 
 After pushing:
+
 ```bash
 gh release create vX.X.X --title "vX.X.X" --notes "Updated n8n to vX.X.X"
 ```

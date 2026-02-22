@@ -5,6 +5,7 @@
 ### 1. Create Essential Properties Configuration
 
 Create `src/data/essential-properties.json`:
+
 ```json
 {
   "nodes-base.httpRequest": {
@@ -50,23 +51,23 @@ Add to `src/mcp/server.ts`:
 // Add to tool implementations
 case "get_node_essentials": {
   const { nodeType } = request.params.arguments as { nodeType: string };
-  
+
   // Load essential properties config
   const essentialsConfig = require('../data/essential-properties.json');
   const nodeConfig = essentialsConfig[nodeType];
-  
+
   if (!nodeConfig) {
     // Fallback: extract from existing data
     const node = await service.getNodeByType(nodeType);
     if (!node) {
       return { error: `Node type ${nodeType} not found` };
     }
-    
+
     // Parse properties to find required ones
     const properties = JSON.parse(node.properties_schema || '[]');
     const required = properties.filter((p: any) => p.required);
     const common = properties.slice(0, 5); // Top 5 as fallback
-    
+
     return {
       nodeType,
       displayName: node.display_name,
@@ -79,21 +80,21 @@ case "get_node_essentials": {
       }
     };
   }
-  
+
   // Use configured essentials
   const node = await service.getNodeByType(nodeType);
   const properties = JSON.parse(node.properties_schema || '[]');
-  
+
   const requiredProps = nodeConfig.required.map((name: string) => {
     const prop = findPropertyByName(properties, name);
     return prop ? simplifyProperty(prop) : null;
   }).filter(Boolean);
-  
+
   const commonProps = nodeConfig.common.map((name: string) => {
     const prop = findPropertyByName(properties, name);
     return prop ? simplifyProperty(prop) : null;
   }).filter(Boolean);
-  
+
   return {
     nodeType,
     displayName: node.display_name,
@@ -163,10 +164,10 @@ export class PropertyParser {
    */
   static parseProperties(properties: any[], path = ''): ParsedProperty[] {
     const results: ParsedProperty[] = [];
-    
+
     for (const prop of properties) {
       const currentPath = path ? `${path}.${prop.name}` : prop.name;
-      
+
       // Add current property
       results.push({
         name: prop.name,
@@ -178,7 +179,7 @@ export class PropertyParser {
         default: prop.default,
         options: prop.options?.filter((opt: any) => typeof opt === 'string' || opt.value)
       });
-      
+
       // Recursively parse nested properties
       if (prop.type === 'collection' && prop.options) {
         results.push(...this.parseProperties(prop.options, currentPath));
@@ -190,10 +191,10 @@ export class PropertyParser {
         }
       }
     }
-    
+
     return results;
   }
-  
+
   /**
    * Find properties matching a search query
    */
@@ -205,7 +206,7 @@ export class PropertyParser {
       prop.path.toLowerCase().includes(lowerQuery)
     );
   }
-  
+
   /**
    * Categorize properties
    */
@@ -217,7 +218,7 @@ export class PropertyParser {
       advanced: [],
       other: []
     };
-    
+
     for (const prop of properties) {
       if (prop.name.includes('auth') || prop.name.includes('credential')) {
         categories.authentication.push(prop);
@@ -232,7 +233,7 @@ export class PropertyParser {
         categories.other.push(prop);
       }
     }
-    
+
     return categories;
   }
 }
@@ -266,27 +267,27 @@ import { MCPClient } from '../src/mcp/client';
 
 async function testEssentials() {
   const client = new MCPClient();
-  
+
   console.log('Testing get_node_essentials...\n');
-  
+
   // Test HTTP Request node
   const httpEssentials = await client.call('get_node_essentials', {
     nodeType: 'nodes-base.httpRequest'
   });
-  
+
   console.log('HTTP Request Essentials:');
   console.log(`- Required: ${httpEssentials.requiredProperties.map(p => p.name).join(', ')}`);
   console.log(`- Common: ${httpEssentials.commonProperties.map(p => p.name).join(', ')}`);
   console.log(`- Total properties: ${httpEssentials.requiredProperties.length + httpEssentials.commonProperties.length}`);
-  
+
   // Compare with full response
   const fullInfo = await client.call('get_node_info', {
     nodeType: 'nodes-base.httpRequest'
   });
-  
+
   const fullSize = JSON.stringify(fullInfo).length;
   const essentialSize = JSON.stringify(httpEssentials).length;
-  
+
   console.log(`\nSize comparison:`);
   console.log(`- Full response: ${(fullSize / 1024).toFixed(1)}KB`);
   console.log(`- Essential response: ${(essentialSize / 1024).toFixed(1)}KB`);
@@ -304,16 +305,16 @@ case "search_node_properties": {
     nodeType: string; 
     query: string;
   };
-  
+
   const node = await service.getNodeByType(nodeType);
   if (!node) {
     return { error: `Node type ${nodeType} not found` };
   }
-  
+
   const properties = JSON.parse(node.properties_schema || '[]');
   const parsed = PropertyParser.parseProperties(properties);
   const matches = PropertyParser.searchProperties(parsed, query);
-  
+
   return {
     query,
     matches: matches.map(prop => ({

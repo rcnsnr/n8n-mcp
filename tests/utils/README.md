@@ -5,6 +5,7 @@ This directory contains comprehensive database testing utilities for the n8n-mcp
 ## Overview
 
 The `database-utils.ts` file provides a complete set of utilities for:
+
 - Creating test databases (in-memory or file-based)
 - Seeding test data (nodes and templates)
 - Managing database state (snapshots, resets)
@@ -18,18 +19,18 @@ import { createTestDatabase, seedTestNodes, dbHelpers } from '../utils/database-
 
 describe('My Test', () => {
   let testDb;
-  
+
   afterEach(async () => {
     if (testDb) await testDb.cleanup();
   });
-  
+
   it('should test something', async () => {
     // Create in-memory database
     testDb = await createTestDatabase();
-    
+
     // Seed test data
     await seedTestNodes(testDb.nodeRepository);
-    
+
     // Run your tests
     const node = testDb.nodeRepository.getNode('nodes-base.httpRequest');
     expect(node).toBeDefined();
@@ -40,36 +41,46 @@ describe('My Test', () => {
 ## Main Functions
 
 ### createTestDatabase(options?)
+
 Creates a test database with repositories.
 
 Options:
+
 - `inMemory` (boolean, default: true) - Use in-memory SQLite
 - `dbPath` (string) - Custom path for file-based database
 - `initSchema` (boolean, default: true) - Initialize database schema
 - `enableFTS5` (boolean, default: false) - Enable full-text search
 
 ### seedTestNodes(repository, nodes?)
+
 Seeds test nodes into the database. Includes 3 default nodes (httpRequest, webhook, slack) plus any custom nodes provided.
 
 ### seedTestTemplates(repository, templates?)
+
 Seeds test templates into the database. Includes 2 default templates plus any custom templates provided.
 
 ### createTestNode(overrides?)
+
 Creates a test node with sensible defaults that can be overridden.
 
 ### createTestTemplate(overrides?)
+
 Creates a test template with sensible defaults that can be overridden.
 
 ### resetDatabase(adapter)
+
 Drops all tables and reinitializes the schema.
 
 ### createDatabaseSnapshot(adapter)
+
 Creates a snapshot of the current database state.
 
 ### restoreDatabaseSnapshot(adapter, snapshot)
+
 Restores database to a previous snapshot state.
 
 ### loadFixtures(adapter, fixturePath)
+
 Loads nodes and templates from a JSON fixture file.
 
 ## Database Helpers (dbHelpers)
@@ -83,11 +94,13 @@ Loads nodes and templates from a JSON fixture file.
 ## Testing Patterns
 
 ### Unit Tests (In-Memory Database)
+
 ```typescript
 const testDb = await createTestDatabase(); // Fast, isolated
 ```
 
 ### Integration Tests (File Database)
+
 ```typescript
 const testDb = await createTestDatabase({
   inMemory: false,
@@ -96,11 +109,13 @@ const testDb = await createTestDatabase({
 ```
 
 ### Using Fixtures
+
 ```typescript
 await loadFixtures(testDb.adapter, './fixtures/complex-scenario.json');
 ```
 
 ### State Management with Snapshots
+
 ```typescript
 // Save current state
 const snapshot = await createDatabaseSnapshot(testDb.adapter);
@@ -112,6 +127,7 @@ await restoreDatabaseSnapshot(testDb.adapter, snapshot);
 ```
 
 ### Transaction Testing
+
 ```typescript
 await withTransaction(testDb.adapter, async () => {
   // Operations here will be rolled back
@@ -120,6 +136,7 @@ await withTransaction(testDb.adapter, async () => {
 ```
 
 ### Performance Testing
+
 ```typescript
 const duration = await measureDatabaseOperation('Bulk Insert', async () => {
   // Insert many nodes

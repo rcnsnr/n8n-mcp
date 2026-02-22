@@ -12,6 +12,7 @@ This guide shows how to configure the n8n-nodes-mcp community node to connect to
    - Restart n8n if prompted
 
 2. Ensure environment variable is set:
+
    ```bash
    N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE=true
    ```
@@ -34,19 +35,21 @@ docker-compose -f docker-compose.n8n.yml up -d
 
 ### Step 2: Create MCP Credentials in n8n
 
-1. Open n8n at http://localhost:5678
+1. Open n8n at <http://localhost:5678>
 2. Go to Credentials → Add credential
 3. Search for "MCP" and select "MCP API"
 4. Configure the fields as follows:
    - **Credential Name**: `n8n MCP Server`
    - **HTTP Stream URL**: `
    - **Messages Post Endpoint**: (leave empty)
-   - **Additional Headers**: 
+   - **Additional Headers**:
+
      ```json
      {
        "Authorization": "Bearer test-secure-token-123456789"
      }
      ```
+
 5. Save the credential
 
 ### Step 3: Configure MCP Client Node
@@ -67,7 +70,9 @@ Add an MCP Client node to your workflow with these settings:
 ## Available Operations
 
 ### List Tools
+
 Shows all available MCP tools:
+
 - `tools_documentation`
 - `list_nodes`
 - `get_node_info`
@@ -77,19 +82,23 @@ Shows all available MCP tools:
 - And many more...
 
 ### Call Tool
+
 Execute specific tools with arguments:
 
 **Example: Get Node Info**
+
 - Tool Name: `get_node_info`
 - Arguments: `{ "nodeType": "n8n-nodes-base.httpRequest" }`
 
 **Example: Search Nodes**
+
 - Tool Name: `search_nodes`
 - Arguments: `{ "query": "webhook", "limit": 5 }`
 
 ## Import Example Workflow
 
 Import the pre-configured workflow:
+
 1. Go to Workflows → Add workflow → Import from File
 2. Select: `examples/n8n-mcp-streamable-workflow.json`
 3. Update the credentials with your bearer token
@@ -97,15 +106,18 @@ Import the pre-configured workflow:
 ## Troubleshooting
 
 ### Connection Refused
+
 - Verify services are running: `docker ps`
 - Check logs: `docker logs n8n-mcp`
 - Ensure you're using `http://n8n-mcp:3000/mcp` (container name) not `localhost`
 
 ### Authentication Failed
+
 - Verify bearer token matches exactly
 - Check CORS settings allow n8n origin
 
 ### Test Endpoint Manually
+
 ```bash
 # Test health check
 curl http://localhost:3000/health

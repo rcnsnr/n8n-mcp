@@ -25,53 +25,65 @@ npm run benchmark tests/benchmarks/node-loading.bench.ts
 ### Continuous Integration
 
 Benchmarks run automatically on:
+
 - Every push to `main` branch
 - Every pull request
 - Manual workflow dispatch
 
 Results are:
+
 - Tracked over time using GitHub Actions
 - Displayed in PR comments
-- Available at: https://czlonkowski.github.io/n8n-mcp/benchmarks/
+- Available at: <https://czlonkowski.github.io/n8n-mcp/benchmarks/>
 
 ## Benchmark Suites
 
 ### 1. Node Loading Performance
+
 Tests the performance of loading n8n node packages and parsing their metadata.
 
 **Key Metrics:**
+
 - Package loading time (< 100ms target)
 - Individual node file loading (< 5ms target)
 - Package.json parsing (< 1ms target)
 
 ### 2. Database Query Performance
+
 Measures database operation performance including queries, inserts, and updates.
 
 **Key Metrics:**
+
 - Node retrieval by type (< 5ms target)
 - Search operations (< 50ms target)
 - Bulk operations (< 100ms target)
 
 ### 3. Search Operations
+
 Tests various search modes and their performance characteristics.
 
 **Key Metrics:**
+
 - Simple word search (< 10ms target)
 - Multi-word OR search (< 20ms target)
 - Fuzzy search (< 50ms target)
 
 ### 4. Validation Performance
+
 Measures configuration and workflow validation speed.
 
 **Key Metrics:**
+
 - Simple config validation (< 1ms target)
 - Complex config validation (< 10ms target)
 - Workflow validation (< 50ms target)
 
 ### 5. MCP Tool Execution
+
 Tests the overhead of MCP tool execution.
 
 **Key Metrics:**
+
 - Tool invocation overhead (< 5ms target)
 - Complex tool operations (< 50ms target)
 
@@ -141,6 +153,7 @@ describe('My Performance Suite', () => {
 ### Performance Regression Detection
 
 A performance regression is flagged when:
+
 1. Operation time increases by >10% from baseline
 2. Multiple related operations show degradation
 3. P99 latency exceeds critical thresholds

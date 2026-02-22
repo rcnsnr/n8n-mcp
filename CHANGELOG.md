@@ -94,11 +94,13 @@ Optimized 4 workflow management tools to return minimal responses instead of ful
 - **n8n_delete_workflow**: Returns `{id, name, deleted: true}` instead of full deleted workflow
 
 **Impact**:
+
 - ~75-90% reduction in response token usage per operation
 - Messages now guide AI agents to use `n8n_get_workflow` with mode 'structure' if verification needed
 - No functional changes - full workflow data still available via `n8n_get_workflow`
 
 **Files Modified**:
+
 - `src/mcp/handlers-workflow-diff.ts` - Optimized partial update response
 - `src/mcp/handlers-n8n-manager.ts` - Optimized create, full update, and delete responses
 - `src/mcp/tool-docs/workflow_management/*.ts` - Updated documentation
@@ -230,6 +232,7 @@ N8N_MCP_MAX_SESSIONS=1000
 ### Changed
 
 **Dependencies**
+
 - Updated n8n from 1.121.2 to 1.122.4
 - Updated n8n-core from 1.120.1 to 1.121.1
 - Updated n8n-workflow from 1.118.1 to 1.119.1
@@ -239,6 +242,7 @@ N8N_MCP_MAX_SESSIONS=1000
 ### Removed
 
 **Templates**
+
 - Removed 7 templates from creator "ludwig" at author's request
   - Template IDs: 2795, 2816, 2825, 2850, 2869, 2939, 3847
 
@@ -421,6 +425,7 @@ n8n_test_workflow({
 #### Technical Details
 
 **New Files:**
+
 - `src/triggers/` - Complete trigger system module
   - `types.ts` - Type definitions for all trigger types
   - `trigger-detector.ts` - Auto-detection logic
@@ -428,11 +433,13 @@ n8n_test_workflow({
   - `handlers/` - Individual handler implementations
 
 **Modified Files:**
+
 - `src/mcp/handlers-n8n-manager.ts` - New `handleTestWorkflow` function
 - `src/mcp/tools-n8n-manager.ts` - Updated tool definition
 - `src/mcp/tool-docs/workflow_management/` - New documentation
 
 **Test Coverage:**
+
 - 32 unit tests for trigger detection and registry
 - 30 unit tests for SSRF protection
 - All parameter validation tests updated
@@ -518,6 +525,7 @@ Fixed Docker image build that was missing the pinned MCP SDK version, causing `n
 #### Root Cause
 
 Two files were not updated when #450 pinned the SDK version in `package.json`:
+
 - `package.runtime.json` had `"@modelcontextprotocol/sdk": "^1.13.2"` instead of `"1.20.1"`
 - `Dockerfile` builder stage had `@modelcontextprotocol/sdk@^1.12.1` hardcoded
 
@@ -652,6 +660,7 @@ Major consolidation of MCP tools from 31 tools to 19 tools, using mode-based par
 **1. Node Tools - `get_node` Enhanced**
 
 The `get_node` tool now supports additional modes:
+
 - `mode='docs'`: Replaces `get_node_documentation` - returns readable docs with examples
 - `mode='search_properties'`: Replaces `search_node_properties` - search within node properties
 
@@ -670,6 +679,7 @@ get_node({nodeType: "nodes-base.httpRequest", mode: "search_properties", propert
 **2. Validation Tools - `validate_node` Unified**
 
 Consolidated `validate_node_operation` and `validate_node_minimal` into single `validate_node`:
+
 - `mode='full'`: Full validation (replaces `validate_node_operation`)
 - `mode='minimal'`: Quick required fields check (replaces `validate_node_minimal`)
 
@@ -688,6 +698,7 @@ validate_node({nodeType: "nodes-base.slack", config: {}, mode: "minimal"})
 **3. Template Tools - `search_templates` Enhanced**
 
 Consolidated `list_node_templates`, `search_templates_by_metadata`, and `get_templates_for_task`:
+
 - `searchMode='keyword'`: Search by keywords (default, was `search_templates`)
 - `searchMode='by_nodes'`: Search by node types (was `list_node_templates`)
 - `searchMode='by_metadata'`: Search by AI metadata (was `search_templates_by_metadata`)
@@ -708,6 +719,7 @@ search_templates({searchMode: "by_task", task: "webhook_processing"})
 **4. Workflow Getters - `n8n_get_workflow` Enhanced**
 
 Consolidated `n8n_get_workflow_details`, `n8n_get_workflow_structure`, `n8n_get_workflow_minimal`:
+
 - `mode='full'`: Complete workflow data (default)
 - `mode='details'`: Workflow with metadata (was `n8n_get_workflow_details`)
 - `mode='structure'`: Nodes and connections only (was `n8n_get_workflow_structure`)
@@ -728,6 +740,7 @@ n8n_get_workflow({id: "123", mode: "minimal"})
 **5. Execution Tools - `n8n_executions` Unified**
 
 Consolidated `n8n_list_executions`, `n8n_get_execution`, `n8n_delete_execution`:
+
 - `action='list'`: List executions with filters
 - `action='get'`: Get single execution details
 - `action='delete'`: Delete an execution
@@ -752,6 +765,7 @@ n8n_executions({action: "delete", id: "456"})
 ### 🗑️ Removed Tools
 
 The following tools have been removed (use consolidated equivalents):
+
 - `get_node_documentation` → `get_node` with `mode='docs'`
 - `search_node_properties` → `get_node` with `mode='search_properties'`
 - `get_property_dependencies` → Removed (use `validate_node` for dependency info)
@@ -772,12 +786,14 @@ The following tools have been removed (use consolidated equivalents):
 **Tool Count**: 31 → 19 tools (38% reduction)
 
 **For AI Agents:**
+
 - Fewer tools to choose from reduces decision complexity
 - Mode-based parameters provide clear action disambiguation
 - Consistent patterns across tool categories
 - Backward-compatible parameter handling
 
 **For Users:**
+
 - Simpler tool discovery and documentation
 - Consistent API design patterns
 - Reduced token usage in tool descriptions
@@ -785,6 +801,7 @@ The following tools have been removed (use consolidated equivalents):
 ### 🔧 Technical Details
 
 **Files Modified:**
+
 - `src/mcp/tools.ts` - Consolidated tool definitions
 - `src/mcp/tools-n8n-manager.ts` - n8n manager tool consolidation
 - `src/mcp/server.ts` - Handler consolidation and mode routing
@@ -805,12 +822,14 @@ Added export/restore functionality for MCP sessions to enable zero-downtime depl
 #### What's New
 
 **1. Export Session State**
+
 - `exportSessionState()` method in `SingleSessionHTTPServer` and `N8NMCPEngine`
 - Exports all active sessions with metadata and instance context
 - Automatically filters expired sessions
 - Returns serializable `SessionState[]` array
 
 **2. Restore Session State**
+
 - `restoreSessionState(sessions)` method for session recovery
 - Validates session structure using existing `validateInstanceContext()`
 - Handles null/invalid sessions gracefully with warnings
@@ -818,12 +837,14 @@ Added export/restore functionality for MCP sessions to enable zero-downtime depl
 - Skips expired sessions during restore
 
 **3. SessionState Type**
+
 - New type definition in `src/types/session-state.ts`
 - Fully documented with JSDoc comments
 - Includes metadata (timestamps) and context (credentials)
 - Exported from main package index
 
 **4. Dormant Session Behavior**
+
 - Restored sessions are "dormant" until first request
 - Transport and server objects recreated on-demand
 - Memory-efficient session recovery
@@ -833,17 +854,20 @@ Added export/restore functionality for MCP sessions to enable zero-downtime depl
 ⚠️ **IMPORTANT:** Exported session data contains plaintext n8n API keys. Downstream applications MUST encrypt session data before persisting to disk using AES-256-GCM or equivalent.
 
 #### Use Cases
+
 - Zero-downtime deployments in container orchestration
 - Session recovery after crashes or restarts
 - Multi-tenant platform session management
 - Rolling updates without user disruption
 
 #### Testing
+
 - 22 comprehensive unit tests (100% passing)
 - Tests cover export, restore, edge cases, and round-trip cycles
 - Validation of expired session filtering and error handling
 
 #### Implementation Details
+
 - Only exports sessions with valid `n8nApiUrl` and `n8nApiKey` in context
 - Respects `sessionTimeout` setting (default 30 minutes)
 - Session metadata and context persisted; transport/server recreated on-demand
@@ -862,11 +886,13 @@ Introduced `get_node` - a unified tool that consolidates and enhances node infor
 #### What's New
 
 **1. Progressive Detail Levels**
+
 - `minimal`: Basic metadata only (~200 tokens) - nodeType, displayName, description, category, version summary
 - `standard`: Essential properties and operations - AI-friendly default (~1000-2000 tokens)
 - `full`: Complete node information including all properties (~3000-8000 tokens)
 
 **2. Version History & Management**
+
 - `versions` mode: List all versions with breaking changes summary
 - `compare` mode: Compare two versions with property-level changes
 - `breaking` mode: Show only breaking changes between versions
@@ -874,6 +900,7 @@ Introduced `get_node` - a unified tool that consolidates and enhances node infor
 - Version summary always included in info mode responses
 
 **3. Type Structure Metadata**
+
 - `includeTypeInfo` parameter exposes type structures from v2.23.0 validation system
 - Includes: type category, JS type, validation rules, structure hints
 - Helps AI agents understand complex types (filter, resourceMapper, resourceLocator, etc.)
@@ -881,6 +908,7 @@ Introduced `get_node` - a unified tool that consolidates and enhances node infor
 - Works with all detail levels
 
 **4. Real-World Examples**
+
 - `includeExamples` parameter includes configuration examples from templates
 - Shows popular workflow patterns
 - Includes metadata (views, complexity, use cases)
@@ -936,10 +964,12 @@ get_node({
 **Removed Deprecated Tools**
 
 Immediately removed `get_node_info` and `get_node_essentials` in favor of the unified `get_node` tool:
+
 - `get_node_info` → Use `get_node` with `detail='full'`
 - `get_node_essentials` → Use `get_node` with `detail='standard'` (default)
 
 **Migration:**
+
 ```javascript
 // Old
 get_node_info({nodeType: "nodes-base.httpRequest"})
@@ -959,12 +989,14 @@ get_node({nodeType: "nodes-base.httpRequest", detail: "standard", includeExample
 **Tool Count**: 40 → 39 tools (-2 deprecated, +1 new unified)
 
 **For AI Agents:**
+
 - Better understanding of complex n8n types through type metadata
 - Version upgrade planning with breaking change detection
 - Token-efficient defaults reduce costs
 - Progressive disclosure of information as needed
 
 **For Users:**
+
 - Single tool to learn instead of two separate tools
 - Clear progression from minimal to full detail
 - Version history helps with node upgrades
@@ -973,21 +1005,24 @@ get_node({nodeType: "nodes-base.httpRequest", detail: "standard", includeExample
 ### 🔧 Technical Details
 
 **Files Added:**
+
 - Enhanced type structure exposure in node information
 
 **Files Modified:**
+
 - `src/mcp/tools.ts` - Removed get_node_info and get_node_essentials, added get_node
 - `src/mcp/server.ts` - Added unified getNode() implementation with all modes
 - `package.json` - Version bump to 2.24.0
 
 **Implementation:**
+
 - ~250 lines of new code
 - 7 new private methods for mode handling
 - Version repository methods utilized (previously unused)
 - TypeStructureService integrated for type metadata
 - 100% backward compatible in behavior (just different API)
 
-Conceived by Romuald Członkowski - https://www.aiadvisors.pl/en
+Conceived by Romuald Członkowski - <https://www.aiadvisors.pl/en>
 
 ## [2.23.0] - 2025-11-21
 
@@ -1004,24 +1039,28 @@ Type Structure Validation is an automatic, zero-configuration validation system 
 #### Key Features
 
 **1. Automatic Structure Validation**
+
 - Validates 4 special n8n types: filter, resourceMapper, assignmentCollection, resourceLocator
 - Zero configuration required - works automatically in all validation tools
 - Integrated in `validate_node_operation` and `validate_node_minimal` tools
 - 100% backward compatible - no breaking changes
 
 **2. Comprehensive Type Coverage**
+
 - **filter** (FilterValue) - Complex filtering conditions with 40+ operations (equals, contains, regex, etc.)
 - **resourceMapper** (ResourceMapperValue) - Data mapping configuration for format transformation
 - **assignmentCollection** (AssignmentCollectionValue) - Variable assignments for setting multiple values
 - **resourceLocator** (INodeParameterResourceLocator) - Resource selection with multiple lookup modes (ID, name, URL)
 
 **3. Production-Ready Performance**
+
 - **100% pass rate** on 776 real-world validations (91 templates, 616 nodes)
 - **0.01ms average** validation time (500x faster than 50ms target)
 - **0% false positive rate**
 - Tested against top n8n.io workflow templates
 
 **4. Clear Error Messages**
+
 - Actionable error messages with property paths
 - Fix suggestions for common issues
 - Context-aware validation with node-specific logic
@@ -1030,18 +1069,21 @@ Type Structure Validation is an automatic, zero-configuration validation system 
 #### Implementation Phases
 
 **Phase 1: Type Structure Definitions** ✅
+
 - 22 complete type structures defined in `src/constants/type-structures.ts` (741 lines)
 - Type definitions in `src/types/type-structures.ts` (301 lines)
 - Complete coverage of filter, resourceMapper, assignmentCollection, resourceLocator
 - TypeScript interfaces with validation schemas
 
 **Phase 2: Validation Integration** ✅
+
 - Integrated in `EnhancedConfigValidator` service (427 lines)
 - Automatic validation in all MCP tools (validate_node_operation, validate_node_minimal)
 - Four validation profiles: minimal, runtime, ai-friendly, strict
 - Node-specific validation logic for edge cases
 
 **Phase 3: Real-World Validation** ✅
+
 - 100% pass rate on 776 validations across 91 templates
 - 616 nodes tested from top n8n.io workflows
 - Type-specific results:
@@ -1052,6 +1094,7 @@ Type Structure Validation is an automatic, zero-configuration validation system 
 - Performance: 0.01ms average (500x better than target)
 
 **Phase 4: Documentation & Polish** ✅
+
 - Comprehensive technical documentation (`docs/TYPE_STRUCTURE_VALIDATION.md`)
 - Updated internal documentation (CLAUDE.md)
 - Progressive discovery maintained (minimal tool documentation changes)
@@ -1060,31 +1103,37 @@ Type Structure Validation is an automatic, zero-configuration validation system 
 #### Edge Cases Handled
 
 **1. Credential-Provided Fields**
+
 - Fields like Google Sheets `sheetId` that come from credentials at runtime
 - No false positives for credential-populated fields
 
 **2. Filter Operations**
+
 - Universal operations (exists, notExists, isNotEmpty) work across all data types
 - Type-specific operations validated (regex for strings, gt/lt for numbers)
 
 **3. Node-Specific Logic**
+
 - Custom validation for specific nodes (Google Sheets, Slack, etc.)
 - Context-aware error messages based on node operation
 
 #### Technical Details
 
 **Files Added:**
+
 - `src/types/type-structures.ts` (301 lines) - Type definitions
 - `src/constants/type-structures.ts` (741 lines) - 22 complete type structures
 - `src/services/type-structure-service.ts` (427 lines) - Validation service
 - `docs/TYPE_STRUCTURE_VALIDATION.md` (239 lines) - Technical documentation
 
 **Files Modified:**
+
 - `src/services/enhanced-config-validator.ts` - Integrated structure validation
 - `src/mcp/tools-documentation.ts` - Minimal progressive discovery notes
 - `CLAUDE.md` - Updated architecture and Phase 1-3 completion
 
 **Test Coverage:**
+
 - `tests/unit/types/type-structures.test.ts` (14 tests)
 - `tests/unit/constants/type-structures.test.ts` (39 tests)
 - `tests/unit/services/type-structure-service.test.ts` (64 tests)
@@ -1117,18 +1166,21 @@ validate_node_operation("nodes-base.if", {
 #### Benefits
 
 **For Users:**
+
 - ✅ Prevents configuration errors before deployment
 - ✅ Clear, actionable error messages
 - ✅ Faster workflow development with immediate feedback
 - ✅ Confidence in workflow correctness
 
 **For AI Agents:**
+
 - ✅ Better understanding of complex n8n types
 - ✅ Self-correction based on clear error messages
 - ✅ Reduced validation errors and retry loops
 - ✅ Educational feedback for learning n8n patterns
 
 **Technical:**
+
 - ✅ Zero breaking changes (100% backward compatible)
 - ✅ Automatic integration (no configuration needed)
 - ✅ High performance (0.01ms average)
@@ -1137,14 +1189,17 @@ validate_node_operation("nodes-base.if", {
 #### Documentation
 
 **User Documentation:**
+
 - `docs/TYPE_STRUCTURE_VALIDATION.md` - Complete technical reference
 - Includes: Overview, supported types, performance metrics, examples, developer guide
 
 **Internal Documentation:**
+
 - `CLAUDE.md` - Architecture updates and Phase 1-3 results
 - `src/mcp/tools-documentation.ts` - Progressive discovery notes
 
 **Implementation Details:**
+
 - `docs/local/v3/implementation-plan-final.md` - Complete technical specifications
 - All 4 phases documented with success criteria and results
 
@@ -1157,7 +1212,7 @@ validate_node_operation("nodes-base.if", {
   - Phase 4: Documentation and polish completed
   - Zero false positives, 0.01ms average validation time
 
-Conceived by Romuald Członkowski - https://www.aiadvisors.pl/en
+Conceived by Romuald Członkowski - <https://www.aiadvisors.pl/en>
 
 ## [2.22.21] - 2025-11-20
 
@@ -1168,6 +1223,7 @@ Conceived by Romuald Członkowski - https://www.aiadvisors.pl/en
 Fixed critical bug where `n8n_update_partial_workflow` tool failed with "request/body must NOT have additional properties" error when workflows had no settings or only non-whitelisted settings properties.
 
 #### Root Cause
+
 - `cleanWorkflowForUpdate()` in `src/services/n8n-validation.ts` was sending empty `settings: {}` objects to the n8n API
 - n8n API rejects empty settings objects as "additional properties" violation
 - Issue occurred when:
@@ -1175,6 +1231,7 @@ Fixed critical bug where `n8n_update_partial_workflow` tool failed with "request
   - Workflow had only non-whitelisted settings (e.g., only `callerPolicy`)
 
 #### Changes
+
 - **Primary Fix**: Modified `cleanWorkflowForUpdate()` to delete `settings` property when empty after filtering
   - Instead of sending `settings: {}`, the property is now omitted entirely
   - Added safeguards in lines 193-199 and 201-204
@@ -1185,6 +1242,7 @@ Fixed critical bug where `n8n_update_partial_workflow` tool failed with "request
   - Added 2 new comprehensive tests for edge cases
 
 #### Testing
+
 - All 75 unit tests in `n8n-validation.test.ts` passing
 - New tests cover:
   - Workflows with no settings → omits property
@@ -1194,7 +1252,7 @@ Fixed critical bug where `n8n_update_partial_workflow` tool failed with "request
 **Related Issues**: #431, #248 (n8n API design limitation)
 **Related n8n Issue**: n8n-io/n8n#19587 (closed as NOT_PLANNED - MCP server issue)
 
-Conceived by Romuald Członkowski - https://www.aiadvisors.pl/en
+Conceived by Romuald Członkowski - <https://www.aiadvisors.pl/en>
 
 ## [2.22.20] - 2025-11-19
 
@@ -1210,7 +1268,7 @@ Updated all n8n-related dependencies to their latest versions:
 - @n8n/n8n-nodes-langchain: 1.118.0 → 1.119.1
 - Rebuilt node database with 544 nodes (439 from n8n-nodes-base, 105 from @n8n/n8n-nodes-langchain)
 
-Conceived by Romuald Członkowski - https://www.aiadvisors.pl/en
+Conceived by Romuald Członkowski - <https://www.aiadvisors.pl/en>
 
 ## [2.22.18] - 2025-11-14
 
@@ -1221,6 +1279,7 @@ Conceived by Romuald Członkowski - https://www.aiadvisors.pl/en
 Added structural hash tracking to enable cross-referencing between workflow mutations and workflow quality data:
 
 #### Structural Hash Generation
+
 - Added `workflowStructureHashBefore` and `workflowStructureHashAfter` fields to mutation records
 - Hashes based on node types + connections (structural elements only)
 - Compatible with `telemetry_workflows.workflow_hash` format for cross-referencing
@@ -1228,28 +1287,32 @@ Added structural hash tracking to enable cross-referencing between workflow muta
 - Enables linking mutation impact to workflow quality scores and grades
 
 #### Success Tracking Enhancement
+
 - Added `isTrulySuccessful` computed field to mutation records
 - Definition: Mutation executed successfully AND improved/maintained validation AND has known intent
 - Enables filtering to high-quality mutation data
 - Provides automated success detection without manual review
 
 #### Testing & Verification
+
 - All 17 mutation-tracker unit tests passing
 - Verified with live mutations: structural changes detected (hash changes), config-only updates detected (hash stays same)
 - Success tracking working accurately (64% truly successful rate in testing)
 
 **Files Modified**:
+
 - `src/telemetry/mutation-tracker.ts`: Generate structural hashes during mutation processing
 - `src/telemetry/mutation-types.ts`: Add new fields to WorkflowMutationRecord interface
 - `src/telemetry/workflow-sanitizer.ts`: Expose generateWorkflowHash() method
 - `tests/unit/telemetry/mutation-tracker.test.ts`: Add 5 new test cases
 
 **Impact**:
+
 - Enables cross-referencing between mutation and workflow data
 - Provides labeled dataset with quality indicators
 - Maintains backward compatibility (new fields optional)
 
-Conceived by Romuald Członkowski - https://www.aiadvisors.pl/en
+Conceived by Romuald Członkowski - <https://www.aiadvisors.pl/en>
 
 ## [2.22.17] - 2025-11-13
 
@@ -1260,6 +1323,7 @@ Conceived by Romuald Członkowski - https://www.aiadvisors.pl/en
 Fixed three critical issues in workflow mutation telemetry to improve data quality and security:
 
 #### 1. Fixed Inconsistent Sanitization (Security Critical)
+
 - **Problem**: 30% of workflows (178-188 records) were unsanitized, exposing potential credentials/tokens
 - **Solution**: Replaced weak inline sanitization with robust `WorkflowSanitizer.sanitizeWorkflowRaw()`
 - **Impact**: Now 100% sanitization coverage with 17 sensitive patterns detected and redacted
@@ -1268,6 +1332,7 @@ Fixed three critical issues in workflow mutation telemetry to improve data quali
   - `src/telemetry/mutation-tracker.ts`: Removed redundant sanitization code, use centralized sanitizer
 
 #### 2. Enabled Validation Data Capture (Data Quality Blocker)
+
 - **Problem**: Zero validation metrics captured (validation_before/after all NULL)
 - **Solution**: Added workflow validation before and after mutations using `WorkflowValidator`
 - **Impact**: Can now measure mutation quality, track error resolution patterns
@@ -1280,6 +1345,7 @@ Fixed three critical issues in workflow mutation telemetry to improve data quali
   - `src/mcp/handlers-workflow-diff.ts`: Added pre/post mutation validation
 
 #### 3. Improved Intent Capture (Data Quality)
+
 - **Problem**: 92.62% of intents were generic "Partial workflow update"
 - **Solution**: Enhanced tool documentation + automatic intent inference from operations
 - **Impact**: Meaningful intents automatically generated when not explicitly provided
@@ -1296,6 +1362,7 @@ Fixed three critical issues in workflow mutation telemetry to improve data quali
 ### 📊 Expected Results
 
 After deployment, telemetry data should show:
+
 - **100% sanitization coverage** (up from 70%)
 - **100% validation capture** (up from 0%)
 - **50%+ meaningful intents** (up from 7.33%)
@@ -1304,12 +1371,14 @@ After deployment, telemetry data should show:
 ### 🎯 Technical Details
 
 **Sanitization Coverage**: Now detects and redacts:
+
 - Webhook URLs, API keys (OpenAI sk-*, GitHub ghp-*, etc.)
 - Bearer tokens, OAuth credentials, passwords
 - URLs with authentication, long tokens (20+ chars)
 - Sensitive field names (apiKey, token, secret, password, etc.)
 
 **Validation Metrics Captured**:
+
 - Workflow validity status (true/false)
 - Error/warning counts and details
 - Node configuration errors
@@ -1318,6 +1387,7 @@ After deployment, telemetry data should show:
 - Validation improvement tracking (errors resolved/introduced)
 
 **Intent Inference Examples**:
+
 - `addNode` → "Add n8n-nodes-base.webhook"
 - `rewireConnection` → "Rewire IF from ErrorHandler to SuccessHandler"
 - Multiple operations → "Workflow update: add 2 nodes, modify connections, update metadata"
@@ -1358,6 +1428,7 @@ Added comprehensive telemetry tracking for workflow mutations to enable more con
 #### Technical Changes
 
 **Modified Files:**
+
 - `src/telemetry/mutation-tracker.ts`: Added comprehensive sanitization methods
 - `src/telemetry/telemetry-manager.ts`: Reduced auto-flush threshold, improved error logging
 - `src/mcp/handlers-workflow-diff.ts`: Added telemetry tracking integration
@@ -1365,10 +1436,12 @@ Added comprehensive telemetry tracking for workflow mutations to enable more con
 - `src/mcp/tool-docs/workflow_management/n8n-update-partial-workflow.ts`: Added intent parameter documentation
 
 **New Test Files:**
+
 - `tests/unit/telemetry/mutation-tracker.test.ts`: 13 comprehensive sanitization tests
 - `tests/unit/telemetry/mutation-validator.test.ts`: 22 validation tests
 
 **Test Coverage:**
+
 - Added 35 new unit tests for mutation tracking and validation
 - All 357 telemetry-related tests passing
 - Coverage includes sanitization, validation, intent classification, and auto-flush behavior
@@ -1376,6 +1449,7 @@ Added comprehensive telemetry tracking for workflow mutations to enable more con
 #### Impact
 
 Users will experience more helpful and context-aware AI responses when working with workflows. The AI can better understand:
+
 - What changes the user is trying to make
 - Why certain operations succeed or fail
 - Common patterns and best practices
@@ -1412,6 +1486,7 @@ In multi-tenant deployments, some tools don't work correctly because they check 
 - These tools appear in the tools list but either don't work correctly (show wrong data), hang/error, or create confusing UX
 
 Additionally, some deployments need to disable certain tools for:
+
 - **Security**: Disable management tools in production for certain users
 - **Feature flags**: Gradually roll out new tools
 - **Deployment-specific**: Different tool sets for cloud vs self-hosted
@@ -1419,11 +1494,13 @@ Additionally, some deployments need to disable certain tools for:
 #### Solution
 
 **Environment Variable Format:**
+
 ```bash
 DISABLED_TOOLS=n8n_diagnostic,n8n_health_check,custom_tool
 ```
 
 **Implementation:**
+
 1. **`getDisabledTools()` Method** (`src/mcp/server.ts` lines 326-348)
    - Parses comma-separated tool names from `DISABLED_TOOLS` env var
    - Returns `Set<string>` for O(1) lookup performance
@@ -1446,6 +1523,7 @@ DISABLED_TOOLS=n8n_diagnostic,n8n_health_check,custom_tool
    - Ensures complete protection against disabled tool calls
 
 **Error Response Format:**
+
 ```json
 {
   "error": "TOOL_DISABLED",
@@ -1457,24 +1535,28 @@ DISABLED_TOOLS=n8n_diagnostic,n8n_health_check,custom_tool
 #### Usage Examples
 
 **Multi-tenant deployment:**
+
 ```bash
 # Hide tools that check global env vars
 DISABLED_TOOLS=n8n_diagnostic,n8n_health_check
 ```
 
 **Security hardening:**
+
 ```bash
 # Disable destructive management tools
 DISABLED_TOOLS=n8n_delete_workflow,n8n_update_full_workflow
 ```
 
 **Feature flags:**
+
 ```bash
 # Gradually roll out experimental tools
 DISABLED_TOOLS=experimental_feature_1,beta_tool_2
 ```
 
 **Deployment-specific:**
+
 ```bash
 # Different tool sets for cloud vs self-hosted
 DISABLED_TOOLS=local_only_tool,debug_tool
@@ -1495,6 +1577,7 @@ DISABLED_TOOLS=local_only_tool,debug_tool
 **45 comprehensive tests (all passing):**
 
 **Original Tests (21 scenarios):**
+
 - Environment variable parsing (8 tests)
 - Tool filtering for both doc & mgmt tools (5 tests)
 - ExecuteTool guard (3 tests)
@@ -1502,6 +1585,7 @@ DISABLED_TOOLS=local_only_tool,debug_tool
 - Real-world use cases (3 tests)
 
 **Additional Tests by test-automator (24 scenarios):**
+
 - Error response structure validation (3 tests)
 - Multi-tenant mode interaction (3 tests)
 - Special characters & unicode (5 tests)
@@ -1515,30 +1599,36 @@ DISABLED_TOOLS=local_only_tool,debug_tool
 #### Files Modified
 
 **Core Implementation (1 file):**
+
 - `src/mcp/server.ts` - Added filtering logic (~40 lines)
 
 **Configuration (4 files):**
+
 - `.env.example` - Added `DISABLED_TOOLS` documentation with examples
 - `.env.docker` - Added `DISABLED_TOOLS` example
 - `package.json` - Version bump to 2.22.14
 - `package.runtime.json` - Version bump to 2.22.14
 
 **Tests (2 files):**
+
 - `tests/unit/mcp/disabled-tools.test.ts` - 21 comprehensive test scenarios
 - `tests/unit/mcp/disabled-tools-additional.test.ts` - 24 additional test scenarios
 
 **Documentation (2 files):**
+
 - `DISABLED_TOOLS_TEST_COVERAGE_ANALYSIS.md` - Detailed coverage analysis
 - `DISABLED_TOOLS_TEST_SUMMARY.md` - Executive summary
 
 #### Impact
 
 **Before:**
+
 - ❌ Multi-tenant deployments showed incorrect diagnostic information
 - ❌ No way to disable problematic tools at deployment level
 - ❌ All-or-nothing approach (either all tools or no tools)
 
 **After:**
+
 - ✅ Fine-grained control over available tools per deployment
 - ✅ Multi-tenant deployments can hide env-var-based tools
 - ✅ Security hardening via tool filtering
@@ -1548,16 +1638,19 @@ DISABLED_TOOLS=local_only_tool,debug_tool
 #### Technical Details
 
 **Performance:**
+
 - O(1) lookup performance using `Set<string>`
 - Tested with 1000 tools: filtering completes in <100ms
 - No runtime overhead for tool execution
 
 **Security:**
+
 - Defense in depth: filtering + runtime rejection
 - Clear error messages prevent information leakage
 - No way to bypass disabled tool restrictions
 
 **Compatibility:**
+
 - 100% backward compatible
 - No breaking changes
 - Easy rollback (unset environment variable)
@@ -1577,6 +1670,7 @@ Based on comprehensive telemetry analysis of 593 validation errors across 4,000+
 #### Problem
 
 Telemetry analysis revealed that while validation works correctly (100% error recovery rate), AI agents struggle with three specific areas:
+
 1. **378 errors** (64% of failures): Missing required fields because agents didn't call `get_node_essentials()` first
 2. **179 errors** (30% of failures): Unhelpful "Duplicate node ID: undefined" messages lacking context
 3. **36 errors** (6% of failures): AI Agent node configuration issues without guidance
@@ -1586,6 +1680,7 @@ Telemetry analysis revealed that while validation works correctly (100% error re
 #### Solution
 
 **1. Enhanced Tools Documentation** (`src/mcp/tools-documentation.ts` lines 86-113):
+
 - Added prominent warning: "⚠️ CRITICAL: Always call get_node_essentials() FIRST"
 - Emphasized get_node_essentials with checkmarks and "CALL THIS FIRST" label
 - Repositioned get_node_info as secondary option
@@ -1594,6 +1689,7 @@ Telemetry analysis revealed that while validation works correctly (100% error re
 **Impact**: Prevents 378 required field errors (64% reduction)
 
 **2. Improved Duplicate ID Error Messages** (`src/services/workflow-validator.ts` lines 297-320):
+
 - Enhanced error to include:
   - Node indices (positions in array)
   - Both node names and types for conflicting nodes
@@ -1602,12 +1698,14 @@ Telemetry analysis revealed that while validation works correctly (100% error re
 - Added node index tracking with `nodeIdToIndex` map
 
 **Before**:
-```
+
+```text
 Duplicate node ID: "undefined"
 ```
 
 **After**:
-```
+
+```text
 Duplicate node ID: "abc123". Node at index 1 (name: "Second Node", type: "n8n-nodes-base.set")
 conflicts with node at index 0 (name: "First Node", type: "n8n-nodes-base.httpRequest").
 Each node must have a unique ID. Generate a new UUID using crypto.randomUUID() - Example:
@@ -1617,6 +1715,7 @@ Each node must have a unique ID. Generate a new UUID using crypto.randomUUID() -
 **Impact**: Fixes 179 "duplicate ID: undefined" errors (30% reduction)
 
 **3. AI Agent Node-Specific Validator** (`src/services/node-specific-validators.ts` after line 662):
+
 - Validates promptType and text requirement (promptType: "define" requires text)
 - Checks system message presence and quality (warns if < 20 characters)
 - Warns about output parser and fallback model connections
@@ -1631,27 +1730,32 @@ Each node must have a unique ID. Generate a new UUID using crypto.randomUUID() -
 #### Changes Summary
 
 **Files Modified (4 files)**:
+
 - `src/mcp/tools-documentation.ts` - Enhanced workflow pattern documentation (27 lines)
 - `src/services/workflow-validator.ts` - Improved duplicate ID errors (23 lines + import)
 - `src/services/node-specific-validators.ts` - Added AI Agent validator (90 lines)
 - `src/services/enhanced-config-validator.ts` - AI Agent integration (3 lines)
 
 **Test Files (2 files)**:
+
 - `tests/unit/services/workflow-validator.test.ts` - Duplicate ID tests (56 lines)
 - `tests/unit/services/node-specific-validators.test.ts` - AI Agent validator tests (181 lines)
 
 **Configuration (2 files)**:
+
 - `package.json` - Version bump to 2.22.13
 - `package.runtime.json` - Version bump to 2.22.13
 
 #### Testing Results
 
 **Test Coverage**: All tests passing
+
 - Workflow validator: Duplicate ID detection with context
 - Node-specific validators: AI Agent prompt, system message, maxIterations, error handling
 - Integration: Enhanced-config-validator switch statement
 
 **Patterns Followed**:
+
 - Duplicate ID enhancement: Matches Issue #392 parameter validation pattern
 - AI Agent validator: Follows Slack validator pattern (lines 22-89)
 - Error messages: Consistent with existing validation errors
@@ -1659,18 +1763,21 @@ Each node must have a unique ID. Generate a new UUID using crypto.randomUUID() -
 #### Expected Impact
 
 **For AI Agents**:
+
 - ✅ **Clear Guidance**: Documentation emphasizes calling essentials first
 - ✅ **Better Error Messages**: Duplicate ID errors include node context and UUID examples
 - ✅ **AI Agent Support**: Comprehensive validation for common configuration issues
 - ✅ **Self-Correction**: AI agents can fix issues based on improved error messages
 
 **Projected Error Reduction**:
+
 - Required field errors: -64% (378 → ~136 errors)
 - Duplicate ID errors: -30% (179 → ~125 errors)
 - AI Agent errors: -6% (36 → ~0 errors)
 - **Total reduction: 30-40% of validation errors**
 
 **Production Impact**:
+
 - **Risk Level**: Very Low (documentation + error messages only)
 - **Breaking Changes**: None (backward compatible)
 - **Performance**: No impact (O(n) complexity unchanged)
@@ -1679,11 +1786,13 @@ Each node must have a unique ID. Generate a new UUID using crypto.randomUUID() -
 #### Technical Details
 
 **Implementation Time**: ~1 hour total
+
 - Quick Win #1 (Documentation): 10 minutes
 - Quick Win #2 (Duplicate IDs): 20 minutes
 - Quick Win #3 (AI Agent): 30 minutes
 
 **Dependencies**:
+
 - Node.js 22.17.0 (crypto.randomUUID() available since 14.17.0)
 - No new package dependencies
 
@@ -1726,11 +1835,12 @@ Fixed cryptic error message when users mistakenly use `changes` instead of `upda
 
 Users who mistakenly used `changes` instead of `updates` in `n8n_update_partial_workflow` updateNode operations encountered a cryptic error:
 
-```
+```text
 Diff engine error: Cannot read properties of undefined (reading 'name')
 ```
 
 This error occurred because:
+
 1. The code tried to read `operation.updates.name` at line 406 of `workflow-diff-engine.ts`
 2. When users sent `changes` instead of `updates`, `operation.updates` was `undefined`
 3. Reading `.name` from `undefined` → unhelpful error message
@@ -1743,6 +1853,7 @@ This error occurred because:
 Added early validation in `validateUpdateNode()` method to detect and provide helpful guidance:
 
 **1. Parameter Validation** (`src/services/workflow-diff-engine.ts` lines 400-409):
+
 ```typescript
 // Check for common parameter mistake: "changes" instead of "updates" (Issue #392)
 const operationAny = operation as any;
@@ -1757,12 +1868,14 @@ if (!operation.updates) {
 ```
 
 **2. Documentation Fix** (`docs/VS_CODE_PROJECT_SETUP.md` line 165):
+
 - Fixed outdated example that showed incorrect parameter name
 - Changed from: `{type: 'updateNode', nodeId: 'slack1', changes: {position: [100, 200]}}`
 - Changed to: `{type: 'updateNode', nodeId: 'slack1', updates: {position: [100, 200]}}`
 - Prevents AI agents from learning the wrong syntax
 
 **3. Comprehensive Test Coverage** (`tests/unit/services/workflow-diff-engine.test.ts` lines 388-428):
+
 - Test for using `changes` instead of `updates` (validates helpful error message)
 - Test for missing `updates` parameter entirely
 - Both tests verify error message content includes examples
@@ -1770,12 +1883,14 @@ if (!operation.updates) {
 #### Error Messages
 
 **Before Fix:**
-```
+
+```text
 Diff engine error: Cannot read properties of undefined (reading 'name')
 ```
 
 **After Fix:**
-```
+
+```text
 Missing required parameter 'updates'. The updateNode operation requires an 'updates'
 object containing properties to modify. Example: {type: "updateNode", nodeId: "abc",
 updates: {name: "New Name"}}
@@ -1784,18 +1899,21 @@ updates: {name: "New Name"}}
 #### Impact
 
 **For AI Agents:**
+
 - ✅ **Clear Error Messages**: Explicitly states what's wrong ("Invalid parameter 'changes'")
 - ✅ **Educational**: Explains the correct parameter name ("requires 'updates'")
 - ✅ **Actionable**: Includes working example showing correct syntax
 - ✅ **Self-Correction**: AI agents can immediately fix their code based on the error
 
 **Testing Results:**
+
 - Test Coverage: 85% confidence (production ready)
 - n8n-mcp-tester validation: All 3 test cases passed
 - Code Review: Approved with minor optional suggestions
 - Consistency: Follows existing patterns from Issue #249
 
 **Production Impact:**
+
 - **Risk Level**: Very Low (only adds validation, no logic changes)
 - **Breaking Changes**: None (backward compatible)
 - **False Positive Rate**: 0% (validation is specific to the exact mistake)
@@ -1803,19 +1921,23 @@ updates: {name: "New Name"}}
 #### Technical Details
 
 **Files Modified (3 files):**
+
 - `src/services/workflow-diff-engine.ts` - Added early validation (10 lines)
 - `docs/VS_CODE_PROJECT_SETUP.md` - Fixed incorrect example (1 line)
 - `tests/unit/services/workflow-diff-engine.test.ts` - Added 2 comprehensive test cases (40 lines)
 
 **Configuration (1 file):**
+
 - `package.json` - Version bump to 2.22.12
 
 **Validation Flow:**
+
 1. Check if operation has `changes` property but no `updates` → Error with helpful message
 2. Check if operation is missing `updates` entirely → Error with example
 3. Continue with normal validation if `updates` is present
 
 **Consistency:**
+
 - Pattern matches existing parameter validation in `validateAddConnection()` (lines 444-451)
 - Error message format consistent with existing errors (lines 461, 466, 469)
 - Uses same `as any` approach for detecting invalid properties
@@ -1849,17 +1971,20 @@ Implemented activation/deactivation as diff operations, following the establishe
 #### Changes
 
 **API Client** (`src/services/n8n-api-client.ts`):
+
 - Added `activateWorkflow(id: string): Promise<Workflow>` method
 - Added `deactivateWorkflow(id: string): Promise<Workflow>` method
 - Both use POST requests to dedicated n8n API endpoints
 
 **Diff Engine Types** (`src/types/workflow-diff.ts`):
+
 - Added `ActivateWorkflowOperation` interface
 - Added `DeactivateWorkflowOperation` interface
 - Added `shouldActivate` and `shouldDeactivate` flags to `WorkflowDiffResult`
 - Increased supported operations from 15 to 17
 
 **Diff Engine** (`src/services/workflow-diff-engine.ts`):
+
 - Added validation for activation (requires activatable triggers)
 - Added operation application logic
 - Transfers activation intent from workflow object to result
@@ -1867,17 +1992,20 @@ Implemented activation/deactivation as diff operations, following the establishe
 - Rejects workflows with only `executeWorkflowTrigger` (cannot activate)
 
 **Handler** (`src/mcp/handlers-workflow-diff.ts`):
+
 - Checks `shouldActivate` and `shouldDeactivate` flags after workflow update
 - Calls appropriate API methods
 - Includes activation status in response message and details
 - Handles activation/deactivation errors gracefully
 
 **Documentation** (`src/mcp/tool-docs/workflow_management/n8n-update-partial-workflow.ts`):
+
 - Updated operation count from 15 to 17
 - Added "Workflow Activation Operations" section
 - Added activation tip to essentials
 
 **Tool Registration** (`src/mcp/handlers-n8n-manager.ts`):
+
 - Removed "Cannot activate/deactivate workflows via API" from limitations
 
 #### Usage
@@ -1946,13 +2074,15 @@ Fixed critical startup crash when the server falls back to sql.js adapter (used 
 #### Problem
 
 When Claude Desktop was configured to use a different Node.js version than the one used to build the project:
+
 - better-sqlite3 fails to load due to NODE_MODULE_VERSION mismatch (e.g., built with Node v22, running with Node v20)
 - System gracefully falls back to sql.js adapter (pure JavaScript, no native dependencies)
 - **BUT** the database health check crashed with "no such module: fts5" error
 - Server exits immediately after startup, preventing connection
 
 **Error Details:**
-```
+
+```text
 [ERROR] Database health check failed: Error: no such module: fts5
     at e.handleError (sql-wasm.js:90:371)
     at e.prepare (sql-wasm.js:89:104)
@@ -1991,11 +2121,13 @@ try {
 #### Impact
 
 **Before Fix:**
+
 - ❌ Server crashed immediately when using sql.js fallback
 - ❌ Claude Desktop connection failed with Node.js version mismatches
 - ❌ No way to use the MCP server without matching Node.js versions exactly
 
 **After Fix:**
+
 - ✅ Server starts successfully with sql.js fallback
 - ✅ Works with any Node.js version (graceful degradation)
 - ✅ Clear warning about FTS5 unavailability in logs
@@ -2004,12 +2136,14 @@ try {
 #### Performance Notes
 
 When using sql.js fallback:
+
 - Full-text search (FTS5) is not available, falls back to LIKE queries
 - Slightly slower search performance (~10-30ms vs ~5ms with FTS5)
 - All other functionality works identically
 - Database operations work correctly
 
 **Recommendation:** For best performance, ensure better-sqlite3 loads successfully by matching Node.js versions or rebuilding:
+
 ```bash
 # If Node version mismatch, rebuild better-sqlite3
 npm rebuild better-sqlite3
@@ -2018,6 +2152,7 @@ npm rebuild better-sqlite3
 #### Files Changed
 
 **Modified (1 file):**
+
 - `src/mcp/server.ts` (lines 299-317) - Added try-catch around FTS5 health check
 
 #### Testing
@@ -2058,10 +2193,12 @@ Updated n8n and all related dependencies to the latest versions:
 Fixed integration test failures caused by n8n 1.118.1 API change where `versionCounter` property is returned in GET responses but rejected in PUT requests.
 
 **Impact**:
+
 - Integration tests were failing with "request/body must NOT have additional properties" error
 - Workflow update operations via n8n API were failing
 
 **Solution**:
+
 - Added `versionCounter` to property exclusion list in `cleanWorkflowForUpdate()` (src/services/n8n-validation.ts:136)
 - Added `versionCounter?: number` type definition to Workflow and WorkflowExport interfaces
 - Added test coverage to prevent regression
@@ -2072,7 +2209,7 @@ Fixed integration test failures caused by n8n 1.118.1 API change where `versionC
 - All node types validated
 - Documentation mappings updated
 
-Conceived by Romuald Członkowski - https://www.aiadvisors.pl/en
+Conceived by Romuald Członkowski - <https://www.aiadvisors.pl/en>
 
 ## [2.22.7] - 2025-10-26
 
@@ -2085,6 +2222,7 @@ Fixed critical documentation error in property removal patterns that could have 
 #### Problem
 
 The documentation incorrectly showed using array index notation `[0]` for removing array elements:
+
 ```javascript
 // INCORRECT (doesn't work as shown)
 updates: { "parameters.headers[0]": undefined }
@@ -2113,6 +2251,7 @@ updates: { "parameters.headers[0]": undefined }
 #### Correct Usage
 
 **To remove an array property:**
+
 ```javascript
 // Correct: Remove entire array
 n8n_update_partial_workflow({
@@ -2126,6 +2265,7 @@ n8n_update_partial_workflow({
 ```
 
 **NOT:**
+
 ```javascript
 // Incorrect: Array index notation doesn't work
 updates: { "parameters.headers[0]": undefined }  // Treated as object key "headers[0]"
@@ -2148,9 +2288,11 @@ updates: { "parameters.headers[0]": undefined }  // Treated as object key "heade
 #### Files Changed
 
 **Documentation (1 file)**:
+
 - `src/mcp/tool-docs/workflow_management/n8n-update-partial-workflow.ts` - Corrected 3 instances of array property removal documentation
 
 **Configuration (2 files)**:
+
 - `package.json` - Version bump to 2.22.7
 - `package.runtime.json` - Version bump to 2.22.7
 
@@ -2172,23 +2314,27 @@ Conceived by Romuald Członkowski - [www.aiadvisors.pl/en](https://www.aiadvisor
 Fixed critical Docker configuration bug where custom PORT environment variable values were not properly mapped to container ports, causing connection failures in Docker deployments.
 
 #### Problem
+
 - **docker-compose.yml**: Port mapping `"${PORT:-3000}:3000"` hardcoded container port to 3000
 - **docker-compose.yml**: Health check hardcoded to port 3000
 - **Dockerfile**: Health check hardcoded to port 3000
 - Impact: When PORT≠3000 (e.g., PORT=8080), Docker mapped host port to wrong container port
 
 #### Solution
+
 - **docker-compose.yml line 44**: Changed port mapping to `"${PORT:-3000}:${PORT:-3000}"`
 - **docker-compose.yml line 56**: Updated health check to use dynamic port `$${PORT:-3000}`
 - **Dockerfile line 93**: Updated HEALTHCHECK to use dynamic port `${PORT:-3000}`
 - **Dockerfile line 85**: Added clarifying comment about PORT configurability
 
 #### Testing
+
 - Verified with default PORT (3000)
 - Verified with custom PORT (8080)
 - Health checks work correctly in both scenarios
 
 #### Related Issues
+
 - Fixes #228 (Docker Compose port error)
 - Likely fixes #109 (Configuration ignored in HTTP mode)
 - Likely fixes #84 (Can't access container)
@@ -2206,17 +2352,20 @@ Improved code maintainability and added comprehensive test coverage for defensiv
 #### Refactoring
 
 **1. Eliminated DRY Violation**
+
 - Extracted duplicated validation logic into `validateListResponse<T>()` helper method
 - Reduced code duplication from 88 lines to single reusable function
 - Impact: 75% reduction in validation code, easier maintenance
 
 **2. Enhanced Error Handling**
+
 - Consistent error message format across all list operations
 - Limited error message verbosity (max 5 keys shown to prevent information exposure)
 - Added security protection against data structure exposure
 - Better error messages: `got object with keys: [data, items, total, hasMore, meta]`
 
 **3. Improved Documentation**
+
 - Added JSDoc comments explaining backwards compatibility
 - Documented modern vs legacy response formats
 - Referenced issue #349 for context
@@ -2224,6 +2373,7 @@ Improved code maintainability and added comprehensive test coverage for defensiv
 #### Testing
 
 **Added Comprehensive Unit Tests** (29 new test cases)
+
 - Legacy array format wrapping for all 4 methods
 - Null/undefined response handling
 - Primitive type rejection (string, number, boolean)
@@ -2233,6 +2383,7 @@ Improved code maintainability and added comprehensive test coverage for defensiv
 - 100% coverage of new validation logic
 
 **Test Coverage Results**:
+
 - Before: 0% coverage of validation scenarios
 - After: 100% coverage (29/29 scenarios tested)
 - All validation paths exercised and verified
@@ -2240,21 +2391,25 @@ Improved code maintainability and added comprehensive test coverage for defensiv
 #### Impact
 
 **Code Quality**:
+
 - ✅ DRY principle restored (no duplication)
 - ✅ Type safety improved with generics
 - ✅ Consistent error handling across all methods
 - ✅ Well-documented backwards compatibility
 
 **Maintainability**:
+
 - ✅ Single source of truth for validation logic
 - ✅ Future bug fixes apply to all methods automatically
 - ✅ Easier to understand and modify
 
 **Security**:
+
 - ✅ Limited information exposure in error messages
 - ✅ Protection against verbose error logs
 
 **Testing**:
+
 - ✅ Full test coverage prevents regressions
 - ✅ All edge cases validated
 - ✅ Backwards compatibility verified
@@ -2262,6 +2417,7 @@ Improved code maintainability and added comprehensive test coverage for defensiv
 #### Files Modified
 
 **Code (1 file)**:
+
 - `src/services/n8n-api-client.ts`
   - Added `validateListResponse<T>()` private helper method (44 lines)
   - Refactored listWorkflows, listExecutions, listCredentials, listTags (reduced from ~100 lines to ~20 lines)
@@ -2269,17 +2425,20 @@ Improved code maintainability and added comprehensive test coverage for defensiv
   - Net reduction: ~80 lines of code
 
 **Tests (1 file)**:
+
 - `tests/unit/services/n8n-api-client.test.ts`
   - Added 29 comprehensive validation test cases (237 lines)
   - Coverage for all 4 list methods
   - Tests for legacy format, null responses, invalid structures, key truncation
 
 **Configuration (1 file)**:
+
 - `package.json` - Version bump to 2.22.3
 
 #### Technical Details
 
 **Helper Method Signature**:
+
 ```typescript
 private validateListResponse<T>(
   responseData: any,
@@ -2288,12 +2447,14 @@ private validateListResponse<T>(
 ```
 
 **Error Message Example**:
-```
+
+```text
 Invalid response from n8n API for workflows: expected {data: [], nextCursor?: string},
 got object with keys: [items, total, hasMore, page, limit]...
 ```
 
 **Usage Example**:
+
 ```typescript
 async listWorkflows(params: WorkflowListParams = {}): Promise<WorkflowListResponse> {
   try {
@@ -2348,12 +2509,14 @@ Added helpful suggestions for HTTP Request node best practices to prevent common
 This enhancement was developed after thorough investigation of issue #361:
 
 **Key Discoveries:**
+
 - ✅ Mixed expression syntax `=literal{{ expression }}` **actually works in n8n** - the issue report's primary claim was incorrect
 - ✅ Real validation gaps identified: missing `alwaysOutputData` and `responseFormat` checks
 - ✅ Workflow analysis showed "?" icon in UI caused by missing required URL (already caught by validation)
 - ✅ Compared broken vs fixed workflows to identify actual production issues
 
 **Testing Evidence:**
+
 - Analyzed workflow SwjKJsJhe8OsYfBk with mixed syntax - executions successful
 - Compared broken workflow (mBmkyj460i5rYTG4) with fixed workflow (hQI9pby3nSFtk4TV)
 - Identified that fixed workflow has `alwaysOutputData: true` and explicit `responseFormat: "json"`
@@ -2368,6 +2531,7 @@ This enhancement was developed after thorough investigation of issue #361:
 #### Test Coverage
 
 Added 8 new test cases covering:
+
 - alwaysOutputData suggestion for all HTTP Request nodes
 - responseFormat suggestion for API endpoint detection (various patterns)
 - responseFormat NOT suggested when already configured
@@ -2378,10 +2542,12 @@ Added 8 new test cases covering:
 #### Technical Details
 
 **Files Modified:**
+
 - `src/services/enhanced-config-validator.ts` - Added `enhanceHttpRequestValidation()` implementation
 - `tests/unit/services/enhanced-config-validator.test.ts` - Added 8 comprehensive test cases
 
 **Validation Flow:**
+
 1. Check for alwaysOutputData suggestion (all HTTP Request nodes)
 2. Detect API endpoints by URL patterns
 3. Check for explicit responseFormat configuration
@@ -2396,7 +2562,7 @@ Added 8 new test cases covering:
   - mBmkyj460i5rYTG4 (broken workflow)
   - hQI9pby3nSFtk4TV (fixed workflow)
 
-Conceived by Romuald Członkowski - https://www.aiadvisors.pl/en
+Conceived by Romuald Członkowski - <https://www.aiadvisors.pl/en>
 
 ---
 
@@ -2426,6 +2592,7 @@ Fixed issue where users could unintentionally place multiple If node connections
 #### Behavior
 
 The existing `branch` parameter works correctly and has comprehensive test coverage:
+
 - `branch="true"` → routes to `main[0]` (TRUE path)
 - `branch="false"` → routes to `main[1]` (FALSE path)
 
@@ -2433,7 +2600,7 @@ The issue was that users who didn't know about the `branch` parameter would natu
 
 #### Example Warning
 
-```
+```text
 Connection to If node "Check Condition" uses sourceIndex=0.
 Consider using branch="true" or branch="false" for better clarity.
 If node outputs: main[0]=TRUE branch, main[1]=FALSE branch.
@@ -2445,7 +2612,7 @@ If node outputs: main[0]=TRUE branch, main[1]=FALSE branch.
 - Verify warnings are generated for If and Switch nodes
 - Confirm existing smart parameter tests still pass
 
-**Conceived by Romuald Członkowski - https://www.aiadvisors.pl/en**
+**Conceived by Romuald Członkowski - <https://www.aiadvisors.pl/en**>
 
 ---
 
@@ -2521,7 +2688,7 @@ n8n_autofix_workflow({
 - Provides clear guidance for AI agents on handling breaking changes
 - Ensures workflows benefit from latest node features and bug fixes
 
-**Conceived by Romuald Członkowski - www.aiadvisors.pl/en**
+**Conceived by Romuald Członkowski - <https://www.aiadvisors.pl/en**>
 
 ---
 
@@ -2642,7 +2809,7 @@ Fixed critical validation issue where `n8n_update_partial_workflow` incorrectly 
 
 Workflows containing AI nodes (OpenAI Chat Model, Postgres Chat Memory, Embeddings OpenAI, Supabase Vector Store) could not be updated via `n8n_update_partial_workflow`, even for trivial changes to unrelated nodes. The validation logic incorrectly expected ALL nodes to have `main` connections, causing false positive errors:
 
-```
+```text
 Invalid connections: [
   {
     "code": "invalid_type",
@@ -2670,6 +2837,7 @@ export const workflowConnectionSchema = z.record(
 ```
 
 AI nodes use specialized connection types exclusively:
+
 - **ai_languageModel** - Language models (OpenAI, Anthropic, etc.)
 - **ai_memory** - Memory systems (Postgres Chat Memory, etc.)
 - **ai_embedding** - Embedding models (Embeddings OpenAI, etc.)
@@ -2681,6 +2849,7 @@ These nodes **never have `main` connections** - they only have their AI-specific
 #### Fixed
 
 **1. Updated Zod Schema** (`src/services/n8n-validation.ts` lines 27-49):
+
 ```typescript
 // AFTER (Fixed):
 const connectionArraySchema = z.array(
@@ -2707,6 +2876,7 @@ export const workflowConnectionSchema = z.record(
 ```
 
 **2. Comprehensive Test Suite** (New file: `tests/integration/workflow-diff/ai-node-connection-validation.test.ts`):
+
 - 13 test scenarios covering all AI connection types
 - Tests for AI nodes with ONLY AI-specific connections (no `main`)
 - Tests for mixed workflows (regular nodes + AI nodes)
@@ -2714,6 +2884,7 @@ export const workflowConnectionSchema = z.record(
 - All tests passing ✅
 
 **3. Updated Documentation** (`src/mcp/tool-docs/workflow_management/n8n-update-partial-workflow.ts`):
+
 - Added clarification that AI nodes do NOT require `main` connections
 - Documented fix for issue #357
 - Updated best practices for AI workflows
@@ -2721,11 +2892,13 @@ export const workflowConnectionSchema = z.record(
 #### Testing
 
 **Before Fix**:
+
 - ❌ `n8n_validate_workflow`: Returns `valid: true` (correct)
 - ❌ `n8n_update_partial_workflow`: FAILS with "main connections required" errors
 - ❌ Cannot update workflows containing AI nodes at all
 
 **After Fix**:
+
 - ✅ `n8n_validate_workflow`: Returns `valid: true` (still correct)
 - ✅ `n8n_update_partial_workflow`: SUCCEEDS without validation errors
 - ✅ AI nodes correctly recognized with AI-specific connection types only
@@ -2735,11 +2908,13 @@ export const workflowConnectionSchema = z.record(
 #### Impact
 
 **Zero Breaking Changes**:
+
 - Making required fields optional is always backward compatible
 - All existing workflows continue working
 - Validation now correctly matches n8n's actual connection model
 
 **Fixes**:
+
 - Users can now update AI workflows via `n8n_update_partial_workflow`
 - AI nodes no longer generate false positive validation errors
 - Consistent validation between `n8n_validate_workflow` and `n8n_update_partial_workflow`
@@ -2747,11 +2922,13 @@ export const workflowConnectionSchema = z.record(
 #### Files Changed
 
 **Modified (3 files)**:
+
 - `src/services/n8n-validation.ts` - Fixed Zod schema to support all connection types
 - `src/mcp/tool-docs/workflow_management/n8n-update-partial-workflow.ts` - Updated documentation
 - `package.json` - Version bump to 2.21.1
 
 **Added (1 file)**:
+
 - `tests/integration/workflow-diff/ai-node-connection-validation.test.ts` - Comprehensive test suite (13 tests)
 
 #### References
@@ -2772,12 +2949,15 @@ Conceived by Romuald Członkowski - [www.aiadvisors.pl/en](https://www.aiadvisor
 Enhanced `n8n_update_partial_workflow` to automatically update all connection references when renaming nodes, matching n8n UI behavior and eliminating the need for complex manual workarounds.
 
 #### Problem
+
 When renaming a node using the `updateNode` operation, connections still referenced the old node name, causing validation errors:
-```
+
+```text
 "Connection references non-existent target node: Old Name"
 ```
 
 This forced users to manually remove and re-add all connections, requiring:
+
 - 3+ operations instead of 1 simple rename
 - Manual tracking of all connection details (source, branch/case, indices)
 - Error-prone connection management
@@ -2786,6 +2966,7 @@ This forced users to manually remove and re-add all connections, requiring:
 #### Solution: Automatic Connection Reference Updates
 
 When you rename a node, **all connection references are automatically updated throughout the entire workflow**. The system:
+
 1. Detects name changes during `updateNode` operations
 2. Tracks old→new name mappings
 3. Updates all connection references after node operations complete
@@ -2794,14 +2975,17 @@ When you rename a node, **all connection references are automatically updated th
 #### What Gets Updated Automatically
 
 **Connection Source Keys:**
+
 - If a source node is renamed, its connections object key is updated
 - Example: `connections['Old Name']` → `connections['New Name']`
 
 **Connection Target References:**
+
 - If a target node is renamed, all connections pointing to it are updated
 - Example: `{node: 'Old Name', type: 'main', index: 0}` → `{node: 'New Name', type: 'main', index: 0}`
 
 **All Connection Types:**
+
 - `main` - Standard connections
 - `error` - Error output connections
 - `ai_tool` - AI tool connections
@@ -2810,6 +2994,7 @@ When you rename a node, **all connection references are automatically updated th
 - All other connection types
 
 **All Branch Configurations:**
+
 - IF node branches (true/false outputs)
 - Switch node cases (multiple numbered outputs)
 - Error output branches
@@ -2818,6 +3003,7 @@ When you rename a node, **all connection references are automatically updated th
 #### Examples
 
 **Before (v2.20.8 and earlier) - Failed:**
+
 ```javascript
 // Attempting to rename would fail
 n8n_update_partial_workflow({
@@ -2844,6 +3030,7 @@ operations: [
 ```
 
 **After (v2.21.0) - Works Automatically:**
+
 ```javascript
 // Same operation now succeeds automatically!
 n8n_update_partial_workflow({
@@ -2869,6 +3056,7 @@ n8n_update_partial_workflow({
 #### Additional Features
 
 **Name Collision Detection:**
+
 ```javascript
 // Attempting to rename to existing name
 {type: "updateNode", nodeId: "abc", updates: {name: "Existing Name"}}
@@ -2879,6 +3067,7 @@ already exists (id: xyz123...). Please choose a different name."
 ```
 
 **Batch Rename Support:**
+
 ```javascript
 // Multiple renames in single call - all connections update correctly
 operations: [
@@ -2889,6 +3078,7 @@ operations: [
 ```
 
 **Chain Operations:**
+
 ```javascript
 // Rename then immediately use new name in subsequent operations
 operations: [
@@ -2900,6 +3090,7 @@ operations: [
 #### Technical Implementation
 
 **Files Modified:**
+
 - `src/services/workflow-diff-engine.ts` - Core auto-update logic
   - Added `renameMap` property to track name changes
   - Added `updateConnectionReferences()` method (lines 943-994)
@@ -2913,10 +3104,12 @@ operations: [
   - Includes before/after examples and best practices
 
 **New Test Files:**
+
 - `tests/unit/services/workflow-diff-node-rename.test.ts` (925 lines, 14 scenarios)
 - `tests/integration/workflow-diff/node-rename-integration.test.ts` (4 real-world workflows)
 
 **Test Coverage:**
+
 1. Simple rename with single connection
 2. Multiple incoming connections
 3. Multiple outgoing connections
@@ -2936,6 +3129,7 @@ operations: [
 #### Benefits
 
 **User Experience:**
+
 - ✅ **Principle of Least Surprise**: Matches n8n UI behavior
 - ✅ **Single Operation**: Rename with 1 operation instead of 3+
 - ✅ **No Manual Tracking**: System handles all connection updates
@@ -2943,6 +3137,7 @@ operations: [
 - ✅ **Faster**: Less error-prone, fewer operations
 
 **Technical:**
+
 - ✅ **100% Backward Compatible**: Enhances existing `updateNode` operation
 - ✅ **All Connection Types**: main, error, AI connections, etc.
 - ✅ **All Branch Types**: IF, Switch, error outputs
@@ -2950,6 +3145,7 @@ operations: [
 - ✅ **Works in Both Modes**: atomic and continueOnError
 
 **Comprehensive:**
+
 - ✅ **14 Test Scenarios**: Unit tests covering all edge cases
 - ✅ **4 Integration Tests**: Real-world workflow validation
 - ✅ **Complete Documentation**: Tool docs with examples
@@ -2958,12 +3154,14 @@ operations: [
 #### Impact on Existing Workflows
 
 **Zero Breaking Changes:**
+
 - All existing workflows continue working
 - Existing operations work identically
 - Only enhances rename behavior
 - No API changes required
 
 **Migration:**
+
 - No migration needed
 - Update to v2.21.0 and renames "just work"
 - Remove manual connection workarounds at your convenience
@@ -2988,11 +3186,13 @@ This release includes two critical bug fixes that improve workflow validation fo
 Fixed bug where sticky notes (UI-only annotation nodes) were incorrectly triggering "disconnected node" validation errors when updating workflows via MCP tools.
 
 #### Problem
+
 - Workflows with sticky notes failed validation with "Node is disconnected" errors
 - Validation logic was inconsistent between `workflow-validator.ts` and `n8n-validation.ts`
 - Sticky notes are UI-only annotations and should never trigger connection validation
 
 #### Fixed
+
 - **Created Shared Utility Module** (`src/utils/node-classification.ts`):
   - `isStickyNote()`: Identifies all sticky note type variations
   - `isTriggerNode()`: Identifies trigger nodes (webhook, manual, cron, schedule)
@@ -3005,11 +3205,13 @@ Fixed bug where sticky notes (UI-only annotation nodes) were incorrectly trigger
 Fixed validation logic that was incorrectly treating Execute Workflow Trigger and other trigger nodes as regular nodes, causing "disconnected node" errors during partial workflow updates.
 
 #### Problem
+
 The workflow validation system used a hardcoded list of only 5 trigger types, missing 200+ trigger nodes including `executeWorkflowTrigger`.
 
 Additionally, no validation prevented users from activating workflows that only have `executeWorkflowTrigger` nodes (which cannot activate workflows - they can only be invoked by other workflows).
 
 #### Fixed
+
 - **Enhanced Trigger Detection** (`src/utils/node-type-utils.ts`):
   - `isTriggerNode()`: Flexible pattern matching recognizes ALL triggers (200+)
   - `isActivatableTrigger()`: Distinguishes triggers that can activate workflows
@@ -3024,11 +3226,13 @@ Additionally, no validation prevented users from activating workflows that only 
 #### Impact
 
 **Before Fix:**
+
 - ❌ Execute Workflow Trigger and 195+ other triggers flagged as "disconnected nodes"
 - ❌ Sticky notes triggered false positive validation errors
 - ❌ Could activate workflows with only `executeWorkflowTrigger` (n8n API would reject)
 
 **After Fix:**
+
 - ✅ ALL trigger types recognized (executeWorkflowTrigger, scheduleTrigger, emailTrigger, etc.)
 - ✅ Sticky notes properly excluded from validation
 - ✅ Clear error messages when trying to activate workflow with only `executeWorkflowTrigger`
@@ -3038,6 +3242,7 @@ Additionally, no validation prevented users from activating workflows that only 
 #### Technical Details
 
 **Files Modified:**
+
 - `src/utils/node-classification.ts` - NEW: Shared node classification utilities
 - `src/utils/node-type-utils.ts` - Enhanced trigger detection functions
 - `src/services/n8n-validation.ts` - Updated to use shared utilities
@@ -3046,6 +3251,7 @@ Additionally, no validation prevented users from activating workflows that only 
 - `package.json` - Version bump to 2.20.8
 
 **Related:**
+
 - **Issue:** #351 - Execute Workflow Trigger not recognized as valid trigger
 - **PR:** #350 - Sticky notes validation fix
 - **PR:** #352 - Comprehensive trigger detection
@@ -3059,17 +3265,20 @@ Conceived by Romuald Członkowski - [www.aiadvisors.pl/en](https://www.aiadvisor
 **Updated n8n to v1.116.2**
 
 Updated all n8n dependencies to the latest compatible versions:
+
 - `n8n`: 1.115.2 → 1.116.2
 - `n8n-core`: 1.114.0 → 1.115.1
 - `n8n-workflow`: 1.112.0 → 1.113.0
 - `@n8n/n8n-nodes-langchain`: 1.114.1 → 1.115.1
 
 **Database Rebuild:**
+
 - Rebuilt node database with 542 nodes from updated n8n packages
 - All 542 nodes loaded successfully from both n8n-nodes-base (439 nodes) and @n8n/n8n-nodes-langchain (103 nodes)
 - Documentation mapping completed for all nodes
 
 **Testing:**
+
 - Changes validated in CI/CD pipeline with full test suite (705 tests)
 - Critical nodes validated: httpRequest, code, slack, agent
 
@@ -3080,6 +3289,7 @@ Updated all n8n dependencies to the latest compatible versions:
 Fixed critical bug in production search where exact matches weren't appearing first in search results.
 
 #### Problem
+
 - SQL ORDER BY clause was `ORDER BY rank, CASE ... END` (wrong order)
 - FTS5 rank sorted first, CASE statement only acted as tiebreaker
 - Since FTS5 ranks are always unique, CASE boosting never applied
@@ -3087,7 +3297,9 @@ Fixed critical bug in production search where exact matches weren't appearing fi
 - Result: Searching "webhook" returned "Webflow Trigger" first, actual "Webhook" node ranked 4th
 
 #### Root Cause Analysis
+
 **SQL Ordering Issue:**
+
 ```sql
 -- BEFORE (Broken):
 ORDER BY rank, CASE ... END  -- rank first, CASE never used
@@ -3100,18 +3312,21 @@ ORDER BY CASE ... END, rank  -- CASE first, exact matches prioritized
 ```
 
 **Case-Sensitivity Issue:**
+
 - Old: `WHEN n.display_name = ?` (case-sensitive, fails on "Webhook" vs "webhook")
 - New: `WHEN LOWER(n.display_name) = LOWER(?)` (case-insensitive, matches correctly)
 
 #### Fixed
 
 **1. Production Code** (`src/mcp/server.ts` lines 1278-1295)
+
 - Changed ORDER BY from: `rank, CASE ... END`
 - To: `CASE WHEN LOWER(n.display_name) = LOWER(?) ... END, rank`
 - Added case-insensitive comparison with LOWER() function
 - Exact matches now consistently appear first in search results
 
 **2. Test Files Updated**
+
 - `tests/integration/database/node-fts5-search.test.ts` (lines 137-160)
 - `tests/integration/ci/database-population.test.ts` (lines 206-234)
 - Both updated to match corrected SQL logic with case-insensitive comparison
@@ -3120,22 +3335,26 @@ ORDER BY CASE ... END, rank  -- CASE first, exact matches prioritized
 #### Impact
 
 **Search Quality:**
+
 - ✅ Exact matches now always rank first (webhook, http, code, etc.)
 - ✅ Case-insensitive matching works correctly (Webhook = webhook = WEBHOOK)
 - ✅ Better user experience - predictable search results
 - ✅ SQL query more efficient (correct ordering at database level)
 
 **Performance:**
+
 - Same or better performance (less JavaScript sorting needed)
 - Database does the heavy lifting with correct ORDER BY
 - JavaScript sorting still provides additional relevance refinement
 
 **Testing:**
+
 - All 705 tests passing (703 passed + 2 fixed)
 - Comprehensive testing by n8n-mcp-tester agent
 - Code review approved with minor optimization suggestions for future
 
 **Verified Search Results:**
+
 - "webhook" → nodes-base.webhook (1st)
 - "http" → nodes-base.httpRequest (1st)
 - "code" → nodes-base.code (1st)
@@ -3153,7 +3372,8 @@ Fixed critical dependency issue where `tslib` was missing from the published npm
 #### Problem
 
 Users installing via `npx n8n-mcp@latest` experienced MODULE_NOT_FOUND errors:
-```
+
+```text
 Error: Cannot find module 'tslib'
 Require stack:
 - node_modules/@supabase/functions-js/dist/main/FunctionsClient.js
@@ -3162,6 +3382,7 @@ Require stack:
 ```
 
 **Root Cause Analysis:**
+
 - `@supabase/supabase-js` depends on `@supabase/functions-js` which requires `tslib` at runtime
 - `tslib` was NOT explicitly listed in `package.runtime.json` dependencies
 - The publish script (`scripts/publish-npm.sh`) copies `package.runtime.json` → `package.json` before publishing to npm
@@ -3170,39 +3391,46 @@ Require stack:
 - When users installed via `npx`, npm didn't install `tslib` → MODULE_NOT_FOUND error
 
 **Why It Worked Locally:**
+
 - Local development uses main `package.json` which has full n8n package dependencies
 - `tslib` existed as a transitive dependency through AWS SDK packages
 - npm's hoisting made it available locally
 
 **Why It Failed in Production:**
+
 - `npx` installations use the published package (which comes from `package.runtime.json`)
 - No transitive path to `tslib` in the minimal runtime dependencies
 - npm's dependency resolution on Windows didn't hoist it properly
 
 **Why Docker Worked:**
+
 - Docker builds used `package-lock.json` which included all transitive dependencies
 - Or the base image already had `tslib` installed
 
 #### Fixed
 
 **1. Added `tslib` to Runtime Dependencies**
+
 - Added `"tslib": "^2.6.2"` to `package.runtime.json` dependencies (line 14)
 - This is the **critical fix** since `package.runtime.json` gets published to npm
 - Version `^2.6.2` matches existing transitive dependency versions
 
 **2. Added `tslib` to Development Dependencies**
+
 - Added `"tslib": "^2.6.2"` to `package.json` dependencies (line 154)
 - Ensures consistency between development and production
 - Prevents confusion for developers
 
 **3. Synced `package.runtime.json` Version**
+
 - Updated `package.runtime.json` version from `2.20.2` to `2.20.5`
 - Keeps runtime package version in sync with main package version
 
 #### Technical Details
 
 **Dependency Chain:**
-```
+
+```text
 n8n-mcp
 └── @supabase/supabase-js@2.57.4
     └── @supabase/functions-js@2.4.6
@@ -3210,6 +3438,7 @@ n8n-mcp
 ```
 
 **Publish Process:**
+
 ```bash
 # CI/CD workflow (.github/workflows/release.yml:329)
 cp package.runtime.json $PUBLISH_DIR/package.json
@@ -3221,6 +3450,7 @@ npx n8n-mcp@latest
 ```
 
 **Files Modified:**
+
 - `package.json` line 154: Added `tslib: "^2.6.2"`
 - `package.runtime.json` line 14: Added `tslib: "^2.6.2"` (critical fix)
 - `package.runtime.json` line 3: Updated version `2.20.2` → `2.20.5`
@@ -3228,12 +3458,14 @@ npx n8n-mcp@latest
 #### Impact
 
 **Before Fix:**
+
 - ❌ Package completely broken on Windows for `npx` users
 - ❌ Affected all platforms using `npx` (not just Windows)
 - ❌ 100% failure rate on fresh installations
 - ❌ Workaround: Use v2.19.6 or install with `npm install` + run locally
 
 **After Fix:**
+
 - ✅ `npx n8n-mcp@latest` works on all platforms
 - ✅ `tslib` guaranteed to be installed with the package
 - ✅ No breaking changes (adding a dependency that was already in transitive tree)
@@ -3242,12 +3474,14 @@ npx n8n-mcp@latest
 #### Verification
 
 **Build & Tests:**
+
 - ✅ TypeScript compilation passes
 - ✅ Type checking passes (`npm run typecheck`)
 - ✅ All tests pass
 - ✅ Build succeeds (`npm run build`)
 
 **CI/CD Validation:**
+
 - ✅ Verified CI workflow copies `package.runtime.json` → `package.json` before publish
 - ✅ Confirmed `tslib` will be included in published package
 - ✅ No changes needed to CI/CD workflows
@@ -3273,6 +3507,7 @@ This release completely eliminates validation false positives on production work
 #### Problem Statement
 
 Production workflows were experiencing an 80% false positive rate during validation:
+
 - Expression-based URLs flagged as invalid (e.g., `={{ $json.protocol }}://{{ $json.domain }}/api`)
 - Expression-based JSON flagged as invalid (e.g., `={{ { key: $json.value } }}`)
 - Webhook `onError` validation checking wrong property location (node-level vs parameters)
@@ -3283,6 +3518,7 @@ Production workflows were experiencing an 80% false positive rate during validat
 #### Solution Overview
 
 **Phase 1: Centralized Expression Detection**
+
 - Created `src/utils/expression-utils.ts` with 5 core utilities:
   - `isExpression()`: Type predicate detecting `=` prefix
   - `containsExpression()`: Detects `{{ }}` markers (optimized with single regex)
@@ -3292,12 +3528,14 @@ Production workflows were experiencing an 80% false positive rate during validat
 - Added comprehensive test suite with 75 tests (100% statement coverage)
 
 **Phase 2: URL and JSON Validation Fixes**
+
 - Modified `config-validator.ts` to skip expression validation:
   - URL validation: Skip when `shouldSkipLiteralValidation()` returns true (lines 385-397)
   - JSON validation: Skip when value contains expressions (lines 424-439)
 - Improved error messages to include actual JSON parse errors
 
 **Phase 3: Webhook Validation Improvements**
+
 - Fixed `onError` property location check in `workflow-validator.ts`:
   - Now checks node-level `onError` property, not `parameters.onError`
   - Added context-aware validation for webhook response modes
@@ -3308,6 +3546,7 @@ Production workflows were experiencing an 80% false positive rate during validat
 - Moved responseNode validation from `node-specific-validators.ts` to `workflow-validator.ts`
 
 **Phase 4: Regex Pattern Enhancement**
+
 - Updated missing prefix pattern in `expression-validator.ts` (line 217):
   - Old: `/(?<!\$|\.)\b(json|node)\b/`
   - New: `/(?<![.$\w['])\b(json|node|input|items|workflow|execution)\b(?!\s*[:''])/`
@@ -3319,6 +3558,7 @@ Production workflows were experiencing an 80% false positive rate during validat
     - After quotes: `"json"` ✓
 
 **Phase 5: Profile-Based Filtering**
+
 - Made hardcoded credential warnings configurable in `enhanced-config-validator.ts`:
   - Created `shouldFilterCredentialWarning()` helper method (lines 469-476)
   - Only show hardcoded credential warnings in `strict` profile
@@ -3326,12 +3566,14 @@ Production workflows were experiencing an 80% false positive rate during validat
 - Replaced 3 instances of duplicate filtering code (lines 492, 510, 539)
 
 **Phase 6: Code Quality Improvements**
+
 - Fixed type guard order in `hasMixedContent()` (line 90)
 - Added type predicate to `isExpression()` for better TypeScript narrowing
 - Extracted helper methods to reduce code duplication
 - Improved error messages with actual parsing details
 
 **Phase 7: Comprehensive Testing**
+
 - Created `tests/unit/utils/expression-utils.test.ts` with 75 tests:
   - `isExpression()`: 18 tests (valid, invalid, edge cases, type narrowing)
   - `containsExpression()`: 14 tests (markers, edge cases)
@@ -3345,12 +3587,14 @@ Production workflows were experiencing an 80% false positive rate during validat
 #### Results
 
 **Validation Accuracy:**
+
 - Total Errors: 16 → 0 (100% elimination)
 - Total Warnings: 45 → 27 (40% reduction)
 - Valid Workflows: 0/6 → 6/6 (100% success rate)
 - False Positive Rate: 80% → 0%
 
 **Test Coverage:**
+
 - New tests: 75 comprehensive test cases
 - Statement coverage: 100%
 - Line coverage: 100%
@@ -3358,6 +3602,7 @@ Production workflows were experiencing an 80% false positive rate during validat
 - All 143 tests passing ✓
 
 **Files Changed:**
+
 - Modified: 7 files
   - `src/services/config-validator.ts`
   - `src/services/enhanced-config-validator.ts`
@@ -3370,6 +3615,7 @@ Production workflows were experiencing an 80% false positive rate during validat
   - `tests/unit/utils/expression-utils.test.ts`
 
 **Code Review:**
+
 - ✅ READY TO MERGE
 - All phases implemented with critical warnings and suggestions addressed
 - Type safety improved with type predicates
@@ -3377,6 +3623,7 @@ Production workflows were experiencing an 80% false positive rate during validat
 - Comprehensive test coverage with real-world scenarios
 
 **Related:**
+
 - PR #346
 - Branch: `feat/sticky-note-validation`
 
@@ -3397,12 +3644,14 @@ PR #343 (merged 2025-10-21) successfully fixed the MCP protocol error -32600 by 
 #### Added
 
 **1. TypeScript Interface for Type Safety**
+
 - Added `MCPToolResponse` interface (src/http-server.ts:26-35)
 - Replaced `any` type with proper interface for response objects
 - Improves IDE autocomplete, catches type errors at compile time
 - Better code maintainability and refactoring safety
 
 **2. 1MB Response Size Validation**
+
 - Implements size check before adding `structuredContent` (src/http-server.ts:434-449)
 - Prevents memory exhaustion and potential DoS attacks
 - Matches STDIO server behavior (src/mcp/server.ts:515-520)
@@ -3412,12 +3661,14 @@ PR #343 (merged 2025-10-21) successfully fixed the MCP protocol error -32600 by 
   - If <= 1MB: Include structuredContent (normal case)
 
 **3. Warning Logs for Large Responses**
+
 - Logs warnings when validation responses exceed 1MB (src/http-server.ts:438-442)
 - Includes actual size in logs for debugging
 - Helps identify performance issues and potential problems
 - **Example:** `Validation tool validate_workflow response is very large (1500000 chars). Truncating for HTTP transport safety.`
 
 **4. Response Truncation for Safety**
+
 - Truncates responses larger than 1MB to 999KB + message (src/http-server.ts:443-444)
 - Prevents HTTP transport issues with very large payloads
 - Ensures client stability even with pathological inputs
@@ -3426,6 +3677,7 @@ PR #343 (merged 2025-10-21) successfully fixed the MCP protocol error -32600 by 
 #### Technical Details
 
 **Size Validation Flow:**
+
 ```typescript
 // 1. Convert result to JSON
 let responseText = JSON.stringify(result, null, 2);
@@ -3449,6 +3701,7 @@ if (toolName.startsWith('validate_')) {
 ```
 
 **STDIO Parity:**
+
 - HTTP server now matches STDIO server safety features
 - Same 1MB limit (STDIO: src/mcp/server.ts:516)
 - Same truncation behavior
@@ -3481,6 +3734,7 @@ if (toolName.startsWith('validate_')) {
 #### Documentation
 
 **New Documentation:**
+
 - `docs/CI_TEST_INFRASTRUCTURE.md` - Documents known CI test infrastructure issues
   - Explains why external contributor PRs have integration test failures
   - Clarifies that these are infrastructure issues, not code quality issues
@@ -3488,6 +3742,7 @@ if (toolName.startsWith('validate_')) {
   - References PR #343 as example
 
 **Why CI Tests Fail for External PRs:**
+
 - GitHub Actions doesn't expose secrets to external contributor PRs (security)
 - MSW (Mock Service Worker) doesn't intercept requests properly in CI
 - Integration tests expect mock n8n server that isn't responding
@@ -3504,12 +3759,15 @@ if (toolName.startsWith('validate_')) {
 #### Files Changed
 
 **Code (1 file):**
+
 - `src/http-server.ts` - Enhanced with safety features (interface, size validation, logging)
 
 **Documentation (1 file):**
+
 - `docs/CI_TEST_INFRASTRUCTURE.md` - Documents CI test infrastructure known issues (NEW)
 
 **Configuration (1 file):**
+
 - `package.json` - Version bump to 2.20.4
 
 ---
@@ -3525,6 +3783,7 @@ Significantly improved error messages and recovery guidance for workflow validat
 #### Problem
 
 When workflow validation failed after applying diff operations, error messages were generic and unhelpful:
+
 - Simple "Workflow validation failed after applying operations" message
 - No categorization of error types
 - No recovery guidance for AI agents
@@ -3533,12 +3792,14 @@ When workflow validation failed after applying diff operations, error messages w
 #### Fixed
 
 **1. Enhanced Error Messages (handlers-workflow-diff.ts:130-193)**
+
 - **Error Categorization**: Analyzes errors and categorizes them by type (operator issues, connection issues, missing metadata, branch mismatches)
 - **Targeted Recovery Guidance**: Provides specific, actionable steps based on error type
 - **Clear Error Messages**: Shows single error or count with detailed context
 - **Auto-Sanitization Notes**: Explains what auto-sanitization can and cannot fix
 
 **Example Error Response**:
+
 ```json
 {
   "success": false,
@@ -3578,17 +3839,20 @@ Updated 4 tool documentation files to explain auto-sanitization system:
 #### Impact
 
 **AI Agent Experience**:
+
 - ✅ **Clear Error Messages**: Specific errors with exact problem identification
 - ✅ **Actionable Recovery**: Step-by-step guidance to fix issues
 - ✅ **Error Categorization**: Understand error type immediately
 - ✅ **Example Code**: Error responses include fix suggestions with code snippets
 
 **Documentation Quality**:
+
 - ✅ **Comprehensive**: Auto-sanitization system fully documented
 - ✅ **Accurate**: All technical claims verified by tests
 - ✅ **Helpful**: Clear explanations of what can/cannot be auto-fixed
 
 **Error Response Structure**:
+
 - `details.errors` - Array of specific error messages
 - `details.errorCount` - Number of errors found
 - `details.recoveryGuidance` - Actionable steps to fix issues
@@ -3606,9 +3870,11 @@ Updated 4 tool documentation files to explain auto-sanitization system:
 #### Files Changed
 
 **Code (1 file)**:
+
 - `src/mcp/handlers-workflow-diff.ts` - Enhanced error messages with categorization and recovery guidance
 
 **Documentation (4 files)**:
+
 - `src/mcp/tool-docs/workflow_management/n8n-update-partial-workflow.ts` - Auto-sanitization section
 - `src/mcp/tool-docs/workflow_management/n8n-create-workflow.ts` - Auto-sanitization tips
 - `src/mcp/tool-docs/validation/validate-node-operation.ts` - Operator validation guidance
@@ -3625,6 +3891,7 @@ Updated 4 tool documentation files to explain auto-sanitization system:
 Fixed critical issue where `n8n_update_partial_workflow` could create corrupted workflows that n8n API accepts but UI cannot render. **Enhanced validation to detect ALL disconnected nodes**, not just workflows with zero connections.
 
 #### Problem
+
 - Partial workflow updates validated individual operations but not final workflow structure
 - Users could inadvertently create invalid workflows:
   - Multi-node workflows with no connections
@@ -3636,12 +3903,14 @@ Fixed critical issue where `n8n_update_partial_workflow` could create corrupted 
 #### Solution (Two-Phase Fix)
 
 **Phase 1 - Basic Validation**:
+
 - ✅ Added final workflow structure validation after applying all diff operations
 - ✅ Improved error messages with actionable examples showing correct syntax
 - ✅ Reject updates that would create invalid workflows with clear feedback
 - ✅ Updated tests to create valid workflows and verify prevention of invalid ones
 
 **Phase 2 - Enhanced Validation** (discovered via real-world testing):
+
 - ✅ Detects ALL disconnected nodes, not just empty connection objects
 - ✅ Identifies each disconnected node by name and type
 - ✅ Provides specific fix suggestions naming the actual nodes
@@ -3649,6 +3918,7 @@ Fixed critical issue where `n8n_update_partial_workflow` could create corrupted 
 - ✅ Tested against real incremental workflow building scenarios
 
 #### Changes
+
 - `src/mcp/handlers-workflow-diff.ts`: Added `validateWorkflowStructure()` call after diff application
 - `src/services/n8n-validation.ts`:
   - Enhanced error messages with operation examples
@@ -3661,13 +3931,16 @@ Fixed critical issue where `n8n_update_partial_workflow` could create corrupted 
   - Test for incremental node addition without connections
 
 #### Real-World Testing
+
 Tested against actual workflow building scenario (`chat_workflows_phase1.md`):
+
 - Agent building 28-node workflow incrementally
 - Validation correctly detected node added without connection
 - Error message provided exact fix with node names
 - Prevents UI from showing "Workflow not found" error
 
 #### Impact
+
 - 🎯 **Prevention**: Impossible to create workflows that UI cannot render
 - 📝 **Feedback**: Clear error messages explaining why workflow is invalid
 - ✅ **Compatibility**: All existing valid workflows continue to work
@@ -3685,6 +3958,7 @@ Fixed critical memory leak causing growth from 100Mi to 2.2GB over 2-3 days in l
 #### Problem Analysis
 
 **Environment:**
+
 - Kubernetes/Docker deployments using sql.js fallback
 - Growth rate: ~23 MB/hour (444Mi after 19 hours)
 - Pattern: Linear accumulation, not garbage collected
@@ -3699,7 +3973,8 @@ Fixed critical memory leak causing growth from 100Mi to 2.2GB over 2-3 days in l
 5. **Docker limitation:** Main Dockerfile lacked build tools, forcing sql.js fallback instead of better-sqlite3
 
 **Memory Growth Pattern:**
-```
+
+```text
 Hour 0:   104 MB  (baseline)
 Hour 5:   220 MB  (+116 MB)
 Hour 10:  330 MB  (+110 MB)
@@ -3712,27 +3987,32 @@ Day 3:   2250 MB  (extrapolated - OOM kill)
 **Code-Level Optimizations (sql.js adapter):**
 
 ✅ **Removed unnecessary save triggers**
+
 - `prepare()` no longer calls `scheduleSave()` (read operations don't modify DB)
 - Only `exec()` and `run()` trigger saves (write operations only)
 - **Impact:** 90% reduction in save calls
 
 ✅ **Increased debounce interval**
+
 - Changed: 100ms → 5000ms (5 seconds)
 - Configurable via `SQLJS_SAVE_INTERVAL_MS` environment variable
 - **Impact:** 98% reduction in save frequency (100ms → 5s)
 
 ✅ **Removed Buffer.from() copy**
+
 - Before: `const buffer = Buffer.from(data);` (2-5MB copy)
 - After: `fsSync.writeFileSync(path, data);` (direct Uint8Array write)
 - **Impact:** 50% reduction in temporary allocations per save
 
 ✅ **Optimized memory allocation**
+
 - Removed Buffer.from() copy, write Uint8Array directly to disk
 - Local variable automatically cleared when function exits
 - V8 garbage collector can reclaim memory immediately after save
 - **Impact:** 50% reduction in temporary allocations per save
 
 ✅ **Made save interval configurable**
+
 - New env var: `SQLJS_SAVE_INTERVAL_MS` (default: 5000)
 - Validates input (minimum 100ms, falls back to default if invalid)
 - **Impact:** Tunable for different deployment scenarios
@@ -3740,12 +4020,14 @@ Day 3:   2250 MB  (extrapolated - OOM kill)
 **Infrastructure Fix (Dockerfile):**
 
 ✅ **Enabled better-sqlite3 in Docker**
+
 - Added build tools (python3, make, g++) to main Dockerfile
 - Compile better-sqlite3 during npm install, then remove build tools
 - Image size increase: ~5-10MB (acceptable for eliminating memory leak)
 - **Impact:** Eliminates sql.js entirely in Docker (best fix)
 
 ✅ **Railway Dockerfile verified**
+
 - Already had build tools (python3, make, g++)
 - Added explanatory comment for maintainability
 - **Impact:** No changes needed
@@ -3753,12 +4035,14 @@ Day 3:   2250 MB  (extrapolated - OOM kill)
 #### Impact
 
 **With better-sqlite3 (now default in Docker):**
+
 - ✅ Memory: Stable at ~100-120 MB (native SQLite)
 - ✅ Performance: Better than sql.js (no WASM overhead)
 - ✅ No periodic saves needed (writes directly to disk)
 - ✅ Eliminates memory leak entirely
 
 **With sql.js (fallback only, if better-sqlite3 fails):**
+
 - ✅ Memory: Stable at 150-200 MB (vs 2.2GB after 3 days)
 - ✅ No OOM kills in long-running Kubernetes pods
 - ✅ Reduced CPU usage (98% fewer disk writes)
@@ -3784,6 +4068,7 @@ SQLJS_SAVE_INTERVAL_MS=5000  # Debounce interval in milliseconds
 ```
 
 **Usage:**
+
 - Only relevant when sql.js fallback is used
 - Default: 5000ms (5 seconds)
 - Minimum: 100ms
@@ -3791,6 +4076,7 @@ SQLJS_SAVE_INTERVAL_MS=5000  # Debounce interval in milliseconds
 - Invalid values fall back to default
 
 **Example Docker Configuration:**
+
 ```yaml
 environment:
   - SQLJS_SAVE_INTERVAL_MS=10000  # Save every 10 seconds
@@ -3799,6 +4085,7 @@ environment:
 #### Technical Details
 
 **Files Modified:**
+
 - `src/database/database-adapter.ts` - SQLJSAdapter optimization
 - `Dockerfile` - Added build tools for better-sqlite3
 - `Dockerfile.railway` - Added documentation comment
@@ -3806,6 +4093,7 @@ environment:
 - `tests/integration/database/sqljs-memory-leak.test.ts` - New integration tests
 
 **Testing:**
+
 - ✅ All unit tests passing
 - ✅ New integration tests for memory leak prevention
 - ✅ Docker builds verified (both Dockerfile and Dockerfile.railway)
@@ -3833,7 +4121,8 @@ Fixed critical CI/CD race condition that caused temporary ARM64-only Docker mani
 During v2.20.0 release, **5 workflows ran simultaneously** on the same commit, causing a race condition where the `latest` Docker tag was temporarily ARM64-only:
 
 **Timeline of the Race Condition:**
-```
+
+```text
 17:01:36Z → All 5 workflows start simultaneously
   - docker-build.yml (triggered by main push)
   - release.yml (triggered by package.json version change)
@@ -3847,6 +4136,7 @@ Race Condition Window:
 ```
 
 **User Impact:**
+
 - AMD64 users pulling `latest` during this window received ARM64-only images
 - `docker pull` failed with "does not provide the specified platform (linux/amd64)"
 - Workaround: Pin to specific version tags (e.g., `2.19.5`)
@@ -3883,11 +4173,13 @@ concurrency:
 **Impact:** Workflows now wait for each other. When one is pushing to `latest`, the other queues.
 
 **2. Removed Redundant Tag Trigger**
+
 - **docker-build.yml:** Removed `v*` tag trigger
 - **Reason:** release.yml already handles versioned releases completely
 - **Benefit:** Eliminates one source of race condition
 
 **3. Enabled Build Caching**
+
 - Changed `no-cache: true` → `no-cache: false` in docker-build.yml
 - Added `cache-from: type=gha` and `cache-to: type=gha,mode=max`
 - **Benefit:** Faster builds (40-60% improvement), more predictable timing
@@ -3928,6 +4220,7 @@ fi
 **Benefit:** Catches incomplete pushes immediately, prevents silent failures
 
 **6. Railway Build Improvements**
+
 - Added `needs: build` dependency → Ensures sequential execution
 - Enabled caching → Faster builds
 - Better error handling
@@ -3935,6 +4228,7 @@ fi
 #### Files Changed
 
 **docker-build.yml:**
+
 - Removed `tags: - 'v*'` trigger (line 8-9)
 - Added shared concurrency group `docker-push-${{ github.ref }}`
 - Changed `no-cache: true` → `false`
@@ -3943,6 +4237,7 @@ fi
 - Added `needs: build` to Railway job
 
 **release.yml:**
+
 - Updated concurrency group to shared `docker-push-${{ github.ref }}`
 - Added multi-arch verification for `latest` tag with retry
 - Added multi-arch verification for version tag with retry
@@ -3951,6 +4246,7 @@ fi
 #### Impact
 
 **Before Fix:**
+
 - ❌ Race condition between workflows
 - ❌ Temporal ARM64-only window (minutes to hours)
 - ❌ Slow builds (no-cache: true)
@@ -3958,6 +4254,7 @@ fi
 - ❌ 5 workflows running simultaneously
 
 **After Fix:**
+
 - ✅ Workflows serialized via shared concurrency group
 - ✅ Always multi-arch or fail fast with verification
 - ✅ Faster builds (caching enabled, 40-60% improvement)
@@ -3974,6 +4271,7 @@ fi
 #### Verification Steps
 
 After merge, monitor that:
+
 1. Regular main pushes trigger only `docker-build.yml`
 2. Version bumps trigger `release.yml` (docker-build.yml waits)
 3. Actions tab shows workflows queuing (not running in parallel)
@@ -3983,6 +4281,7 @@ After merge, monitor that:
 #### Technical Details
 
 **Concurrency Serialization:**
+
 ```yaml
 # Workflow 1 starts → Acquires docker-push-main lock
 # Workflow 2 starts → Sees lock held → Waits in queue
@@ -3991,12 +4290,14 @@ After merge, monitor that:
 ```
 
 **Retry Algorithm:**
+
 - Total attempts: 5
 - Backoff sequence: 2s, 4s, 8s, 16s
 - Max total wait: ~30 seconds
 - Handles registry propagation delays
 
 **Manifest Verification:**
+
 - Checks for both `linux/amd64` AND `linux/arm64` in manifest
 - Fails build if either platform missing
 - Provides full manifest output in logs for debugging
@@ -4010,7 +4311,7 @@ After merge, monitor that:
 ### References
 
 - **Issue:** #328 - latest on GHCR is arm64-only
-- **PR:** #334 - https://github.com/czlonkowski/n8n-mcp/pull/334
+- **PR:** #334 - <https://github.com/czlonkowski/n8n-mcp/pull/334>
 - **Code Review:** Identified critical concurrency group issue
 - **Reporter:** @mickahouan
 - **Branch:** `fix/docker-multiarch-race-condition-328`
@@ -4022,10 +4323,10 @@ After merge, monitor that:
 **MCP Server Icon Support (SEP-973)**
 
 - Added custom server icons for MCP clients
-  - Icons served from https://www.n8n-mcp.com/logo*.png
+  - Icons served from <https://www.n8n-mcp.com/logo*.png>
   - Multiple sizes: 48x48, 128x128, 192x192
   - Future-proof for Claude Desktop icon UI support
-- Added websiteUrl field pointing to https://n8n-mcp.com
+- Added websiteUrl field pointing to <https://n8n-mcp.com>
 - Server now reports correct version from package.json instead of hardcoded '1.0.0'
 
 ### 📦 Dependency Updates
@@ -4127,7 +4428,8 @@ This release fixes critical validator false positives by implementing true schem
 - **Code Quality**: Code review score 9.3/10
 
 #### Example Error Message (After Fix)
-```
+
+```text
 resourceLocator 'sheetName.mode' must be one of [list, url, id, name], got 'invalid'
 Fix: Change mode to one of: list, url, id, name
 ```
@@ -4148,6 +4450,7 @@ This release fixes a unit test failure that occurred after implementing environm
   - **Root Cause**: Environment-aware debugging improvements added a `troubleshooting` array to error responses, but unit test wasn't updated
   - **Fix**: Updated test expectation to include the new troubleshooting field (lines 1030-1035 in `tests/unit/mcp/handlers-n8n-manager.test.ts`)
   - **Error Response Structure** (now includes):
+
     ```typescript
     details: {
       apiUrl: 'https://n8n.test.com',
@@ -4195,18 +4498,21 @@ This release fixes critical search failures that caused 69% of user searches to 
 #### Problem
 
 **Root Cause Analysis:**
+
 1. **Missing FTS5 Table**: Production database had NO `nodes_fts` FTS5 virtual table
 2. **Empty Database Scenario**: When database was empty, both FTS5 and LIKE fallback returned zero results
 3. **No Detection**: Missing validation to catch empty database or missing FTS5 table
 4. **Production Impact**: 9 of 13 searches (69%) returned zero results for critical nodes with high user adoption
 
 **Telemetry Evidence** (Sept 26 - Oct 9, 2025):
+
 - "webhook" search: 3 failures (node has 39.6% adoption rate - 4,316 actual uses)
 - "merge" search: 1 failure (node has 10.7% adoption rate - 1,418 actual uses)
 - "split batch" search: 2 failures (node is actively used in workflows)
 - Overall: 9/13 searches failed (69% failure rate)
 
 **Technical Root Cause:**
+
 - `schema.sql` had a note claiming "FTS5 tables are created conditionally at runtime" (line 111)
 - This was FALSE - no runtime creation code existed
 - `schema-optimized.sql` had correct FTS5 implementation but was never used
@@ -4216,6 +4522,7 @@ This release fixes critical search failures that caused 69% of user searches to 
 #### Fixed
 
 **1. Schema Updates**
+
 - **File**: `src/database/schema.sql`
 - Added `nodes_fts` FTS5 virtual table with full-text indexing
 - Added synchronization triggers (INSERT/UPDATE/DELETE) to keep FTS5 in sync with nodes table
@@ -4223,6 +4530,7 @@ This release fixes critical search failures that caused 69% of user searches to 
 - Updated misleading note about conditional FTS5 creation
 
 **2. Database Validation**
+
 - **File**: `src/scripts/rebuild.ts`
 - Added critical empty database detection (fails fast if zero nodes)
 - Added FTS5 table existence validation
@@ -4231,6 +4539,7 @@ This release fixes critical search failures that caused 69% of user searches to 
 - Added minimum node count validation (expects 500+ nodes from both packages)
 
 **3. Runtime Health Checks**
+
 - **File**: `src/mcp/server.ts`
 - Added database health validation on first access
 - Detects empty database and throws clear error message
@@ -4238,6 +4547,7 @@ This release fixes critical search failures that caused 69% of user searches to 
 - Logs successful health check with node count
 
 **4. Comprehensive Test Suite**
+
 - **New File**: `tests/integration/database/node-fts5-search.test.ts` (14 tests)
   - FTS5 table existence and trigger validation
   - FTS5 index population and synchronization
@@ -4263,6 +4573,7 @@ This release fixes critical search failures that caused 69% of user searches to 
 #### Technical Details
 
 **FTS5 Implementation:**
+
 ```sql
 CREATE VIRTUAL TABLE IF NOT EXISTS nodes_fts USING fts5(
   node_type,
@@ -4276,16 +4587,19 @@ CREATE VIRTUAL TABLE IF NOT EXISTS nodes_fts USING fts5(
 ```
 
 **Synchronization Triggers:**
+
 - `nodes_fts_insert`: Adds to FTS5 when node inserted
 - `nodes_fts_update`: Updates FTS5 when node modified
 - `nodes_fts_delete`: Removes from FTS5 when node deleted
 
 **Validation Strategy:**
+
 1. **Build Time** (`rebuild.ts`): Validates FTS5 creation and population
 2. **Runtime** (`server.ts`): Health check on first database access
 3. **CI Time** (tests): 52 tests ensure database integrity
 
 **Search Performance:**
+
 - FTS5 search: < 100ms for typical queries (20 results)
 - LIKE fallback: < 500ms (still functional if FTS5 unavailable)
 - Ranking: Exact matches prioritized in results
@@ -4293,12 +4607,14 @@ CREATE VIRTUAL TABLE IF NOT EXISTS nodes_fts USING fts5(
 #### Impact
 
 **Before Fix:**
+
 - 69% of searches returned zero results
 - Users couldn't find critical nodes via AI assistant
 - Silent failure - no error messages
 - n8n workflows still worked (nodes loaded directly from npm)
 
 **After Fix:**
+
 - ✅ All critical searches return results
 - ✅ FTS5 provides fast, ranked search
 - ✅ Clear error messages if database empty
@@ -4318,6 +4634,7 @@ Testing revealed LIKE search fallback was **perfectly functional** - it only fai
 #### Migration
 
 **Existing Installations:**
+
 ```bash
 # Rebuild database to add FTS5 index
 npm run rebuild
@@ -4327,6 +4644,7 @@ npm run validate
 ```
 
 **CI/CD:**
+
 - New CI validation suite (`tests/integration/ci/database-population.test.ts`)
 - Runs when database exists (after n8n update commits)
 - Validates FTS5 table, search functionality, and data integrity
@@ -4343,6 +4661,7 @@ This release fixes a critical constructor bug in `NodeRepository` that caused th
 #### Problem
 
 When using the sql.js fallback adapter (pure JavaScript implementation without native dependencies), three critical MCP tools were failing with "Cannot read properties of undefined" errors:
+
 - `get_node_essentials`
 - `get_node_info`
 - `validate_node_operation`
@@ -4351,6 +4670,7 @@ When using the sql.js fallback adapter (pure JavaScript implementation without n
 The `NodeRepository` constructor used duck typing (`'db' in object`) to determine whether to unwrap the database adapter. This check incorrectly matched BOTH `SQLiteStorageService` AND `DatabaseAdapter` instances because both have a `.db` property.
 
 When sql.js was used:
+
 1. `createDatabaseAdapter()` returned a `SQLJSAdapter` instance (wrapped)
 2. `NodeRepository` constructor saw `'db' in adapter` was true
 3. Constructor unwrapped it: `this.db = adapter.db`
@@ -4361,6 +4681,7 @@ When sql.js was used:
 #### Fixed
 
 **NodeRepository Constructor Type Discrimination**
+
 - Changed from duck typing (`'db' in object`) to precise instanceof check
 - Only unwrap `SQLiteStorageService` instances (intended behavior)
 - Keep `DatabaseAdapter` instances intact (preserves wrapper logic)
@@ -4369,6 +4690,7 @@ When sql.js was used:
 #### Technical Details
 
 **Before (Broken):**
+
 ```typescript
 constructor(dbOrService: DatabaseAdapter | SQLiteStorageService) {
   if ('db' in dbOrService) {           // ❌ Matches EVERYTHING with .db property
@@ -4380,6 +4702,7 @@ constructor(dbOrService: DatabaseAdapter | SQLiteStorageService) {
 ```
 
 **After (Fixed):**
+
 ```typescript
 constructor(dbOrService: DatabaseAdapter | SQLiteStorageService) {
   if (dbOrService instanceof SQLiteStorageService) {  // ✅ Only matches SQLiteStorageService
@@ -4392,12 +4715,14 @@ constructor(dbOrService: DatabaseAdapter | SQLiteStorageService) {
 ```
 
 **Why instanceof is Critical:**
+
 - `'db' in object` is property checking (duck typing) - too permissive
 - `instanceof` is class hierarchy checking - precise type discrimination
 - With instanceof, sql.js queries flow through `SQLJSAdapter` → `SQLJSStatement` wrapper chain
 - Wrapper normalizes sql.js behavior to match better-sqlite3 API (object returns)
 
 **Impact:**
+
 - Fixes MCP tool failures on systems where better-sqlite3 cannot compile (Node.js version mismatches, ARM architectures)
 - Ensures sql.js fallback works correctly with proper data normalization
 - No performance impact (same code path, just preserved wrapper)
@@ -4419,6 +4744,7 @@ This release fixes critical safety violations in the startup error logging syste
 #### Problem
 
 Code review of v2.18.2 identified 7 critical/high-priority safety issues:
+
 - **CRITICAL-01**: Missing database checkpoints (DATABASE_CONNECTING/CONNECTED never logged)
 - **CRITICAL-02**: Constructor can throw before defensive initialization
 - **CRITICAL-03**: Blocking awaits delay startup (5s+ with 10 checkpoints × 500ms latency)
@@ -4430,6 +4756,7 @@ Code review of v2.18.2 identified 7 critical/high-priority safety issues:
 #### Fixed
 
 **CRITICAL-01: Missing Database Checkpoints**
+
 - Added `DATABASE_CONNECTING` checkpoint before database initialization
 - Added `DATABASE_CONNECTED` checkpoint after successful initialization
 - Pass `earlyLogger` to `N8NDocumentationMCPServer` constructor
@@ -4437,6 +4764,7 @@ Code review of v2.18.2 identified 7 critical/high-priority safety issues:
 - Files: `src/mcp/server.ts`, `src/mcp/index.ts`
 
 **CRITICAL-02: Constructor Can Throw**
+
 - Converted `EarlyErrorLogger` to singleton pattern with `getInstance()` method
 - Initialize ALL fields to safe defaults BEFORE any operation that can throw
 - Defensive initialization order:
@@ -4448,6 +4776,7 @@ Code review of v2.18.2 identified 7 critical/high-priority safety issues:
 - File: `src/telemetry/early-error-logger.ts`
 
 **CRITICAL-03: Blocking Awaits Delay Startup**
+
 - Removed ALL `await` keywords from checkpoint calls (8 locations)
 - Changed `logCheckpoint()` from async to synchronous (void return)
 - Changed `logStartupError()` to fire-and-forget with internal async implementation
@@ -4456,12 +4785,14 @@ Code review of v2.18.2 identified 7 critical/high-priority safety issues:
 - Files: `src/mcp/index.ts`, `src/telemetry/early-error-logger.ts`
 
 **HIGH-01: ReDoS Vulnerability in Error Sanitization**
+
 - Removed negative lookbehind regex: `(?<!Bearer\s)token\s*[=:]\s*\S+`
 - Replaced with simplified regex: `\btoken\s*[=:]\s*[^\s;,)]+`
 - No complex capturing groups (catastrophic backtracking impossible)
 - File: `src/telemetry/error-sanitization-utils.ts`
 
 **HIGH-02: Race Conditions in EarlyErrorLogger**
+
 - Singleton pattern prevents multiple instances
 - Added `initPromise` property to track initialization state
 - Added `waitForInit()` method for testing
@@ -4469,6 +4800,7 @@ Code review of v2.18.2 identified 7 critical/high-priority safety issues:
 - File: `src/telemetry/early-error-logger.ts`
 
 **HIGH-03: No Timeout on Supabase Operations**
+
 - Added `withTimeout()` wrapper function (5-second max)
 - Uses `Promise.race()` pattern to prevent hanging
 - Applies to all direct Supabase inserts
@@ -4476,6 +4808,7 @@ Code review of v2.18.2 identified 7 critical/high-priority safety issues:
 - File: `src/telemetry/early-error-logger.ts`
 
 **HIGH-04: Missing N8N API Checkpoints**
+
 - Added `N8N_API_CHECKING` checkpoint before n8n API configuration check
 - Added `N8N_API_READY` checkpoint after configuration validated
 - Logged after database initialization completes
@@ -4484,17 +4817,20 @@ Code review of v2.18.2 identified 7 critical/high-priority safety issues:
 #### Added
 
 **Shared Sanitization Utilities**
+
 - Created `src/telemetry/error-sanitization-utils.ts`
 - `sanitizeErrorMessageCore()` function shared across modules
 - Eliminates code duplication between `error-sanitizer.ts` and `event-tracker.ts`
 - Includes ReDoS fix (simplified token regex)
 
 **Singleton Pattern for EarlyErrorLogger**
+
 - `EarlyErrorLogger.getInstance()` - Get singleton instance
 - Private constructor prevents direct instantiation
 - `waitForInit()` method for testing
 
 **Timeout Wrapper**
+
 - `withTimeout()` helper function
 - 5-second timeout for all Supabase operations
 - Promise.race pattern with automatic cleanup
@@ -4502,18 +4838,21 @@ Code review of v2.18.2 identified 7 critical/high-priority safety issues:
 #### Changed
 
 **EarlyErrorLogger Architecture**
+
 - Singleton instead of direct instantiation
 - Defensive initialization (safe defaults first)
 - Fire-and-forget methods (non-blocking)
 - Timeout protection for network operations
 
 **Checkpoint Logging**
+
 - All checkpoint calls are now fire-and-forget (no await)
 - No startup delay from telemetry operations
 - Database checkpoints now logged in server.ts
 - N8N API checkpoints now logged after database init
 
 **Error Sanitization**
+
 - Shared utilities across all telemetry modules
 - ReDoS-safe regex patterns
 - Consistent sanitization behavior
@@ -4521,6 +4860,7 @@ Code review of v2.18.2 identified 7 critical/high-priority safety issues:
 #### Technical Details
 
 **Defensive Initialization Pattern:**
+
 ```typescript
 export class EarlyErrorLogger {
   // Safe defaults FIRST (before any throwing operation)
@@ -4552,6 +4892,7 @@ export class EarlyErrorLogger {
 ```
 
 **Fire-and-Forget Pattern:**
+
 ```typescript
 // BEFORE (BLOCKING):
 await earlyLogger.logCheckpoint(STARTUP_CHECKPOINTS.PROCESS_STARTED);
@@ -4561,6 +4902,7 @@ earlyLogger.logCheckpoint(STARTUP_CHECKPOINTS.PROCESS_STARTED);
 ```
 
 **Timeout Wrapper:**
+
 ```typescript
 async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, operation: string): Promise<T | null> {
   try {
@@ -4576,6 +4918,7 @@ async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, operation:
 ```
 
 **ReDoS Fix:**
+
 ```typescript
 // BEFORE (VULNERABLE):
 .replace(/(?<!Bearer\s)token\s*[=:]\s*\S+/gi, 'token=[REDACTED]')
@@ -4587,26 +4930,31 @@ async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, operation:
 #### Impact
 
 **Server Stability:**
+
 - **100%** elimination of telemetry-caused startup failures
 - Telemetry failures NEVER crash the server
 - Startup time unaffected by telemetry latency
 
 **Coverage Improvement:**
+
 - Database failures now tracked (DATABASE_CONNECTING/CONNECTED checkpoints)
 - N8N API configuration issues now tracked (N8N_API_CHECKING/READY checkpoints)
 - Complete visibility into all startup phases
 
 **Performance:**
+
 - No startup delay from telemetry (removed blocking awaits)
 - 5-second timeout prevents hanging on Supabase failures
 - Fire-and-forget pattern ensures server starts immediately
 
 **Security:**
+
 - ReDoS vulnerability eliminated
 - Simplified regex patterns (no catastrophic backtracking)
 - Shared sanitization ensures consistency
 
 **Code Quality:**
+
 - DRY principle (shared error-sanitization-utils)
 - Defensive programming (safe defaults before operations)
 - Race-condition free (singleton + initPromise)
@@ -4614,9 +4962,11 @@ async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, operation:
 #### Files Changed
 
 **New Files (1):**
+
 - `src/telemetry/error-sanitization-utils.ts` - Shared sanitization utilities
 
 **Modified Files (5):**
+
 - `src/telemetry/early-error-logger.ts` - Singleton + defensive init + fire-and-forget + timeout
 - `src/telemetry/error-sanitizer.ts` - Use shared sanitization utils
 - `src/telemetry/event-tracker.ts` - Use shared sanitization utils
@@ -4648,6 +4998,7 @@ This release addresses a critical telemetry gap: we now capture errors that occu
 #### Problem
 
 Analysis of telemetry data revealed critical gaps in error coverage:
+
 - **Zero telemetry captured** when server fails to start (no data before MCP handshake)
 - **106 users (2.2%)** had only `session_start` with no other activity (likely startup failures)
 - **463 users (9.7%)** experienced immediate failures or quick abandonment
@@ -4657,6 +5008,7 @@ Analysis of telemetry data revealed critical gaps in error coverage:
 #### Added
 
 **Early Error Logging System**
+
 - New `EarlyErrorLogger` class - Independent error tracking before main telemetry ready
 - Direct Supabase insert (bypasses batching for immediate persistence)
 - Works even when main telemetry fails to initialize
@@ -4664,6 +5016,7 @@ Analysis of telemetry data revealed critical gaps in error coverage:
 - File: `src/telemetry/early-error-logger.ts`
 
 **Startup Checkpoint Tracking System**
+
 - 10 checkpoints throughout startup process to identify failure points:
   1. `process_started` - Process initialization
   2. `database_connecting` - Before DB connection
@@ -4679,24 +5032,28 @@ Analysis of telemetry data revealed critical gaps in error coverage:
 - File: `src/telemetry/startup-checkpoints.ts`
 
 **New Event Type: `startup_error`**
+
 - Captures pre-handshake failures with full context
 - Properties: `checkpoint`, `errorMessage`, `errorType`, `checkpointsPassed`, `startupDuration`, platform info
 - Fires even when main telemetry not ready
 - Uses early error logger with direct Supabase insert
 
 **Enhanced `session_start` Event**
+
 - `startupDurationMs` - Time from process start to ready (new, optional)
 - `checkpointsPassed` - Array of successfully passed checkpoints (new, optional)
 - `startupErrorCount` - Count of errors during startup (new, optional)
 - Backward compatible - all new fields optional
 
 **Startup Completion Event**
+
 - New `startup_completed` event type
 - Fired after first successful tool call
 - Confirms server is functional (not a "zombie server")
 - Distinguishes "never started" from "started but silent"
 
 **Error Message Sanitization**
+
 - New `error-sanitizer.ts` utility for secure error message handling
 - `extractErrorMessage()` - Safe extraction from Error objects, strings, unknowns
 - `sanitizeStartupError()` - Security-focused sanitization using v2.15.3 patterns
@@ -4728,12 +5085,14 @@ Analysis of telemetry data revealed critical gaps in error coverage:
 #### Technical Details
 
 **Checkpoint Flow:**
-```
+
+```text
 Process Started → Telemetry Init → Telemetry Ready →
 MCP Handshake Starting → MCP Handshake Complete → Server Ready
 ```
 
 **Error Capture Example:**
+
 ```typescript
 try {
   await earlyLogger.logCheckpoint(STARTUP_CHECKPOINTS.DATABASE_CONNECTING);
@@ -4747,6 +5106,7 @@ try {
 ```
 
 **Error Sanitization:**
+
 - Reuses v2.15.3 security patterns
 - Early truncation to 1500 chars (ReDoS prevention)
 - Redacts: URLs → `[URL]`, AWS keys → `[AWS_KEY]`, emails → `[EMAIL]`, etc.
@@ -4754,6 +5114,7 @@ try {
 - Final truncation to 500 chars
 
 **Database Schema:**
+
 ```typescript
 // startup_error event structure
 {
@@ -4777,11 +5138,13 @@ try {
 #### Impact
 
 **Coverage Improvement:**
+
 - **Before: 45%** error coverage (only post-handshake errors captured)
 - **After: 95%** error coverage (pre-handshake + post-handshake errors)
 - **+50 percentage points** in error detection capability
 
 **New Scenarios Now Diagnosable:**
+
 1. Database connection timeout → `database_connecting` checkpoint + error details
 2. Database file not found → `database_connecting` checkpoint + specific file path error
 3. MCP protocol mismatch → `mcp_handshake_starting` checkpoint + protocol version error
@@ -4794,6 +5157,7 @@ try {
 10. Resource constraints (memory, disk) → Checkpoint + resource error
 
 **Visibility Gains:**
+
 - Users experiencing startup failures now generate telemetry events
 - Failed checkpoint identifies exact failure point in startup sequence
 - Sanitized error messages provide actionable debugging information
@@ -4801,6 +5165,7 @@ try {
 - Completion percentage shows how far initialization progressed
 
 **Data Volume Impact:**
+
 - Each successful startup: ~300 bytes (checkpoint list in session_start)
 - Each failed startup: ~800 bytes (startup_error event with context)
 - Expected increase: <1KB per user session
@@ -4809,11 +5174,13 @@ try {
 #### Files Changed
 
 **New Files (3):**
+
 - `src/telemetry/early-error-logger.ts` - Early error capture system
 - `src/telemetry/startup-checkpoints.ts` - Checkpoint constants and helpers
 - `src/telemetry/error-sanitizer.ts` - Error message sanitization utility
 
 **Modified Files (6):**
+
 - `src/mcp/index.ts` - Integrated checkpoint tracking throughout startup
 - `src/mcp/server.ts` - Enhanced database initialization logging
 - `src/telemetry/event-tracker.ts` - Enhanced session_start with startup data
@@ -4848,6 +5215,7 @@ This release enables measurement of the v2.17.1 user ID stability fix by trackin
 #### Problem
 
 The v2.17.1 fix for Docker/cloud user ID stability (boot_id-based IDs) could not be validated because telemetry didn't capture Docker/cloud environment flags. Analysis showed:
+
 - Zero Docker/cloud users detected across all versions
 - No way to measure if the fix is working
 - Cannot determine what % of users are affected
@@ -4888,6 +5256,7 @@ The v2.17.1 fix for Docker/cloud user ID stability (boot_id-based IDs) could not
 #### Impact
 
 **Enables Future Analysis**:
+
 - Measure % of users in Docker/cloud vs local
 - Validate v2.17.1 boot_id-based user ID stability
 - Segment retention metrics by environment
@@ -4895,6 +5264,7 @@ The v2.17.1 fix for Docker/cloud user ID stability (boot_id-based IDs) could not
 - Calculate actual Docker user duplicate rate reduction
 
 **Expected Insights** (once data collected):
+
 - Actual % of Docker/cloud users in user base
 - Validation that boot_id method is being used
 - User ID stability improvements measurable
@@ -4902,6 +5272,7 @@ The v2.17.1 fix for Docker/cloud user ID stability (boot_id-based IDs) could not
 - Platform distribution of user base
 
 **No Breaking Changes**:
+
 - Only adds new fields to existing events
 - All existing code continues working
 - Event validator handles new fields automatically
@@ -4910,12 +5281,14 @@ The v2.17.1 fix for Docker/cloud user ID stability (boot_id-based IDs) could not
 #### Technical Details
 
 **Detection Logic**:
+
 ```typescript
 isDocker: process.env.IS_DOCKER === 'true'
 cloudPlatform: detectCloudPlatform()  // Checks 8 env vars
 ```
 
 **Platform Detection Priority**:
+
 1. Railway: `RAILWAY_ENVIRONMENT`
 2. Render: `RENDER`
 3. Fly.io: `FLY_APP_NAME`
@@ -4926,6 +5299,7 @@ cloudPlatform: detectCloudPlatform()  // Checks 8 env vars
 8. Azure: `AZURE_FUNCTIONS_ENVIRONMENT`
 
 **Event Structure**:
+
 ```json
 {
   "event": "session_start",
@@ -4959,6 +5333,7 @@ This release fundamentally fixes the validation warning system that was overwhel
 #### Problem
 
 The validation system was warning about properties with default values as if the user had configured them:
+
 - HTTP Request with 2 properties → 29 warnings (96% false positives)
 - Webhook with 1 property → 6 warnings (83% false positives)
 - Overall signal-to-noise ratio: 3%
@@ -4977,6 +5352,7 @@ The validation system was warning about properties with default values as if the
 #### Results
 
 After fix (verified with n8n-mcp-tester):
+
 - HTTP Request with 2 properties → 1 warning (96.5% noise reduction)
 - Webhook with 1 property → 1 warning (83% noise reduction)
 - Overall signal-to-noise ratio: >90%
@@ -5030,6 +5406,7 @@ This release improves type safety for VersionedNodeType and node class parameter
   - **Problem**: n8n's type hierarchy has union types (`INodeTypeBaseDescription | INodeTypeDescription`) where properties like `polling`, `version`, `webhooks` only exist on one side
   - **Solution**: Keep strong types in method signatures, use strategic `as any` assertions internally for property access
   - **Pattern**:
+
     ```typescript
     // Strong signature provides caller type safety
     private method(description: INodeTypeBaseDescription | INodeTypeDescription): ReturnType {
@@ -5038,6 +5415,7 @@ This release improves type safety for VersionedNodeType and node class parameter
       return desc.polling || desc.webhooks; // Access union-incompatible properties
     }
     ```
+
   - **Result**: 70% type safety benefit (method signatures) with 0% breakage (zero compilation errors)
 
 #### Benefits
@@ -5134,6 +5512,7 @@ This release fixes two critical bugs that caused incorrect version data and vali
     - `node-parser.ts`: 5 instances
     - `property-extractor.ts`: 3 instances
   - **Fix:** Added defensive validation:
+
     ```typescript
     const versions = Object.keys(nodeVersions).map(Number);
     if (versions.length > 0) {
@@ -5143,11 +5522,13 @@ This release fixes two critical bugs that caused incorrect version data and vali
       }
     }
     ```
+
   - **Verification:** All Math.max() calls now have proper validation
 
 #### Technical Details
 
 **Version Extraction Fix:**
+
 ```typescript
 // BEFORE (BROKEN):
 if (instance?.baseDescription?.defaultVersion) {  // Property doesn't exist!
@@ -5164,6 +5545,7 @@ if (instance?.description?.defaultVersion) {  // Correct property name
 ```
 
 **typeVersion Validation Fix:**
+
 ```typescript
 // BEFORE (BROKEN):
 // Skip ALL node repository validation for langchain nodes
@@ -5396,7 +5778,7 @@ This release implements 2 high-priority security protections identified in the s
     - JSON-RPC formatted error responses (429 Too Many Requests)
     - Automatic IP detection behind reverse proxies (requires TRUST_PROXY=1)
   - **Verification:** 4 integration tests with sequential request patterns
-  - **See:** https://github.com/czlonkowski/n8n-mcp/issues/265 (HIGH-02)
+  - **See:** <https://github.com/czlonkowski/n8n-mcp/issues/265> (HIGH-02)
 
 - **🛡️ HIGH-03: SSRF Protection for Webhooks**
   - **Issue:** Webhook triggers vulnerable to Server-Side Request Forgery attacks
@@ -5413,9 +5795,10 @@ This release implements 2 high-priority security protections identified in the s
     - `src/utils/ssrf-protection.ts` - Core protection logic
     - `src/services/n8n-api-client.ts:219` - Webhook trigger validation
   - **Verification:** 25 unit tests covering all three modes, DNS rebinding, IPv6
-  - **See:** https://github.com/czlonkowski/n8n-mcp/issues/265 (HIGH-03)
+  - **See:** <https://github.com/czlonkowski/n8n-mcp/issues/265> (HIGH-03)
 
 ### Added
+
 - **Configuration:** `AUTH_RATE_LIMIT_WINDOW` - Rate limit window in milliseconds (default: 900000 = 15 minutes)
 - **Configuration:** `AUTH_RATE_LIMIT_MAX` - Max authentication attempts per window per IP (default: 20)
 - **Configuration:** `WEBHOOK_SECURITY_MODE` - SSRF protection mode (strict/moderate/permissive, default: strict)
@@ -5427,11 +5810,13 @@ This release implements 2 high-priority security protections identified in the s
   - README.md - Local n8n configuration section for moderate mode
 
 ### Changed
+
 - **Security:** All webhook triggers now validate URLs through SSRF protection before execution
 - **Security:** HTTP authentication endpoint now enforces rate limiting per IP address
 - **Dependencies:** Added `express-rate-limit@^7.1.5` for rate limiting functionality
 
 ### Fixed
+
 - **Security:** IPv6 localhost URLs (`http://[::1]/webhook`) now correctly stripped of brackets before validation
 - **Security:** Localhost detection now properly handles all localhost variants (127.x.x.x, ::1, localhost, etc.)
 
@@ -5455,7 +5840,7 @@ This release addresses 2 critical security vulnerabilities identified in the sec
   - **New Method:** `AuthManager.timingSafeCompare()` - constant-time token comparison utility
   - **Verification:** 11 unit tests with timing variance analysis (<10% variance proven)
   - **CVSS:** 8.5 (High) - Confirmed critical, requires authentication but trivially exploitable
-  - **See:** https://github.com/czlonkowski/n8n-mcp/issues/265 (CRITICAL-02)
+  - **See:** <https://github.com/czlonkowski/n8n-mcp/issues/265> (CRITICAL-02)
 
 - **🚨 CRITICAL-01: Command Injection Vulnerability**
   - **Issue:** User-controlled `nodeType` parameter injected into shell commands via `execSync`
@@ -5475,7 +5860,7 @@ This release addresses 2 critical security vulnerabilities identified in the sec
     - ✅ Better error handling and logging
   - **Verification:** 9 integration tests covering all attack vectors
   - **CVSS:** 8.8 (High) - Requires MCP access but trivially exploitable
-  - **See:** https://github.com/czlonkowski/n8n-mcp/issues/265 (CRITICAL-01)
+  - **See:** <https://github.com/czlonkowski/n8n-mcp/issues/265> (CRITICAL-01)
 
 ### Added
 
@@ -5501,6 +5886,7 @@ This release addresses 2 critical security vulnerabilities identified in the sec
 ### Technical Details
 
 **Timing-Safe Comparison Implementation:**
+
 ```typescript
 // NEW: Constant-time comparison utility
 static timingSafeCompare(plainToken: string, expectedToken: string): boolean {
@@ -5525,6 +5911,7 @@ const isValidToken = this.authToken &&
 ```
 
 **Command Injection Fix:**
+
 ```typescript
 // BEFORE (VULNERABLE):
 execSync(`find ${this.docsPath}/docs/integrations/builtin -name "${nodeType}.md"...`)
@@ -5557,6 +5944,7 @@ npm update n8n-mcp
 ### Deployment Notes
 
 **Recommended Actions:**
+
 1. ✅ **Upgrade immediately** - These are critical security fixes
 2. ✅ **Review logs** - Check for any suspicious authentication attempts or unusual nodeType parameters
 3. ✅ **Rotate tokens** - Consider rotating AUTH_TOKEN after upgrade (optional but recommended)
@@ -5566,12 +5954,14 @@ npm update n8n-mcp
 ### Test Results
 
 **All Tests Passing:**
+
 - Unit tests: 11/11 ✅ (timing-safe comparison)
 - Integration tests: 9/9 ✅ (command injection prevention)
 - Timing variance: <10% ✅ (proves constant-time)
 - All existing tests: ✅ (no regressions)
 
 **Security Verification:**
+
 - ✅ No command execution with malicious inputs
 - ✅ Timing attack variance <10% (statistical analysis over 1000 samples)
 - ✅ Directory traversal blocked (parent dir, absolute paths, URL-encoded)
@@ -5585,7 +5975,7 @@ npm update n8n-mcp
 
 ### References
 
-- Security Audit: https://github.com/czlonkowski/n8n-mcp/issues/265
+- Security Audit: <https://github.com/czlonkowski/n8n-mcp/issues/265>
 - Implementation Plan: `docs/local/security-implementation-plan-issue-265.md`
 - Audit Analysis: `docs/local/security-audit-analysis-issue-265.md`
 
@@ -5685,6 +6075,7 @@ npm update n8n-mcp
   - **Root Cause**: Line 697 filtered empty arrays: `connections.filter(conns => conns.length > 0)`
   - **Fix**: Only remove trailing empty arrays, preserve intermediate ones to maintain index integrity
   - **Code Change**:
+
     ```typescript
     // Before (BUGGY):
     workflow.connections[node][output] = connections.filter(conns => conns.length > 0);
@@ -5694,6 +6085,7 @@ npm update n8n-mcp
       connections.pop();
     }
     ```
+
   - **Testing**: Added integration test verifying Switch node rewiring preserves all indices
   - **Discovered by**: n8n-mcp-tester agent during comprehensive testing
   - **Commit**: aeb7410
@@ -5743,6 +6135,7 @@ npm update n8n-mcp
 ### Technical Details
 
 **TypeError Prevention (Issue #275):**
+
 ```typescript
 // Layer 1: Defensive utility function
 export function getNodeTypeAlternatives(nodeType: string): string[] {
@@ -5760,6 +6153,7 @@ if (param === '') {
 ```
 
 **Smart Parameters Resolution:**
+
 ```typescript
 // Resolve branch parameter for IF nodes
 if (operation.branch !== undefined && operation.sourceIndex === undefined) {
@@ -5776,6 +6170,7 @@ if (operation.case !== undefined && operation.sourceIndex === undefined) {
 ```
 
 **Real n8n IF Node Structure:**
+
 ```json
 "IF": {
   "main": [
@@ -5788,6 +6183,7 @@ if (operation.case !== undefined && operation.sourceIndex === undefined) {
 ### Migration Guide
 
 **Before (v2.15.7):**
+
 ```typescript
 // Old way: updateConnection (REMOVED)
 {type: "updateConnection", source: "Webhook", target: "Handler", updates: {...}}
@@ -5797,6 +6193,7 @@ if (operation.case !== undefined && operation.sourceIndex === undefined) {
 ```
 
 **After (v2.16.0):**
+
 ```typescript
 // New way: rewireConnection
 {type: "rewireConnection", source: "Webhook", from: "OldHandler", to: "NewHandler"}
@@ -5810,15 +6207,18 @@ if (operation.case !== undefined && operation.sourceIndex === undefined) {
 ### Impact Summary
 
 **Production Error Reduction:**
+
 - Issue #275 fix: -323 errors (-57.4% of total production errors)
 - Helps 127 users (76.5% of users experiencing errors)
 
 **UX Improvements:**
+
 - Semantic parameters make multi-output node connections intuitive
 - `rewireConnection` provides clear intent for connection changes
 - Integration tests ensure production reliability
 
 **Breaking Changes:**
+
 - `updateConnection` removed (use `rewireConnection` or manual remove+add)
 
 ### References
@@ -5876,6 +6276,7 @@ if (operation.case !== undefined && operation.sourceIndex === undefined) {
 ### Technical Details
 
 **Multi-Output Node Fix:**
+
 ```typescript
 // Before (BROKEN):
 const sourceIndex = operation.sourceIndex || 0;  // 0 treated as falsy!
@@ -5885,6 +6286,7 @@ const sourceIndex = operation.sourceIndex ?? 0;  // explicit 0 preserved
 ```
 
 **Runtime Validation Fix:**
+
 ```typescript
 // Added comprehensive validation:
 if (!operation.updates || typeof operation.updates !== 'object') {
@@ -5903,6 +6305,7 @@ if (!operation.updates || typeof operation.updates !== 'object') {
 ### Phase 1 Roadmap
 
 Phase 0 addressed critical bugs. Future Phase 1 improvements planned:
+
 - Add `rewireConnection` operation for intuitive connection rewiring
 - Add smart parameters (`branch` for IF nodes, `case` for Switch nodes)
 - Enhanced error messages with spell-checking
@@ -5911,6 +6314,7 @@ Phase 0 addressed critical bugs. Future Phase 1 improvements planned:
 ## [2.15.6] - 2025-10-05
 
 ### Fixed
+
 - **Issue #269: Missing addNode Examples** - Added comprehensive examples for addNode operation in MCP tool documentation
   - Problem: Claude AI didn't know how to use addNode operation correctly due to zero examples in documentation
   - Solution: Added 4 progressive examples to `n8n_update_partial_workflow` tool documentation:
@@ -5929,6 +6333,7 @@ Phase 0 addressed critical bugs. Future Phase 1 improvements planned:
   - Duplicate Prevention: Fixed `validateAddNode()` to use normalization when checking for duplicate node names
 
 ### Changed
+
 - **WorkflowDiffEngine String Normalization** - Enhanced to handle edge cases from code review
   - Regex Processing Order: Fixed critical bug - now processes backslashes BEFORE quotes (prevents multiply-escaped character failures)
   - Whitespace Handling: Comprehensive normalization of tabs, newlines, and mixed whitespace (prevents collision edge cases)
@@ -5936,6 +6341,7 @@ Phase 0 addressed critical bugs. Future Phase 1 improvements planned:
   - Best Practice: Documentation recommends using node IDs over names for special characters
 
 ### Technical Details
+
 - **Normalization Algorithm**: 4-step process
   1. Trim leading/trailing whitespace
   2. Unescape backslashes (MUST be first!)
@@ -5945,6 +6351,7 @@ Phase 0 addressed critical bugs. Future Phase 1 improvements planned:
 - **Collision Prevention**: Duplicate checking uses same normalization to prevent subtle bugs
 
 ### Test Coverage
+
 - Unit tests: 120/120 passing (up from 116)
 - New test scenarios:
   - Tabs in node names
@@ -5954,6 +6361,7 @@ Phase 0 addressed critical bugs. Future Phase 1 improvements planned:
 - Coverage: 90.11% statements (up from 90.05%)
 
 ### Code Review
+
 - All 6 MUST FIX and SHOULD FIX recommendations implemented:
   - ✅ Fixed regex processing order (critical bug)
   - ✅ Added comprehensive whitespace tests
@@ -5964,6 +6372,7 @@ Phase 0 addressed critical bugs. Future Phase 1 improvements planned:
 - Final review: APPROVED FOR MERGE (production-ready)
 
 ### Impact
+
 - **Workflow Operations**: All 8 affected operations now handle special characters correctly
 - **User Experience**: Clear error messages with actionable suggestions
 - **Reliability**: Comprehensive normalization prevents subtle bugs
@@ -5972,6 +6381,7 @@ Phase 0 addressed critical bugs. Future Phase 1 improvements planned:
 ## [2.15.5] - 2025-10-04
 
 ### Added
+
 - **Phase 5 Integration Tests** - Comprehensive workflow management tests (16 scenarios)
   - `delete-workflow.test.ts`: 3 test scenarios
     - Successful deletion
@@ -5987,6 +6397,7 @@ Phase 0 addressed critical bugs. Future Phase 1 improvements planned:
     - Sort order consistency verification
 
 ### Fixed
+
 - **handleDeleteWorkflow** - Now returns deleted workflow data in response
   - Before: Returned only success message
   - After: Returns deleted workflow object per n8n API specification
@@ -6004,17 +6415,20 @@ Phase 0 addressed critical bugs. Future Phase 1 improvements planned:
   - Impact: Aligns with n8n API behavior where DELETE returns the deleted resource
 
 ### Changed
+
 - **WorkflowListParams.tags** - Type changed for API compliance
   - Before: `tags?: string[] | null` (incorrect)
   - After: `tags?: string | null` (comma-separated string per n8n OpenAPI spec)
   - Impact: Type safety now matches actual API behavior
 
 ### Technical Details
+
 - **API Compliance**: All fixes align with n8n OpenAPI specification
 - **Backward Compatibility**: Handler maintains existing MCP tool interface (array input converted internally)
 - **Type Safety**: TypeScript types now accurately reflect n8n API contracts
 
 ### Test Coverage
+
 - Integration tests: 71/71 passing (Phase 1-5 complete)
 - Total test scenarios across all phases: 87
 - New coverage:
@@ -6022,6 +6436,7 @@ Phase 0 addressed critical bugs. Future Phase 1 improvements planned:
   - Workflow listing with filters: 13 scenarios
 
 ### Impact
+
 - **DELETE workflows**: Now returns workflow data for verification
 - **List with tags**: Tag filtering now functional (was broken before)
 - **API alignment**: Implementation correctly matches n8n OpenAPI specification
@@ -6030,6 +6445,7 @@ Phase 0 addressed critical bugs. Future Phase 1 improvements planned:
 ## [2.15.4] - 2025-10-04
 
 ### Fixed
+
 - **Workflow Settings Updates** - Enhanced `cleanWorkflowForUpdate` to enable settings updates while maintaining Issue #248 protection
   - Changed from always overwriting settings with `{}` to filtering to whitelisted properties
   - Filters settings to OpenAPI spec whitelisted properties: `saveExecutionProgress`, `saveManualExecutions`, `saveDataErrorExecution`, `saveDataSuccessExecution`, `executionTimeout`, `errorWorkflow`, `timezone`, `executionOrder`
@@ -6044,18 +6460,21 @@ Phase 0 addressed critical bugs. Future Phase 1 improvements planned:
   - All 42 workflow update test scenarios now passing
 
 ### Changed
+
 - **Settings Filtering Strategy** - Updated `cleanWorkflowForUpdate()` implementation
   - Before: Always set `settings = {}` (prevented all settings updates)
   - After: Filter to whitelisted properties (allows valid updates, blocks problematic ones)
   - Impact: Users can now update workflow settings via API while staying protected from validation errors
 
 ### Technical Details
+
 - **Whitelist-based Filtering**: Implements principle of least privilege for settings properties
 - **Reference**: Properties validated against n8n OpenAPI specification `workflowSettings` schema
 - **Security**: More secure than blacklist approach (fails safe, unknown properties filtered)
 - **Performance**: Filtering adds <1ms overhead per workflow update
 
 ### Test Coverage
+
 - Unit tests: 72/72 passing (100% coverage for n8n-validation)
 - Integration tests: 433/433 passing (Phase 4 complete)
 - Test scenarios:
@@ -6065,6 +6484,7 @@ Phase 0 addressed critical bugs. Future Phase 1 improvements planned:
   - Multi-node workflow connection validation
 
 ### Impact
+
 - **Settings Updates**: Users can now update workflow settings (timezone, executionOrder, etc.) via API
 - **Issue #248 Protection Maintained**: `callerPolicy` and other problematic properties still filtered
 - **Test Reliability**: All Phase 4 integration tests passing in CI
@@ -6073,6 +6493,7 @@ Phase 0 addressed critical bugs. Future Phase 1 improvements planned:
 ## [2.15.3] - 2025-10-03
 
 ### Added
+
 - **Error Message Capture in Telemetry** - Enhanced telemetry tracking to capture actual error messages for better debugging
   - Added optional `errorMessage` parameter to `trackError()` method
   - Comprehensive error message sanitization to protect sensitive data
@@ -6080,6 +6501,7 @@ Phase 0 addressed critical bugs. Future Phase 1 improvements planned:
   - Error messages now stored in telemetry events table for analysis
 
 ### Security
+
 - **Enhanced Error Message Sanitization** - Comprehensive security hardening for telemetry data
   - **ReDoS Prevention**: Early truncation to 1500 chars before regex processing
   - **Full URL Redaction**: Changed from `[URL]/path` to `[URL]` to prevent API structure leakage
@@ -6089,17 +6511,20 @@ Phase 0 addressed critical bugs. Future Phase 1 improvements planned:
   - **Stack Trace Truncation**: Limited to first 3 lines to reduce attack surface
 
 ### Fixed
+
 - **Missing Error Messages**: Resolved issue where 272+ weekly validation errors had no error messages captured
 - **Data Leakage**: Fixed URL path preservation exposing API versions and user IDs
 - **Email Exposure**: Fixed sanitization order allowing emails in URLs to leak
 - **ReDoS Vulnerability**: Removed complex capturing regex patterns that could cause performance issues
 
 ### Changed
+
 - **Breaking Change**: `trackError()` signature updated with 4th parameter `errorMessage?: string`
   - All internal call sites updated in single commit (atomic change)
   - Not backwards compatible but acceptable as all code is internal
 
 ### Technical Details
+
 - **Sanitization Patterns**:
   - AWS Keys: `AKIA[A-Z0-9]{16}` → `[AWS_KEY]`
   - GitHub Tokens: `ghp_[a-zA-Z0-9]{36,}` → `[GITHUB_TOKEN]`
@@ -6110,18 +6535,21 @@ Phase 0 addressed critical bugs. Future Phase 1 improvements planned:
   - Generic Credentials: `password/api_key/token=<value>` → `<field>=[REDACTED]`
 
 ### Test Coverage
+
 - Added 18 new security-focused tests
 - Total telemetry tests: 269 passing
 - Coverage: 90.75% for telemetry module
 - All security patterns validated with edge cases
 
 ### Performance
+
 - Early truncation prevents ReDoS attacks
 - Simplified regex patterns (no complex capturing groups)
 - Sanitization adds <1ms overhead per error
 - Final message truncated to 500 chars max
 
 ### Impact
+
 - **Debugging**: Error messages now available for root cause analysis
 - **Security**: Comprehensive protection against credential leakage
 - **Performance**: Protected against ReDoS attacks
@@ -6130,6 +6558,7 @@ Phase 0 addressed critical bugs. Future Phase 1 improvements planned:
 ## [2.15.2] - 2025-10-03
 
 ### Fixed
+
 - **Template Search Performance & Reliability** - Enhanced `search_templates_by_metadata` with production-ready improvements
   - **Ordering Stability**: Implemented CTE with VALUES clause to preserve exact Phase 1 ordering
     - Prevents ordering discrepancies between ID selection and data fetch phases
@@ -6145,6 +6574,7 @@ Phase 0 addressed critical bugs. Future Phase 1 improvements planned:
     - Centralized filter-building logic
 
 ### Added
+
 - **Comprehensive Test Coverage** - 31 new unit tests achieving 100% coverage for changed code
   - `buildMetadataFilterConditions` - All filter combinations (11 tests)
   - Performance logging validation (3 tests)
@@ -6154,11 +6584,13 @@ Phase 0 addressed critical bugs. Future Phase 1 improvements planned:
 - Fixed flaky integration tests with deterministic ordering using unique view counts
 
 ### Performance
+
 - Query optimization maintains sub-1ms Phase 1 performance
 - Two-phase approach prevents timeout on large template sets
 - CTE-based ordering adds negligible overhead (<1ms)
 
 ### Test Results
+
 - Unit tests: 31 new tests, all passing
 - Integration tests: 36 passing, 1 skipped
 - **Coverage**: 100% for changed code (previously 36.58% patch coverage)
@@ -6168,6 +6600,7 @@ Phase 0 addressed critical bugs. Future Phase 1 improvements planned:
 ### 🚀 Major Features
 
 #### P0-R3: Pre-extracted Template Configurations
+
 - **Template-Based Configuration System** - 2,646 real-world node configurations from popular templates
   - Pre-extracted node configurations from all workflow templates
   - Ranked by template popularity (views)
@@ -6178,18 +6611,21 @@ Phase 0 addressed critical bugs. Future Phase 1 improvements planned:
 ### Breaking Changes
 
 #### Removed: `get_node_for_task` Tool
+
 - **Reason**: Only 31 hardcoded tasks, 28% failure rate in production
 - **Replacement**: Template-based examples with 2,646 real configurations
 
 #### Migration Guide
 
 **Before (v2.14.7):**
+
 ```javascript
 // Get configuration for a task
 get_node_for_task({ task: "receive_webhook" })
 ```
 
 **After (v2.15.0):**
+
 ```javascript
 // Option 1: Search nodes with examples
 search_nodes({
@@ -6265,6 +6701,7 @@ get_node_essentials({
 ## [2.14.7] - 2025-10-02
 
 ### Fixed
+
 - **Issue #248: Settings Validation Error** - Fixed "settings must NOT have additional properties" API errors
   - Added `callerPolicy` property to `workflowSettingsSchema` to support valid n8n workflow setting
   - Implemented whitelist-based settings filtering in `cleanWorkflowForUpdate()` to prevent API errors
@@ -6291,6 +6728,7 @@ get_node_essentials({
   - Resolves the single largest source of validation errors in production
 
 ### Added
+
 - `NodeTypeNormalizer` utility class for universal node type normalization
   - `normalizeToFullForm()` - Convert any node type variation to canonical form
   - `normalizeWithDetails()` - Get normalization result with metadata
@@ -6300,21 +6738,25 @@ get_node_essentials({
 - 14 new unit tests for issues #248 and #249 fixes
 
 ### Changed
+
 - Node repository now uses `NodeTypeNormalizer` for all lookups
 - Workflow validation applies normalization before structure checks
 - Workflow diff engine validates connection parameters before processing
 - Settings filtering applied to all workflow update operations
 
 ### Performance
+
 - No performance impact - normalization adds <1ms overhead per workflow
 - Settings filtering is O(9) - negligible impact
 
 ### Test Coverage
+
 - n8n-validation tests: 73/73 passing (100% coverage)
 - workflow-diff-engine tests: 110/110 passing (89.72% coverage)
 - Total: 183 tests passing
 
 ### Impact
+
 - **Issue #248**: Eliminates ALL settings validation errors for workflows with non-standard properties
 - **Issue #249**: Provides clear, actionable error messages reducing user frustration
 - **P0-R1**: Reduces validation error rate by 80% (addresses 4,800+ weekly errors)
@@ -6323,6 +6765,7 @@ get_node_essentials({
 ## [2.14.6] - 2025-10-01
 
 ### Enhanced
+
 - **Webhook Error Messages**: Replaced generic "Please try again later or contact support" messages with actionable guidance
   - Error messages now extract execution ID and workflow ID from failed webhook triggers
   - Guide users to use `n8n_get_execution({id: executionId, mode: 'preview'})` for efficient debugging
@@ -6330,6 +6773,7 @@ get_node_essentials({
   - When no execution ID available: "Workflow failed to execute. Use n8n_list_executions to find recent executions, then n8n_get_execution with mode='preview' to investigate."
 
 ### Added
+
 - New error formatting functions in `n8n-errors.ts`:
   - `formatExecutionError()` - Creates execution-specific error messages with debugging guidance
   - `formatNoExecutionError()` - Provides guidance when execution context unavailable
@@ -6338,20 +6782,24 @@ get_node_essentials({
 - 30 new comprehensive tests for error message formatting and webhook error handling
 
 ### Changed
+
 - `handleTriggerWebhookWorkflow` now extracts execution context from error responses
 - `getUserFriendlyErrorMessage` returns actual server error messages instead of generic text
 - Tool documentation type enhanced with optional `errorHandling` field
 
 ### Fixed
+
 - Test expectations updated to match new error message format (handlers-workflow-diff.test.ts)
 
 ### Benefits
+
 - **Fast debugging**: Preview mode executes in <50ms (vs seconds for full data)
 - **Efficient**: Uses ~500 tokens (vs 50K+ tokens for full execution data)
 - **Safe**: No timeout or token limit risks
 - **Actionable**: Clear next steps for users to investigate failures
 
 ### Impact
+
 - Eliminates unhelpful "contact support" messages
 - Provides specific, actionable debugging guidance
 - Reduces debugging time by directing users to efficient tools
@@ -6360,6 +6808,7 @@ get_node_essentials({
 ## [2.14.5] - 2025-09-30
 
 ### Added
+
 - **Intelligent Execution Data Filtering**: Major enhancement to `n8n_get_execution` tool to handle large datasets without exceeding token limits
   - **Preview Mode**: Shows data structure, counts, and size estimates without actual data (~500 tokens)
   - **Summary Mode**: Returns 2 sample items per node (safe default, ~2-5K tokens)
@@ -6372,6 +6821,7 @@ get_node_essentials({
   - Automatic size estimation and token consumption guidance
 
 ### Enhanced
+
 - `n8n_get_execution` tool with new parameters:
   - `mode`: 'preview' | 'summary' | 'filtered' | 'full'
   - `nodeNames`: Filter to specific nodes
@@ -6382,6 +6832,7 @@ get_node_essentials({
 - Type system with new interfaces: `ExecutionMode`, `ExecutionPreview`, `ExecutionFilterOptions`, `FilteredExecutionResponse`
 
 ### Technical Improvements
+
 - New `ExecutionProcessor` service with intelligent filtering logic
 - Smart data truncation with metadata (`hasMoreData`, `truncated` flags)
 - Validation for `itemsLimit` (capped at 1000, negative values default to 2)
@@ -6391,12 +6842,14 @@ get_node_essentials({
 - Null-safe data access throughout
 
 ### Performance
+
 - Preview mode: <50ms (no data, just structure)
 - Summary mode: <200ms (2 items per node)
 - Filtered mode: 50-500ms (depends on filters)
 - Size estimation within 10-20% accuracy
 
 ### Impact
+
 - Solves token limit issues when inspecting large workflow executions
 - Enables AI agents to understand execution data without overwhelming responses
 - Reduces token usage by 80-95% for large datasets (50+ items)
@@ -6404,12 +6857,14 @@ get_node_essentials({
 - Recommended workflow: preview → recommendation → filtered/summary
 
 ### Fixed
+
 - Preview mode bug: Fixed API data fetching logic to ensure preview mode retrieves execution data for structure analysis and recommendation generation
   - Changed `fetchFullData` condition in handlers-n8n-manager.ts to include preview mode
   - Preview mode now correctly returns structure, item counts, and size estimates
   - Recommendations are now accurate and prevent token overflow issues
 
 ### Migration Guide
+
 - **No breaking changes**: Existing `n8n_get_execution` calls work unchanged
 - New recommended workflow:
   1. Call with `mode: 'preview'` to assess data size
@@ -6420,6 +6875,7 @@ get_node_essentials({
 ## [2.14.4] - 2025-09-30
 
 ### Added
+
 - **Workflow Cleanup Operations**: Two new operations for `n8n_update_partial_workflow`
   - `cleanStaleConnections`: Automatically removes connections referencing non-existent nodes
   - `replaceConnections`: Replace entire connections object in a single operation
@@ -6430,11 +6886,13 @@ get_node_essentials({
   - Maintains atomic mode as default for safety
 
 ### Enhanced
+
 - Tool documentation for workflow cleanup scenarios
 - Type system with new operation interfaces
 - 15 new tests covering all new features
 
 ### Impact
+
 - Reduces broken workflow fix time from 10-15 minutes to 30 seconds
 - Token efficiency: `cleanStaleConnections` is 1 operation vs 10+ manual operations
 - 100% backwards compatibility maintained
@@ -6442,17 +6900,20 @@ get_node_essentials({
 ## [2.14.3] - 2025-09-30
 
 ### Added
+
 - Incremental template updates with `npm run fetch:templates:update`
 - Smart filtering for new templates (5-10 min vs 30-40 min full rebuild)
 - 48 new templates (2,598 → 2,646 total)
 
 ### Fixed
+
 - Template metadata generation: Updated to `gpt-4o-mini-2025-08-07` model
 - Removed unsupported `temperature` parameter from OpenAI Batch API
 - Template sanitization: Added Airtable PAT and GitHub token detection
 - Sanitized 24 templates removing API tokens
 
 ### Updated
+
 - n8n: 1.112.3 → 1.113.3
 - n8n-core: 1.111.0 → 1.112.1
 - n8n-workflow: 1.109.0 → 1.110.0
@@ -6462,6 +6923,7 @@ get_node_essentials({
 ## [2.14.2] - 2025-09-29
 
 ### Fixed
+
 - Validation false positives for Google Drive nodes with 'fileFolder' resource
   - Added node type normalization to handle both `n8n-nodes-base.` and `nodes-base.` prefixes correctly
   - Fixed resource validation to properly recognize all valid resource types
@@ -6477,30 +6939,34 @@ get_node_essentials({
   - Returns safe defaults on errors to ensure validation continues
 
 ### Added
+
 - Comprehensive test coverage for validation fixes in `tests/unit/services/validation-fixes.test.ts`
 - New repository methods for better default value handling:
   - `getNodePropertyDefaults()` - retrieves default values for node properties
   - `getDefaultOperationForResource()` - gets default operation for a specific resource
 
 ### Changed
+
 - Enhanced `filterPropertiesByMode` to return both filtered properties and config with defaults applied
 - Improved node type validation to accept both valid prefix formats
 
 ## [2.14.1] - 2025-09-26
 
 ### Changed
+
 - **BREAKING**: Refactored telemetry system with major architectural improvements
   - Split 636-line TelemetryManager into 7 focused modules (event-tracker, batch-processor, event-validator, rate-limiter, circuit-breaker, workflow-sanitizer, config-manager)
   - Changed TelemetryManager constructor to private, use `getInstance()` method now
   - Implemented lazy initialization pattern to avoid early singleton creation
 
 ### Added
+
 - Security & Privacy enhancements for telemetry:
   - Comprehensive input validation with Zod schemas
   - Enhanced sanitization of sensitive data (URLs, API keys, emails)
   - Expanded sensitive key detection patterns (25+ patterns)
   - Row Level Security on Supabase backend
-  - Data deletion contact info (romuald@n8n-mcp.com)
+  - Data deletion contact info (<romuald@n8n-mcp.com>)
 - Performance & Reliability improvements:
   - Sliding window rate limiter (100 events/minute)
   - Circuit breaker pattern for network failures
@@ -6516,6 +6982,7 @@ get_node_essentials({
   - Branch coverage improved from 69% to 87%
 
 ### Fixed
+
 - TypeScript lint errors in telemetry test files
   - Corrected variable name conflicts in integration tests
   - Fixed process.exit mock implementation in batch-processor tests
@@ -6532,6 +6999,7 @@ get_node_essentials({
 ## [2.14.0] - 2025-09-26
 
 ### Added
+
 - Anonymous telemetry system with Supabase integration to understand usage patterns
   - Tracks active users with deterministic anonymous IDs
   - Records MCP tool usage frequency and error rates
@@ -6554,17 +7022,20 @@ get_node_essentials({
 - Comprehensive test coverage for telemetry components (91%+ coverage)
 
 ### Fixed
+
 - Fixed TypeErrors in `get_node_info`, `get_node_essentials`, and `get_node_documentation` tools that were affecting 50% of calls
 - Added null safety checks for undefined node properties
 - Fixed multi-process telemetry issues with immediate flush strategy
 - Resolved RLS policy and permission issues with Supabase
 
 ### Changed
+
 - Updated Docker configuration to include Supabase client for telemetry support
 - Enhanced workflow validation tools to track validated workflows
 - Improved error handling with proper null coalescing operators
 
 ### Documentation
+
 - Added PRIVACY.md with comprehensive privacy policy
 - Added telemetry configuration instructions to README
 - Updated CLAUDE.md with telemetry system architecture
